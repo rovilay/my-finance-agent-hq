@@ -1,0 +1,76 @@
+import { tool } from 'ai';
+import z from 'zod';
+
+export const years = [2026] as const;
+type Year = (typeof years)[number];
+
+/**
+ * Simplified 2026 Combined Tax Brackets (Federal + Ontario)
+ * Note: These are representative of the progressive brackets for 2026.
+ */
+const INCOME_TAX_BRACKETS: Record<Year, { threshold: number; rate: number }[]> = {
+  2026: [
+    { threshold: 53891, rate: 0.1905 }, // Combined rate for first bracket
+    { threshold: 58523, rate: 0.2315 },
+    { threshold: 107785, rate: 0.2965 },
+    { threshold: 117045, rate: 0.3148 },
+    { threshold: Infinity, rate: 0.3389 },
+  ],
+};
+
+const OntrarioTaxSchema = z.object({
+  income: z.number().min(0).describe('Total annual gross income in CAD.'),
+  invoiceAmount: z
+    .number()
+    .optional()
+    .describe('An optional business invoice amount to calculate HST for in CAD.'),
+});
+
+type OntrarioTaxSchemaType = z.infer<typeof OntrarioTaxSchema>;
+type OntarioTaxResult = {
+  currency: 'CAD';
+  incomeTax: number;
+  netIncome: number;
+  hst: number;
+  effectiveRate: string;
+  disclaimer: string;
+};
+
+const calculateOntarioIncomeTax = async ({
+  income,
+  invoiceAmount,
+}: OntrarioTaxSchemaType): Promise<OntarioTaxResult> => {
+  // 1. Calculate Progressive Income Tax
+  let remainingIncome = income;
+  let totalIncomeTax = 0;
+  let previousThreshold = 0;
+
+  for (const { threshold, rate } of INCOME_TAX_BRACKETS[2026]) {
+    const taxableInThisBracket = Math.min(
+      Math.max(remainingIncome, 0),
+      threshold - previousThreshold
+    );
+    totalIncomeTax += taxableInThisBracket * rate;
+    remainingIncome -= taxableInThisBracket;
+    previousThreshold = threshold;
+    if (remainingIncome <= 0) break;
+  }
+
+  // 2. Calculate HST if invoiceAmount is provided
+  const hst = invoiceAmount ? invoiceAmount * 0.13 : 0;
+
+  return {
+    currency: 'CAD',
+    incomeTax: Number(totalIncomeTax.toFixed(2)),
+    netIncome: Number((income - totalIncomeTax).toFixed(2)),
+    hst: Number(hst.toFixed(2)),
+    effectiveRate: `${((totalIncomeTax / income) * 100).toFixed(2)}%`,
+    disclaimer: 'Based on simplified 2026 Ontario/Federal combined estimates.',
+  };
+};
+
+export const calculateOntarioTaxTool = tool({
+  description: 'Calculates Ontario HST (13%) and progressive personal income tax for 2026.',
+  inputSchema: OntrarioTaxSchema,
+  execute: calculateOntarioIncomeTax,
+});

@@ -1,0 +1,31 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+catalog:
+  # AI/ML Dependencies
+  '@ai-sdk/google': ^3.0.10
+  '@ai-sdk/openai': ^3.0.12
+  ai: ^6.0.41
+
+  # Validation
+  zod: ^4.3.5
+
+  # Utilities
+  dotenv: ^17.2.3
+
+  # TypeScript
+  typescript: ^5.9.3
+  '@types/node': ^25.0.9
+  ts-node: ^10.9.2
+
+  # Linting & Formatting
+  eslint: ^9.39.2
+  '@typescript-eslint/eslint-plugin': ^8.53.1
+  '@typescript-eslint/parser': ^8.53.1
+  prettier: ^3.8.0
+  eslint-config-prettier: ^10.1.8
+  eslint-plugin-prettier: ^5.5.5
+
+  # Env Management
+  '@t3-oss/env-core': ^0.13.10
