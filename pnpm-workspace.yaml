@@ -29,3 +29,14 @@ catalog:
 
   # Env Management
   '@t3-oss/env-core': ^0.13.10
+
+  # Database
+  pg: ^8.17.2
+  'drizzle-orm': ^0.45.1
+  'drizzle-kit': ^0.31.8
+  '@types/pg': ^8.11.10
+
+  # Ai
+  '@mastra/pg': ^1.0.0
+  '@mastra/memory': ^1.0.0
+  '@mastra/core': ^1.0.4

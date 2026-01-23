@@ -20,12 +20,23 @@ const EXCHANGE_RATE_API_URL =
 const fetchExchangeRate = async (): Promise<{ rate: number; date: string; provider: string }> => {
   const response = await fetch(EXCHANGE_RATE_API_URL);
   const data = await response.json();
-  /**
-   * Valet API Structure: data.observations[0].FXUSDCAD.v
-   * This represents how many CAD you get for 1 USD.
-   */
+
+  // Log the response for debugging
+  // console.log('Bank of Canada API Response:', JSON.stringify(data, null, 2));
+
+  if (!data.observations || data.observations.length === 0) {
+    throw new Error('No exchange rate data available from Bank of Canada');
+  }
+
   const observation = data.observations[0];
-  const rate = parseFloat(observation.VFXUSDCAD.v);
+
+  if (!observation.FXUSDCAD) {
+    throw new Error(
+      `FXUSDCAD field not found in observation. Available fields: ${Object.keys(observation).join(', ')}`
+    );
+  }
+
+  const rate = parseFloat(observation.FXUSDCAD.v);
   const date = observation.d;
   return { rate, date, provider: 'Bank of Canada' };
 };

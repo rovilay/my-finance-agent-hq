@@ -8,7 +8,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "dev": "pnpm --filter @hq/cli dev",
+    "db:studio": "pnpm --filter @hq/cli db:studio",
+    "db:generate": "pnpm --filter @hq/cli db:generate",
+    "db:migrate": "pnpm --filter @hq/cli db:migrate",
+    "db:push": "pnpm --filter @hq/cli db:push"
   },
   "keywords": [],
   "author": "",

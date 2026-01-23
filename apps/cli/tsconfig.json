@@ -8,5 +8,9 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../../packages/config" }, { "path": "../../packages/tools" }]
+  "references": [
+    { "path": "../../packages/config" },
+    { "path": "../../packages/tools" },
+    { "path": "../../packages/database" }
+  ]
 }
