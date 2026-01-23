@@ -1,45 +1,96 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { stepCountIs, ToolLoopAgent } from 'ai';
 import { aiEnv } from '@hq/config';
 import { calculateOntarioTaxTool, convertCurrencyTool } from '@hq/tools';
+import { mastraStore } from './db';
+import { Memory } from '@mastra/memory';
+import { Agent } from '@mastra/core/agent';
 
 import 'dotenv/config';
+
+// const GEMINI_3_MODEL = 'gemini-3-flash-preview';
+const GEMINI_2_MODEL = 'gemini-2.5-flash';
+
+const memory = new Memory({
+  storage: mastraStore,
+  options: {
+    lastMessages: 10,
+    workingMemory: {
+      enabled: true,
+      // The template acts as the structure the Agent will follow
+      template: `
+        # User Financial Profile
+        ## Personal Details
+        - Name: 
+        - Location: [City, Province]
+
+        ## Income & Tax
+        - Annual Salary:
+        - Tax Year:
+        - Self-Employed/HHT Status:
+
+        ## Financial Goals
+        - Goal 1: 
+        - Goal 2:
+        `,
+    },
+  },
+});
 
 const googleGenAI = createGoogleGenerativeAI({
   apiKey: aiEnv.GOOGLE_GENERATIVE_AI_API_KEY,
 });
 
-const model = googleGenAI('gemini-3-flash-preview');
+const model = googleGenAI(GEMINI_2_MODEL);
 
-const financeAgent = new ToolLoopAgent({
+const instructions = `
+    You are a professional Ontario-based financial advisor.
+    
+    WORKING MEMORY:
+    You have a "User Financial Profile" in your working memory. 
+    1. Whenever the user shares a personal or financial detail, update the profile.
+    2. Always check the profile before asking the user for information you should already know.
+    3. Keep the Markdown structure consistent with the template.
+  `;
+
+const financeAgent = new Agent({
+  id: 'my-finance-hq-agent',
+  name: 'Finance HQ Agent',
+  instructions,
   model,
-  instructions: `You are a high-end Canadian financial advisor. 
-                 Break down calculations for transparency. 
-                 Use the available tools for currency and tax accuracy.`,
+  memory,
   tools: {
     calculateTax: calculateOntarioTaxTool,
     convertCurrency: convertCurrencyTool,
   },
-  // Optional: Override the default 20 steps
-  stopWhen: stepCountIs(10),
 });
 
 async function main() {
-  console.log('🛠️  Agent: Finance HQ Initialized...');
+  console.log('🛠️  Agent: Testing Mastra Memory Persistence...');
 
-  const { text, steps } = await financeAgent.generate({
-    prompt:
-      'I earned $279,000 CAD from a client. if that were my only income this year in Toronto, what would my take-home pay be?',
-  });
+  // Identifiers that link this conversation to YOU and THIS specific chat
+  const memoryContext = {
+    thread: 'test-thread-002',
+    resource: 'user-ogooluwa',
+  };
 
-  console.log('\n--- AGENT RESPONSE ---');
-  console.log(text);
+  // --- TURN 1: Giving Information ---
+  const turn1 = await financeAgent.generate(
+    'Remind me, what are my current financial goals and where do I live?',
+    {
+      memory: memoryContext,
+    }
+  );
+  console.log('Agent:', turn1.text);
 
-  console.log('\n--- THOUGHT PROCESS (STEPS) ---');
-  steps.forEach((step, i) => {
-    const stepInfo = step.text ? 'Text response' : 'Tool call';
-    console.log(`Step ${i + 1}: ${stepInfo}`);
-  });
+  // // --- TURN 2: Recalling Information ---
+  // console.log("\n[Turn 2] User: 'Based on what I just told you, what is my Ontario tax?'");
+  // const turn2 = await financeAgent.generate(
+  //   'Based on what I just told you, what is my Ontario tax?',
+  //   {
+  //     memory: memoryContext,
+  //   }
+  // );
+  // console.log('Agent:', turn2.text);
 }
 
 main().catch(error => {

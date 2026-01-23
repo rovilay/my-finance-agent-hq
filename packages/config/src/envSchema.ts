@@ -20,3 +20,11 @@ export const aiEnv = createEnv({
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
 });
+
+export const dbEnv = createEnv({
+  server: {
+    DATABASE_URL: z.string().min(1).describe('Database connection URL for Prisma ORM'),
+  },
+  runtimeEnv: process.env,
+  emptyStringAsUndefined: true,
+});
