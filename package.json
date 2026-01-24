@@ -34,7 +34,11 @@
     "@ai-sdk/google": "catalog:",
     "@ai-sdk/openai": "catalog:",
     "ai": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
+    "dotenv": "catalog:"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod": "^3.23.8"
+    }
   }
 }

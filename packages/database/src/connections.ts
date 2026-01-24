@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { PostgresStore } from '@mastra/pg';
+import { PgVector, PostgresStore } from '@mastra/pg';
 import pg from 'pg';
 import * as schema from './schema';
 
@@ -10,4 +10,8 @@ export const createDb = (connectionString: string) => {
 
 export const createMastraStore = (id: string, connectionString: string) => {
   return new PostgresStore({ id, connectionString });
+};
+
+export const createPgVectorStore = (id: string, connectionString: string) => {
+  return new PgVector({ id, connectionString });
 };

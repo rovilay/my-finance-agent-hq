@@ -1,17 +1,23 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { aiEnv } from '@hq/config';
 import { calculateOntarioTaxTool, convertCurrencyTool } from '@hq/tools';
-import { mastraStore } from './db';
+import { mastraStore, vectorStore } from './db';
 import { Memory } from '@mastra/memory';
 import { Agent } from '@mastra/core/agent';
+import { ModelRouterEmbeddingModel } from '@mastra/core/llm';
 
 import 'dotenv/config';
 
 // const GEMINI_3_MODEL = 'gemini-3-flash-preview';
 const GEMINI_2_MODEL = 'gemini-2.5-flash';
 
+const GEMINI_EMBEDDING_MODEL = 'google/gemini-2.5-embedding-lite';
+
+const embedder = new ModelRouterEmbeddingModel(GEMINI_EMBEDDING_MODEL);
 const memory = new Memory({
   storage: mastraStore,
+  vector: vectorStore,
+  embedder,
   options: {
     lastMessages: 10,
     workingMemory: {
@@ -74,12 +80,10 @@ async function main() {
   };
 
   // --- TURN 1: Giving Information ---
-  const turn1 = await financeAgent.generate(
-    'Remind me, what are my current financial goals and where do I live?',
-    {
-      memory: memoryContext,
-    }
-  );
+  const prompt1 = 'What is  my Nigerian National ID number and my annual salary?';
+  const turn1 = await financeAgent.generate(prompt1, {
+    memory: memoryContext,
+  });
   console.log('Agent:', turn1.text);
 
   // // --- TURN 2: Recalling Information ---

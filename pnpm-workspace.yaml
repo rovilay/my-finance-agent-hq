@@ -9,7 +9,7 @@ catalog:
   ai: ^6.0.41
 
   # Validation
-  zod: ^4.3.5
+  zod: ^3.23.8
 
   # Utilities
   dotenv: ^17.2.3
