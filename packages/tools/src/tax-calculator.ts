@@ -26,8 +26,8 @@ const OntrarioTaxSchema = z.object({
     .describe('An optional business invoice amount to calculate HST for in CAD.'),
 });
 
-type OntrarioTaxSchemaType = z.infer<typeof OntrarioTaxSchema>;
-type OntarioTaxResult = {
+export type OntrarioTaxSchemaType = z.infer<typeof OntrarioTaxSchema>;
+export type OntarioTaxResult = {
   currency: 'CAD';
   incomeTax: number;
   netIncome: number;
@@ -36,7 +36,7 @@ type OntarioTaxResult = {
   disclaimer: string;
 };
 
-const calculateOntarioIncomeTax = async ({
+export const calculateOntarioIncomeTax = async ({
   income,
   invoiceAmount,
 }: OntrarioTaxSchemaType): Promise<OntarioTaxResult> => {

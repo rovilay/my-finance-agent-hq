@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -16,5 +16,6 @@
     "paths": {
       "@hq/*": ["packages/*/src/index.ts"]
     }
-  }
+  },
+  "references": [{ "path": "../../packages/tools" }, { "path": "../../packages/database" }]
 }

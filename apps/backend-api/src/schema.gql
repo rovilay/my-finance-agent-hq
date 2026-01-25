@@ -1,0 +1,14 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Query {
+  getTaxProjection(annualSalary: Float!, userId: String!): Tax!
+}
+
+type Tax {
+  grossIncome: Float!
+  marginalRate: Float!
+  netIncome: Float!
+  totalTax: Float!
+}
