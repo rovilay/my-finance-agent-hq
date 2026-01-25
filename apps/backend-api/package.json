@@ -21,7 +21,8 @@
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:fix-migrations": "bash scripts/fix-migrations.sh"
   },
   "dependencies": {
     "@apollo/server": "catalog:",
@@ -31,7 +32,7 @@
     "@hq/tools": "workspace:*",
     "@nestjs/apollo": "catalog:",
     "@nestjs/common": "catalog:",
-    "@nestjs/config": "^4.0.2",
+    "@nestjs/config": "catalog:",
     "@nestjs/core": "catalog:",
     "@nestjs/graphql": "catalog:",
     "@nestjs/passport": "catalog:",
