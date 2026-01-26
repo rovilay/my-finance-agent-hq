@@ -2,8 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  syncUser(data: UserInput!): User!
+}
+
 type Query {
   getTaxProjection(annualSalary: Float!, userId: String!): Tax!
+  me: User!
 }
 
 type Tax {
@@ -11,4 +21,23 @@ type Tax {
   marginalRate: Float!
   netIncome: Float!
   totalTax: Float!
+}
+
+type User {
+  avatarUrl: String
+  bio: String
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  updatedAt: DateTime!
+}
+
+input UserInput {
+  avatarUrl: String
+  bio: String
+  email: String!
+  firstName: String!
+  lastName: String!
 }

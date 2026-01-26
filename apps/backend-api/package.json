@@ -37,10 +37,12 @@
     "@nestjs/graphql": "catalog:",
     "@nestjs/passport": "catalog:",
     "@nestjs/platform-express": "catalog:",
+    "drizzle-orm": "catalog:",
     "graphql": "catalog:",
-    "passport-jwt": "catalog:",
+    "jose": "catalog:",
     "reflect-metadata": "catalog:",
-    "rxjs": "catalog:"
+    "rxjs": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@eslint/eslintrc": "catalog:",
