@@ -2,28 +2,35 @@ import { Injectable, Inject } from '@nestjs/common';
 import { DATABASE_CONNECTION, fiscalEntities } from '@hq/database';
 import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { FiscalEntity, FiscalEntityInput } from './models/fiscal-entity.model';
+import {
+  FiscalEntity,
+  FiscalEntityInput,
+  FiscalEntityType,
+} from './models/fiscal-entity.model';
 
 @Injectable()
 export class FiscalEntityService {
   constructor(@Inject(DATABASE_CONNECTION) private db: NodePgDatabase<any>) {}
 
-  async create(userId: string, data: FiscalEntityInput): Promise<FiscalEntity> {
+  async create(
+    userId: string,
+    input: FiscalEntityInput,
+  ): Promise<FiscalEntity> {
     const [newEntity] = await this.db
       .insert(fiscalEntities)
       .values({
         userId,
-        name: data.name,
+        name: input.name,
         province: 'Ontario', // Default for Phase 1
         country: 'Canada', // Default for Phase 1
-        type: 'individual',
+        type: FiscalEntityType.individual, // Default for Phase 1
       })
       .returning();
 
     return {
       id: newEntity.id,
       name: newEntity.name,
-      type: newEntity.type as FiscalEntity['type'],
+      type: newEntity.type as FiscalEntityType,
       country: newEntity.country,
       province: newEntity.province,
       userId: newEntity.userId,

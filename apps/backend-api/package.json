@@ -30,6 +30,7 @@
     "@hq/config": "workspace:*",
     "@hq/database": "workspace:*",
     "@hq/tools": "workspace:*",
+    "@hq/validation-schema": "workspace:*",
     "@nestjs/apollo": "catalog:",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",

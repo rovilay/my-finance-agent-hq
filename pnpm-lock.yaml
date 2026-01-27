@@ -8,7 +8,7 @@ catalogs:
   default:
     '@ai-sdk/google':
       specifier: ^3.0.10
-      version: 3.0.10
+      version: 3.0.13
     '@ai-sdk/openai':
       specifier: ^3.0.12
       version: 3.0.12
@@ -225,6 +225,9 @@ importers:
       '@hq/tools':
         specifier: workspace:*
         version: link:../../packages/tools
+      '@hq/validation-schema':
+        specifier: workspace:*
+        version: link:../../packages/validation-schema
       '@nestjs/apollo':
         specifier: 'catalog:'
         version: 13.2.3(@apollo/server@5.3.0(graphql@16.12.0))(@as-integrations/express5@1.1.2(@apollo/server@5.3.0(graphql@16.12.0))(express@5.2.1))(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)(@nestjs/graphql@13.2.3(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)(graphql@16.12.0)(reflect-metadata@0.2.2))(graphql@16.12.0)
@@ -426,6 +429,19 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.25.76
+
+  packages/validation-schema:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.0.9
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
 packages:
 
