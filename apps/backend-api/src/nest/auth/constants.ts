@@ -1,2 +1,3 @@
-export const FIREBASE_PUBLIC_KEY_URL =
-  'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
+// Firebase Auth JWKS endpoint
+export const FIREBASE_JWKS_URL =
+  'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';

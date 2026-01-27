@@ -10,7 +10,8 @@ import { Request } from 'express';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { UserService } from '../user/user.service';
 import { type EnvConfig, envConfig } from 'src/config/env';
-import { FIREBASE_PUBLIC_KEY_URL } from '../constants';
+import { FIREBASE_JWKS_URL } from '../constants';
+import '../../../types/express';
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {
@@ -31,8 +32,8 @@ export class GqlAuthGuard implements CanActivate {
     }
 
     try {
-      // 2. Verify with jose
-      const jwks = createRemoteJWKSet(new URL(FIREBASE_PUBLIC_KEY_URL));
+      // 2. Verify with jose using Firebase JWKS
+      const jwks = createRemoteJWKSet(new URL(FIREBASE_JWKS_URL));
       const { payload } = await jwtVerify(token, jwks, {
         issuer: this.config.JWT_ISSUER,
         audience: this.config.JWT_AUDIENCE,

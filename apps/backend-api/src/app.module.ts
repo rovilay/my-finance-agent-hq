@@ -10,6 +10,7 @@ import { AuthModule } from './nest/auth/auth.module';
 import './types/express';
 import { DatabaseModule } from './nest/database/database.module';
 import { envConfig } from './config/env';
+import { FiscalEntityModule } from './nest/fiscal-entity/fiscal-entity.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { envConfig } from './config/env';
     }),
     DatabaseModule,
     AuthModule,
+    FiscalEntityModule,
     TaxModule,
   ],
   controllers: [AppController],

@@ -10,13 +10,15 @@ export class AuthResolver {
   constructor(private readonly userService: UserService) {}
 
   @Mutation(() => User)
-  async syncUser(@Args('data') data: UserInput): Promise<User> {
-    return this.userService.syncUser(data);
+  async syncUser(@Args('input') input: UserInput): Promise<User> {
+    console.log('Syncing user with data:', input);
+    return this.userService.syncUser(input);
   }
 
   @Query(() => User, { name: 'me' })
   @UseGuards(GqlAuthGuard)
   async me(@CurrentUser() user: User): Promise<User> {
+    console.log('Fetching current user:', user);
     return Promise.resolve(user);
   }
 }
