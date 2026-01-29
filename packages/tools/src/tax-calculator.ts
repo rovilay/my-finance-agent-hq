@@ -1,14 +1,14 @@
 import { tool } from 'ai';
 import z from 'zod';
 
-export const years = [2026] as const;
-type Year = (typeof years)[number];
+export const supportedTaxYears = [2026] as const;
+type SupportedTaxYear = (typeof supportedTaxYears)[number];
 
 /**
  * Simplified 2026 Combined Tax Brackets (Federal + Ontario)
  * Note: These are representative of the progressive brackets for 2026.
  */
-const INCOME_TAX_BRACKETS: Record<Year, { threshold: number; rate: number }[]> = {
+const INCOME_TAX_BRACKETS: Record<SupportedTaxYear, { threshold: number; rate: number }[]> = {
   2026: [
     { threshold: 53891, rate: 0.1905 }, // Combined rate for first bracket
     { threshold: 58523, rate: 0.2315 },
@@ -18,7 +18,29 @@ const INCOME_TAX_BRACKETS: Record<Year, { threshold: number; rate: number }[]> =
   ],
 };
 
-const OntrarioTaxSchema = z.object({
+const CANADA_FEDERAL_INCOME_TAX_BRACKETS: Record<
+  SupportedTaxYear,
+  { threshold: number; rate: number }[]
+> = {
+  2026: [
+    { threshold: 173205, rate: 0.29 },
+    { threshold: 111733, rate: 0.26 },
+    { threshold: 55867, rate: 0.205 },
+    { threshold: 0, rate: 0.15 },
+  ],
+};
+
+const ONTARIO_INCOME_TAX_BRACKETS: Record<SupportedTaxYear, { threshold: number; rate: number }[]> =
+  {
+    2026: [
+      { threshold: 173205, rate: 0.29 },
+      { threshold: 111733, rate: 0.26 },
+      { threshold: 55867, rate: 0.205 },
+      { threshold: 0, rate: 0.15 },
+    ],
+  };
+
+const OntarioTaxSchema = z.object({
   income: z.number().min(0).describe('Total annual gross income in CAD.'),
   invoiceAmount: z
     .number()
@@ -26,7 +48,7 @@ const OntrarioTaxSchema = z.object({
     .describe('An optional business invoice amount to calculate HST for in CAD.'),
 });
 
-export type OntrarioTaxSchemaType = z.infer<typeof OntrarioTaxSchema>;
+export type OntarioTaxSchemaType = z.infer<typeof OntarioTaxSchema>;
 export type OntarioTaxResult = {
   currency: 'CAD';
   incomeTax: number;
@@ -39,7 +61,7 @@ export type OntarioTaxResult = {
 export const calculateOntarioIncomeTax = async ({
   income,
   invoiceAmount,
-}: OntrarioTaxSchemaType): Promise<OntarioTaxResult> => {
+}: OntarioTaxSchemaType): Promise<OntarioTaxResult> => {
   // 1. Calculate Progressive Income Tax
   let remainingIncome = income;
   let totalIncomeTax = 0;
@@ -71,6 +93,28 @@ export const calculateOntarioIncomeTax = async ({
 
 export const calculateOntarioTaxTool = tool({
   description: 'Calculates Ontario HST (13%) and progressive personal income tax for 2026.',
-  inputSchema: OntrarioTaxSchema,
+  inputSchema: OntarioTaxSchema,
   execute: calculateOntarioIncomeTax,
 });
+
+const applyBrackets = (income: number, brackets: { threshold: number; rate: number }[]): number => {
+  let tax = 0;
+  let remainingIncome = income;
+
+  for (const bracket of brackets) {
+    if (remainingIncome > bracket.threshold) {
+      const taxableAtThisRate = remainingIncome - bracket.threshold;
+      tax += taxableAtThisRate * bracket.rate;
+      remainingIncome = bracket.threshold;
+    }
+  }
+  return tax;
+};
+
+export const calculateCanadaFederalTax = (income: number, taxYear: SupportedTaxYear): number => {
+  return applyBrackets(income, CANADA_FEDERAL_INCOME_TAX_BRACKETS[taxYear]);
+};
+
+export const calculateOntarioTax = (income: number, taxYear: SupportedTaxYear): number => {
+  return applyBrackets(income, ONTARIO_INCOME_TAX_BRACKETS[taxYear]);
+};

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { financialTypeSchema } from './enums';
+import { taxYearSchema } from './tax-year.schema';
 
 export const createFinancialEntrySchema = z.object({
   entityId: z.string().uuid('Invalid entity ID'),
@@ -11,7 +12,7 @@ export const createFinancialEntrySchema = z.object({
   amount: z.number().positive('Amount must be positive'),
   currency: z.string().length(3, 'Currency must be a 3-letter code').default('CAD'),
   date: z.coerce.date(),
-  taxYear: z.string().regex(/^\d{4}$/, 'Tax year must be a 4-digit number'),
+  taxYear: taxYearSchema,
   metadata: z.record(z.unknown()).optional().default({}),
 });
 

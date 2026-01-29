@@ -12,3 +12,6 @@ export * from './user.schema';
 
 // Tax Document Schemas
 export * from './tax-document.schema';
+
+// Tax Year Schemas
+export * from './tax-year.schema';
