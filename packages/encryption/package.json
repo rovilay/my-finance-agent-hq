@@ -1,0 +1,19 @@
+{
+  "name": "@hq/encryption",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "clean": "rm -rf dist",
+    "prebuild": "pnpm run clean"
+  },
+  "dependencies": {
+    "@google-cloud/kms": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
+  }
+}

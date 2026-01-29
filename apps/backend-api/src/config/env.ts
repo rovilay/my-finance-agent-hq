@@ -12,6 +12,9 @@ declare const process: {
     FIREBASE_PROJECT_ID: string;
     JWT_ISSUER: string;
     JWT_AUDIENCE: string;
+    GCS_BUCKET_NAME: string;
+    GCP_KMS_KEY_ID: string;
+    GEMINI_API_KEY: string;
   };
   cwd: () => string;
 };
@@ -47,6 +50,9 @@ const envSchema = z.object({
   FIREBASE_PROJECT_ID: z.string().min(1, 'FIREBASE_PROJECT_ID is required'),
   JWT_ISSUER: z.string().min(1, 'JWT_ISSUER is required'),
   JWT_AUDIENCE: z.string().min(1, 'JWT_AUDIENCE is required'),
+  GCS_BUCKET_NAME: z.string().min(1, 'GCS_BUCKET_NAME is required'),
+  GCP_KMS_KEY_ID: z.string().min(1, 'GCP_KMS_KEY_ID is required'),
+  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
 });
 export type EnvSchema = z.infer<typeof envSchema>;
 
@@ -63,6 +69,9 @@ export const envConfig = registerAs('envConfig', (): EnvSchema => {
       FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
       JWT_ISSUER: process.env.JWT_ISSUER,
       JWT_AUDIENCE: process.env.JWT_AUDIENCE,
+      GCS_BUCKET_NAME: process.env.GCS_BUCKET_NAME,
+      GCP_KMS_KEY_ID: process.env.GCP_KMS_KEY_ID,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

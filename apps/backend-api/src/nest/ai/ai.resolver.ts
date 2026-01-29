@@ -1,25 +1,18 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { TaxService } from '../tax/tax.service';
+import { Args, Mutation, Resolver, ID } from '@nestjs/graphql';
 import { AiService } from './ai.service';
 
 @Resolver()
 export class AiResolver {
-  constructor(
-    private readonly aiService: AiService,
-    private readonly taxService: TaxService,
-  ) {}
+  constructor(private readonly aiService: AiService) {}
 
-  @Mutation(() => String)
-  @Mutation(() => String)
-  async askAdvisor(
-    @Args('question') question: string,
-    @Args('salary') salary: number,
-    @Args('userId') userId: string,
-  ) {
-    // 1. Get the deterministic "Ground Truth" numbers
-    const taxData = await this.taxService.getTaxProjection(salary, userId);
+  @Mutation(() => Boolean)
+  async verifyDocument(
+    @Args('documentId', { type: () => ID }) documentId: string,
+    @Args('approved') approved: boolean,
+    @Args('shouldKeepFile') shouldKeepFile: boolean,
+  ): Promise<boolean> {
+    console.log(`[AiResolver] 🔘 Resuming workflow for Doc: ${documentId}`);
 
-    // 2. Let the AI explain these numbers to the user
-    return this.aiService.getAdvisorInsights(question, userId, taxData);
+    return this.aiService.verifyDocument(documentId, approved, shouldKeepFile);
   }
 }

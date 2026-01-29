@@ -94,3 +94,50 @@ export const taxDocuments = pgTable('tax_documents', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+// 1. Enums for the State Machine & Privacy
+export const documentStatusEnum = pgEnum('document_status', [
+  'uploaded', // Initial state
+  'processed', // AI has extracted data
+  'verified', // User confirmed extraction
+  'purged', // File deleted from storage, data kept
+  'failed', // Error in processing
+]);
+
+export const retentionPolicyEnum = pgEnum('retention_policy', [
+  'permanent', // Standard vaulting
+  'verify_and_purge', // The "Privacy-First" default
+  'ephemeral', // Purge immediately after extraction
+]);
+
+// 2. The Table
+export const documents = pgTable('documents', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  entityId: uuid('entity_id')
+    .references(() => fiscalEntities.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  // Storage & Identification
+  fileName: text('file_name').notNull(),
+  mimeType: text('mime_type').notNull(),
+  storagePath: text('storage_path'), // Will be NULL if purged
+
+  // Security (The $5/mo Robust Layer)
+  kmsKeyId: text('kms_key_id'), // Reference to the GCP KMS Master Key
+  wrappedDek: text('wrapped_dek'), // Encrypted Data Encryption Key (DEK)
+
+  // State & Logic
+  status: documentStatusEnum('status').default('uploaded').notNull(),
+  retentionPolicy: retentionPolicyEnum('retention_policy').default('verify_and_purge').notNull(),
+
+  // Data Payload
+  extractedData: jsonb('extracted_data'), // JSON results from Gemini Flash
+
+  // Audit Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  purgedAt: timestamp('purged_at'), // Tracking when the storage was cleared
+});
