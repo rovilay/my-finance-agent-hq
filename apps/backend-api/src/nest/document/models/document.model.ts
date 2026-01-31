@@ -6,6 +6,7 @@ import {
   InputType,
   Int,
 } from '@nestjs/graphql';
+import { Paginated } from '../../common/models';
 
 export enum DocumentStatus {
   uploaded = 'uploaded',
@@ -99,3 +100,6 @@ export class DocumentInput {
   @Field()
   fileBuffer: string; // base64 encoded file data
 }
+
+@ObjectType()
+export class PaginatedDocument extends Paginated(Document) {}

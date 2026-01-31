@@ -1,19 +1,37 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { FiscalEntityService } from './fiscal-entity.service';
-import { FiscalEntity, FiscalEntityInput } from './models/fiscal-entity.model';
+import {
+  FiscalEntity,
+  FiscalEntityInput,
+  FiscalEntityType,
+  PaginatedFiscalEntity,
+} from './models/fiscal-entity.model';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../auth/models/user.model';
+import { PaginationInput } from '../common/models';
 
 @Resolver(() => FiscalEntity)
 @UseGuards(GqlAuthGuard)
 export class FiscalEntityResolver {
   constructor(private readonly service: FiscalEntityService) {}
 
-  @Query(() => [FiscalEntity])
-  async getFiscalEntities(@CurrentUser() user: User): Promise<FiscalEntity[]> {
-    return this.service.findAllForUser(user.id);
+  @Query(() => PaginatedFiscalEntity, { name: 'fiscalEntities' })
+  async getFiscalEntities(
+    @CurrentUser() user: User,
+    @Args('fiscalEntityType', { type: () => FiscalEntityType, nullable: true }) fiscalEntityType?: FiscalEntityType,
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ): Promise<PaginatedFiscalEntity> {
+    return this.service.findAllForUser(user.id, fiscalEntityType, pagination ?? {});
+  }
+
+  @Query(() => FiscalEntity, { name: 'fiscalEntity' })
+  async getFiscalEntity(
+    @CurrentUser() user: User,
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<FiscalEntity> {
+    return this.service.findById(id, user.id);
   }
 
   @Mutation(() => FiscalEntity)

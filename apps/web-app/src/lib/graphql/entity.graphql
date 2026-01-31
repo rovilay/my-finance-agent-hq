@@ -1,36 +1,43 @@
-# Note: documentsByEntity query needs to be implemented in the backend
-# Temporarily commented out until backend is ready
-# query GetDocumentsByEntity($entityId: String!, $skip: Int, $take: Int) {
-#   documentsByEntity(entityId: $entityId, skip: $skip, take: $take) {
-#     documents {
-#       id
-#       fileName
-#       status
-#       retentionPolicy
-#       storagePath
-#       purgedAt
-#       createdAt
-#       updatedAt
-#       fileMetadata {
-#         mimeType
-#         sizeInKb
-#       }
-#     }
-#     total
-#   }
-# }
+query GetFiscalEntities($type: FiscalEntityType, $pagination: PaginationInput) {
+  fiscalEntities(fiscalEntityType: $type, pagination: $pagination) {
+    items {
+      id
+      name
+      type
+      country
+      province
+      userId
+      createdAt
+      updatedAt
+    }
+    total
+    skip
+    take
+    hasMore
+  }
+}
 
-# Use existing ledger query (no pagination support yet in backend)
-query GetFinancialEntries($entityId: String!, $taxYear: String) {
-  ledger(entityId: $entityId, taxYear: $taxYear) {
+query GetFiscalEntity($id: ID!) {
+  fiscalEntity(id: $id) {
     id
-    amount
-    category
-    currency
-    date
-    entityId
-    taxYear
+    name
     type
+    country
+    province
+    userId
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateFiscalEntity($input: FiscalEntityInput!) {
+  createFiscalEntity(input: $input) {
+    id
+    name
+    type
+    country
+    province
+    userId
     createdAt
     updatedAt
   }

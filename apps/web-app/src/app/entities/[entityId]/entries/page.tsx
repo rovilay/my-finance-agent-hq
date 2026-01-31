@@ -9,6 +9,10 @@ export default function FinancialEntries() {
   const entityId = params?.entityId as string;
 
   return (
-    <EntityEntriesPage entityId={entityId} onBack={() => router.push(`/entities/${entityId}`)} />
+    <EntityEntriesPage
+      entityId={entityId}
+      onBack={() => router.push(`/entities/${entityId}`)}
+    />
   );
 }
+

@@ -9,11 +9,12 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { DocumentService } from './document.service';
-import { Document, DocumentInput } from './models/document.model';
+import { Document, DocumentInput, PaginatedDocument } from './models/document.model';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AiOrchestrator } from '../ai/ai.orchestrator';
 import { User } from '../auth/models/user.model';
+import { PaginationInput } from '../common/models';
 
 @Resolver(() => Document)
 @UseGuards(GqlAuthGuard)
@@ -48,11 +49,22 @@ export class DocumentResolver {
     return this.documentService.finalize(documentId, shouldKeep);
   }
 
+  @Query(() => PaginatedDocument, { name: 'documentsByEntity' })
+  async getDocumentsByEntity(
+    @CurrentUser() user: User,
+    @Args('entityId', { type: () => ID }) entityId: string,
+    @Args('pagination', { nullable: true }) pagination?: PaginationInput,
+  ): Promise<PaginatedDocument> {
+    const docs = await this.documentService.documentsByEntityId(entityId, user.id, pagination ?? {});
+    return docs;
+  }
+
   @Query(() => Document, { name: 'document' })
   async getDocument(
+    @CurrentUser() user: User,
     @Args('id', { type: () => ID }) id: string,
   ): Promise<Document> {
-    const doc = await this.documentService.findDocOrThrow(id);
+    const doc = await this.documentService.findDocOrThrow(id, user.id);
     return doc;
   }
 

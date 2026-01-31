@@ -107,11 +107,43 @@ type Mutation {
   verifyDocument(approved: Boolean!, documentId: ID!, shouldKeepFile: Boolean!): Boolean!
 }
 
+type PaginatedDocument {
+  hasMore: Boolean!
+  items: [Document!]!
+  skip: Int!
+  take: Int!
+  total: Int!
+}
+
+type PaginatedFinancialEntry {
+  hasMore: Boolean!
+  items: [FinancialEntry!]!
+  skip: Int!
+  take: Int!
+  total: Int!
+}
+
+type PaginatedFiscalEntity {
+  hasMore: Boolean!
+  items: [FiscalEntity!]!
+  skip: Int!
+  take: Int!
+  total: Int!
+}
+
+input PaginationInput {
+  skip: Int = 0
+  take: Int = 10
+}
+
 type Query {
   document(id: ID!): Document!
-  getFiscalEntities: [FiscalEntity!]!
+  documentsByEntity(entityId: ID!, pagination: PaginationInput): PaginatedDocument!
+  financialEntries(entityId: ID!, pagination: PaginationInput, taxYear: String): PaginatedFinancialEntry!
+  financialEntry(id: ID!): FinancialEntry!
+  fiscalEntities(fiscalEntityType: FiscalEntityType, pagination: PaginationInput): PaginatedFiscalEntity!
+  fiscalEntity(id: ID!): FiscalEntity!
   getTaxProjection(entityId: String!, taxYear: String!): TaxProjection!
-  ledger(entityId: String!, taxYear: String): [FinancialEntry!]!
   me: User!
 }
 

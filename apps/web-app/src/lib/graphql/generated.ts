@@ -157,12 +157,47 @@ export type MutationVerifyDocumentArgs = {
   shouldKeepFile: Scalars['Boolean']['input'];
 };
 
+export type PaginatedDocument = {
+  __typename?: 'PaginatedDocument';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<Document>;
+  skip: Scalars['Int']['output'];
+  take: Scalars['Int']['output'];
+  total: Scalars['Int']['output'];
+};
+
+export type PaginatedFinancialEntry = {
+  __typename?: 'PaginatedFinancialEntry';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<FinancialEntry>;
+  skip: Scalars['Int']['output'];
+  take: Scalars['Int']['output'];
+  total: Scalars['Int']['output'];
+};
+
+export type PaginatedFiscalEntity = {
+  __typename?: 'PaginatedFiscalEntity';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<FiscalEntity>;
+  skip: Scalars['Int']['output'];
+  take: Scalars['Int']['output'];
+  total: Scalars['Int']['output'];
+};
+
+export type PaginationInput = {
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   document: Document;
-  getFiscalEntities: Array<FiscalEntity>;
+  documentsByEntity: PaginatedDocument;
+  financialEntries: PaginatedFinancialEntry;
+  financialEntry: FinancialEntry;
+  fiscalEntities: PaginatedFiscalEntity;
+  fiscalEntity: FiscalEntity;
   getTaxProjection: TaxProjection;
-  ledger: Array<FinancialEntry>;
   me: User;
 };
 
@@ -172,15 +207,38 @@ export type QueryDocumentArgs = {
 };
 
 
-export type QueryGetTaxProjectionArgs = {
-  entityId: Scalars['String']['input'];
-  taxYear: Scalars['String']['input'];
+export type QueryDocumentsByEntityArgs = {
+  entityId: Scalars['ID']['input'];
+  pagination?: InputMaybe<PaginationInput>;
 };
 
 
-export type QueryLedgerArgs = {
-  entityId: Scalars['String']['input'];
+export type QueryFinancialEntriesArgs = {
+  entityId: Scalars['ID']['input'];
+  pagination?: InputMaybe<PaginationInput>;
   taxYear?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryFinancialEntryArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryFiscalEntitiesArgs = {
+  fiscalEntityType?: InputMaybe<FiscalEntityType>;
+  pagination?: InputMaybe<PaginationInput>;
+};
+
+
+export type QueryFiscalEntityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTaxProjectionArgs = {
+  entityId: Scalars['String']['input'];
+  taxYear: Scalars['String']['input'];
 };
 
 export enum RetentionPolicy {
@@ -231,18 +289,44 @@ export type UploadDocumentMutationVariables = Exact<{
 
 export type UploadDocumentMutation = { __typename?: 'Mutation', uploadDocument: { __typename?: 'Document', id: string, fileName: string, status: DocumentStatus, retentionPolicy: RetentionPolicy, storagePath?: string | null, purgedAt?: any | null, createdAt: any, updatedAt: any, fileMetadata: { __typename?: 'FileMetadata', mimeType: string, sizeInKb: number } } };
 
-export type GetFinancialEntriesQueryVariables = Exact<{
-  entityId: Scalars['String']['input'];
-  taxYear?: InputMaybe<Scalars['String']['input']>;
+export type VerifyAndFinalizeDocumentMutationVariables = Exact<{
+  documentId: Scalars['ID']['input'];
+  approved: Scalars['Boolean']['input'];
+  shouldKeepFile: Scalars['Boolean']['input'];
 }>;
 
 
-export type GetFinancialEntriesQuery = { __typename?: 'Query', ledger: Array<{ __typename?: 'FinancialEntry', id: string, amount: number, category: string, currency: string, date: any, entityId: string, taxYear: string, type: FinancialType, createdAt: any, updatedAt: any }> };
+export type VerifyAndFinalizeDocumentMutation = { __typename?: 'Mutation', verifyDocument: boolean };
 
-export type GetFiscalEntitiesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetDocumentsByEntityQueryVariables = Exact<{
+  entityId: Scalars['ID']['input'];
+  pagination?: InputMaybe<PaginationInput>;
+}>;
 
 
-export type GetFiscalEntitiesQuery = { __typename?: 'Query', getFiscalEntities: Array<{ __typename?: 'FiscalEntity', id: string, name: string, type: FiscalEntityType, country: string, province: string, userId: string, createdAt: any, updatedAt: any }> };
+export type GetDocumentsByEntityQuery = { __typename?: 'Query', documentsByEntity: { __typename?: 'PaginatedDocument', total: number, skip: number, take: number, hasMore: boolean, items: Array<{ __typename?: 'Document', id: string, fileName: string, status: DocumentStatus, retentionPolicy: RetentionPolicy, storagePath?: string | null, purgedAt?: any | null, createdAt: any, updatedAt: any, fileMetadata: { __typename?: 'FileMetadata', mimeType: string, sizeInKb: number } }> } };
+
+export type GetDocumentQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetDocumentQuery = { __typename?: 'Query', document: { __typename?: 'Document', id: string, fileName: string, status: DocumentStatus, retentionPolicy: RetentionPolicy, storagePath?: string | null, purgedAt?: any | null, createdAt: any, updatedAt: any, fileMetadata: { __typename?: 'FileMetadata', mimeType: string, sizeInKb: number } } };
+
+export type GetFiscalEntitiesQueryVariables = Exact<{
+  type?: InputMaybe<FiscalEntityType>;
+  pagination?: InputMaybe<PaginationInput>;
+}>;
+
+
+export type GetFiscalEntitiesQuery = { __typename?: 'Query', fiscalEntities: { __typename?: 'PaginatedFiscalEntity', total: number, skip: number, take: number, hasMore: boolean, items: Array<{ __typename?: 'FiscalEntity', id: string, name: string, type: FiscalEntityType, country: string, province: string, userId: string, createdAt: any, updatedAt: any }> } };
+
+export type GetFiscalEntityQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetFiscalEntityQuery = { __typename?: 'Query', fiscalEntity: { __typename?: 'FiscalEntity', id: string, name: string, type: FiscalEntityType, country: string, province: string, userId: string, createdAt: any, updatedAt: any } };
 
 export type CreateFiscalEntityMutationVariables = Exact<{
   input: FiscalEntityInput;
@@ -252,12 +336,20 @@ export type CreateFiscalEntityMutationVariables = Exact<{
 export type CreateFiscalEntityMutation = { __typename?: 'Mutation', createFiscalEntity: { __typename?: 'FiscalEntity', id: string, name: string, type: FiscalEntityType, country: string, province: string, userId: string, createdAt: any, updatedAt: any } };
 
 export type GetLedgerQueryVariables = Exact<{
-  entityId: Scalars['String']['input'];
+  entityId: Scalars['ID']['input'];
+  pagination?: InputMaybe<PaginationInput>;
   taxYear?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetLedgerQuery = { __typename?: 'Query', ledger: Array<{ __typename?: 'FinancialEntry', id: string, amount: number, category: string, currency: string, date: any, entityId: string, taxYear: string, type: FinancialType, createdAt: any, updatedAt: any }> };
+export type GetLedgerQuery = { __typename?: 'Query', financialEntries: { __typename?: 'PaginatedFinancialEntry', total: number, skip: number, take: number, hasMore: boolean, items: Array<{ __typename?: 'FinancialEntry', id: string, amount: number, category: string, currency: string, date: any, entityId: string, taxYear: string, type: FinancialType, createdAt: any, updatedAt: any }> } };
+
+export type GetFinancialEntryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetFinancialEntryQuery = { __typename?: 'Query', financialEntry: { __typename?: 'FinancialEntry', id: string, amount: number, category: string, currency: string, date: any, entityId: string, taxYear: string, type: FinancialType, createdAt: any, updatedAt: any } };
 
 export type AddFinancialEntryMutationVariables = Exact<{
   input: CreateFinancialEntryInput;
@@ -331,70 +423,175 @@ export function useUploadDocumentMutation(baseOptions?: Apollo.MutationHookOptio
 export type UploadDocumentMutationHookResult = ReturnType<typeof useUploadDocumentMutation>;
 export type UploadDocumentMutationResult = Apollo.MutationResult<UploadDocumentMutation>;
 export type UploadDocumentMutationOptions = Apollo.BaseMutationOptions<UploadDocumentMutation, UploadDocumentMutationVariables>;
-export const GetFinancialEntriesDocument = gql`
-    query GetFinancialEntries($entityId: String!, $taxYear: String) {
-  ledger(entityId: $entityId, taxYear: $taxYear) {
-    id
-    amount
-    category
-    currency
-    date
-    entityId
-    taxYear
-    type
-    createdAt
-    updatedAt
+export const VerifyAndFinalizeDocumentDocument = gql`
+    mutation VerifyAndFinalizeDocument($documentId: ID!, $approved: Boolean!, $shouldKeepFile: Boolean!) {
+  verifyDocument(
+    documentId: $documentId
+    approved: $approved
+    shouldKeepFile: $shouldKeepFile
+  )
+}
+    `;
+export type VerifyAndFinalizeDocumentMutationFn = Apollo.MutationFunction<VerifyAndFinalizeDocumentMutation, VerifyAndFinalizeDocumentMutationVariables>;
+
+/**
+ * __useVerifyAndFinalizeDocumentMutation__
+ *
+ * To run a mutation, you first call `useVerifyAndFinalizeDocumentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVerifyAndFinalizeDocumentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [verifyAndFinalizeDocumentMutation, { data, loading, error }] = useVerifyAndFinalizeDocumentMutation({
+ *   variables: {
+ *      documentId: // value for 'documentId'
+ *      approved: // value for 'approved'
+ *      shouldKeepFile: // value for 'shouldKeepFile'
+ *   },
+ * });
+ */
+export function useVerifyAndFinalizeDocumentMutation(baseOptions?: Apollo.MutationHookOptions<VerifyAndFinalizeDocumentMutation, VerifyAndFinalizeDocumentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VerifyAndFinalizeDocumentMutation, VerifyAndFinalizeDocumentMutationVariables>(VerifyAndFinalizeDocumentDocument, options);
+      }
+export type VerifyAndFinalizeDocumentMutationHookResult = ReturnType<typeof useVerifyAndFinalizeDocumentMutation>;
+export type VerifyAndFinalizeDocumentMutationResult = Apollo.MutationResult<VerifyAndFinalizeDocumentMutation>;
+export type VerifyAndFinalizeDocumentMutationOptions = Apollo.BaseMutationOptions<VerifyAndFinalizeDocumentMutation, VerifyAndFinalizeDocumentMutationVariables>;
+export const GetDocumentsByEntityDocument = gql`
+    query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput) {
+  documentsByEntity(entityId: $entityId, pagination: $pagination) {
+    items {
+      id
+      fileName
+      status
+      retentionPolicy
+      storagePath
+      purgedAt
+      createdAt
+      updatedAt
+      fileMetadata {
+        mimeType
+        sizeInKb
+      }
+    }
+    total
+    skip
+    take
+    hasMore
   }
 }
     `;
 
 /**
- * __useGetFinancialEntriesQuery__
+ * __useGetDocumentsByEntityQuery__
  *
- * To run a query within a React component, call `useGetFinancialEntriesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetFinancialEntriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetDocumentsByEntityQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDocumentsByEntityQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetFinancialEntriesQuery({
+ * const { data, loading, error } = useGetDocumentsByEntityQuery({
  *   variables: {
  *      entityId: // value for 'entityId'
- *      taxYear: // value for 'taxYear'
+ *      pagination: // value for 'pagination'
  *   },
  * });
  */
-export function useGetFinancialEntriesQuery(baseOptions: Apollo.QueryHookOptions<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables> & ({ variables: GetFinancialEntriesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetDocumentsByEntityQuery(baseOptions: Apollo.QueryHookOptions<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables> & ({ variables: GetDocumentsByEntityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>(GetFinancialEntriesDocument, options);
+        return Apollo.useQuery<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>(GetDocumentsByEntityDocument, options);
       }
-export function useGetFinancialEntriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>) {
+export function useGetDocumentsByEntityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>(GetFinancialEntriesDocument, options);
+          return Apollo.useLazyQuery<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>(GetDocumentsByEntityDocument, options);
         }
 // @ts-ignore
-export function useGetFinancialEntriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>): Apollo.UseSuspenseQueryResult<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>;
-export function useGetFinancialEntriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>): Apollo.UseSuspenseQueryResult<GetFinancialEntriesQuery | undefined, GetFinancialEntriesQueryVariables>;
-export function useGetFinancialEntriesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>) {
+export function useGetDocumentsByEntitySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>): Apollo.UseSuspenseQueryResult<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>;
+export function useGetDocumentsByEntitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>): Apollo.UseSuspenseQueryResult<GetDocumentsByEntityQuery | undefined, GetDocumentsByEntityQueryVariables>;
+export function useGetDocumentsByEntitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>(GetFinancialEntriesDocument, options);
+          return Apollo.useSuspenseQuery<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>(GetDocumentsByEntityDocument, options);
         }
-export type GetFinancialEntriesQueryHookResult = ReturnType<typeof useGetFinancialEntriesQuery>;
-export type GetFinancialEntriesLazyQueryHookResult = ReturnType<typeof useGetFinancialEntriesLazyQuery>;
-export type GetFinancialEntriesSuspenseQueryHookResult = ReturnType<typeof useGetFinancialEntriesSuspenseQuery>;
-export type GetFinancialEntriesQueryResult = Apollo.QueryResult<GetFinancialEntriesQuery, GetFinancialEntriesQueryVariables>;
-export const GetFiscalEntitiesDocument = gql`
-    query GetFiscalEntities {
-  getFiscalEntities {
+export type GetDocumentsByEntityQueryHookResult = ReturnType<typeof useGetDocumentsByEntityQuery>;
+export type GetDocumentsByEntityLazyQueryHookResult = ReturnType<typeof useGetDocumentsByEntityLazyQuery>;
+export type GetDocumentsByEntitySuspenseQueryHookResult = ReturnType<typeof useGetDocumentsByEntitySuspenseQuery>;
+export type GetDocumentsByEntityQueryResult = Apollo.QueryResult<GetDocumentsByEntityQuery, GetDocumentsByEntityQueryVariables>;
+export const GetDocumentDocument = gql`
+    query GetDocument($id: ID!) {
+  document(id: $id) {
     id
-    name
-    type
-    country
-    province
-    userId
+    fileName
+    status
+    retentionPolicy
+    storagePath
+    purgedAt
     createdAt
     updatedAt
+    fileMetadata {
+      mimeType
+      sizeInKb
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDocumentQuery__
+ *
+ * To run a query within a React component, call `useGetDocumentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDocumentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDocumentQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetDocumentQuery(baseOptions: Apollo.QueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables> & ({ variables: GetDocumentQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+      }
+export function useGetDocumentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+        }
+// @ts-ignore
+export function useGetDocumentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>): Apollo.UseSuspenseQueryResult<GetDocumentQuery, GetDocumentQueryVariables>;
+export function useGetDocumentSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>): Apollo.UseSuspenseQueryResult<GetDocumentQuery | undefined, GetDocumentQueryVariables>;
+export function useGetDocumentSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDocumentQuery, GetDocumentQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetDocumentQuery, GetDocumentQueryVariables>(GetDocumentDocument, options);
+        }
+export type GetDocumentQueryHookResult = ReturnType<typeof useGetDocumentQuery>;
+export type GetDocumentLazyQueryHookResult = ReturnType<typeof useGetDocumentLazyQuery>;
+export type GetDocumentSuspenseQueryHookResult = ReturnType<typeof useGetDocumentSuspenseQuery>;
+export type GetDocumentQueryResult = Apollo.QueryResult<GetDocumentQuery, GetDocumentQueryVariables>;
+export const GetFiscalEntitiesDocument = gql`
+    query GetFiscalEntities($type: FiscalEntityType, $pagination: PaginationInput) {
+  fiscalEntities(fiscalEntityType: $type, pagination: $pagination) {
+    items {
+      id
+      name
+      type
+      country
+      province
+      userId
+      createdAt
+      updatedAt
+    }
+    total
+    skip
+    take
+    hasMore
   }
 }
     `;
@@ -411,6 +608,8 @@ export const GetFiscalEntitiesDocument = gql`
  * @example
  * const { data, loading, error } = useGetFiscalEntitiesQuery({
  *   variables: {
+ *      type: // value for 'type'
+ *      pagination: // value for 'pagination'
  *   },
  * });
  */
@@ -433,6 +632,56 @@ export type GetFiscalEntitiesQueryHookResult = ReturnType<typeof useGetFiscalEnt
 export type GetFiscalEntitiesLazyQueryHookResult = ReturnType<typeof useGetFiscalEntitiesLazyQuery>;
 export type GetFiscalEntitiesSuspenseQueryHookResult = ReturnType<typeof useGetFiscalEntitiesSuspenseQuery>;
 export type GetFiscalEntitiesQueryResult = Apollo.QueryResult<GetFiscalEntitiesQuery, GetFiscalEntitiesQueryVariables>;
+export const GetFiscalEntityDocument = gql`
+    query GetFiscalEntity($id: ID!) {
+  fiscalEntity(id: $id) {
+    id
+    name
+    type
+    country
+    province
+    userId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetFiscalEntityQuery__
+ *
+ * To run a query within a React component, call `useGetFiscalEntityQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFiscalEntityQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFiscalEntityQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetFiscalEntityQuery(baseOptions: Apollo.QueryHookOptions<GetFiscalEntityQuery, GetFiscalEntityQueryVariables> & ({ variables: GetFiscalEntityQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>(GetFiscalEntityDocument, options);
+      }
+export function useGetFiscalEntityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>(GetFiscalEntityDocument, options);
+        }
+// @ts-ignore
+export function useGetFiscalEntitySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>): Apollo.UseSuspenseQueryResult<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>;
+export function useGetFiscalEntitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>): Apollo.UseSuspenseQueryResult<GetFiscalEntityQuery | undefined, GetFiscalEntityQueryVariables>;
+export function useGetFiscalEntitySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>(GetFiscalEntityDocument, options);
+        }
+export type GetFiscalEntityQueryHookResult = ReturnType<typeof useGetFiscalEntityQuery>;
+export type GetFiscalEntityLazyQueryHookResult = ReturnType<typeof useGetFiscalEntityLazyQuery>;
+export type GetFiscalEntitySuspenseQueryHookResult = ReturnType<typeof useGetFiscalEntitySuspenseQuery>;
+export type GetFiscalEntityQueryResult = Apollo.QueryResult<GetFiscalEntityQuery, GetFiscalEntityQueryVariables>;
 export const CreateFiscalEntityDocument = gql`
     mutation CreateFiscalEntity($input: FiscalEntityInput!) {
   createFiscalEntity(input: $input) {
@@ -474,18 +723,28 @@ export type CreateFiscalEntityMutationHookResult = ReturnType<typeof useCreateFi
 export type CreateFiscalEntityMutationResult = Apollo.MutationResult<CreateFiscalEntityMutation>;
 export type CreateFiscalEntityMutationOptions = Apollo.BaseMutationOptions<CreateFiscalEntityMutation, CreateFiscalEntityMutationVariables>;
 export const GetLedgerDocument = gql`
-    query GetLedger($entityId: String!, $taxYear: String) {
-  ledger(entityId: $entityId, taxYear: $taxYear) {
-    id
-    amount
-    category
-    currency
-    date
-    entityId
-    taxYear
-    type
-    createdAt
-    updatedAt
+    query GetLedger($entityId: ID!, $pagination: PaginationInput, $taxYear: String) {
+  financialEntries(
+    entityId: $entityId
+    pagination: $pagination
+    taxYear: $taxYear
+  ) {
+    items {
+      id
+      amount
+      category
+      currency
+      date
+      entityId
+      taxYear
+      type
+      createdAt
+      updatedAt
+    }
+    total
+    skip
+    take
+    hasMore
   }
 }
     `;
@@ -503,6 +762,7 @@ export const GetLedgerDocument = gql`
  * const { data, loading, error } = useGetLedgerQuery({
  *   variables: {
  *      entityId: // value for 'entityId'
+ *      pagination: // value for 'pagination'
  *      taxYear: // value for 'taxYear'
  *   },
  * });
@@ -526,6 +786,58 @@ export type GetLedgerQueryHookResult = ReturnType<typeof useGetLedgerQuery>;
 export type GetLedgerLazyQueryHookResult = ReturnType<typeof useGetLedgerLazyQuery>;
 export type GetLedgerSuspenseQueryHookResult = ReturnType<typeof useGetLedgerSuspenseQuery>;
 export type GetLedgerQueryResult = Apollo.QueryResult<GetLedgerQuery, GetLedgerQueryVariables>;
+export const GetFinancialEntryDocument = gql`
+    query GetFinancialEntry($id: ID!) {
+  financialEntry(id: $id) {
+    id
+    amount
+    category
+    currency
+    date
+    entityId
+    taxYear
+    type
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useGetFinancialEntryQuery__
+ *
+ * To run a query within a React component, call `useGetFinancialEntryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetFinancialEntryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetFinancialEntryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetFinancialEntryQuery(baseOptions: Apollo.QueryHookOptions<GetFinancialEntryQuery, GetFinancialEntryQueryVariables> & ({ variables: GetFinancialEntryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>(GetFinancialEntryDocument, options);
+      }
+export function useGetFinancialEntryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>(GetFinancialEntryDocument, options);
+        }
+// @ts-ignore
+export function useGetFinancialEntrySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>): Apollo.UseSuspenseQueryResult<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>;
+export function useGetFinancialEntrySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>): Apollo.UseSuspenseQueryResult<GetFinancialEntryQuery | undefined, GetFinancialEntryQueryVariables>;
+export function useGetFinancialEntrySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>(GetFinancialEntryDocument, options);
+        }
+export type GetFinancialEntryQueryHookResult = ReturnType<typeof useGetFinancialEntryQuery>;
+export type GetFinancialEntryLazyQueryHookResult = ReturnType<typeof useGetFinancialEntryLazyQuery>;
+export type GetFinancialEntrySuspenseQueryHookResult = ReturnType<typeof useGetFinancialEntrySuspenseQuery>;
+export type GetFinancialEntryQueryResult = Apollo.QueryResult<GetFinancialEntryQuery, GetFinancialEntryQueryVariables>;
 export const AddFinancialEntryDocument = gql`
     mutation AddFinancialEntry($input: CreateFinancialEntryInput!) {
   addFinancialEntry(input: $input) {

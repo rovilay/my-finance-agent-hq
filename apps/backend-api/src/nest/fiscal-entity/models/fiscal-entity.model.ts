@@ -5,6 +5,7 @@ import {
   registerEnumType,
   InputType,
 } from '@nestjs/graphql';
+import { Paginated } from '../../common/models';
 
 // Register your Drizzle Enum so GraphQL understands it
 export enum FiscalEntityType {
@@ -41,6 +42,9 @@ export class FiscalEntity {
   @Field()
   updatedAt: Date;
 }
+
+@ObjectType()
+export class PaginatedFiscalEntity extends Paginated(FiscalEntity) {}
 
 @InputType()
 export class FiscalEntityInput {

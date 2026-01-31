@@ -10,15 +10,17 @@ import {
   type DatabaseClient,
 } from '@hq/database';
 import { KmsService, CipherUtil } from '@hq/encryption';
-import { eq } from 'drizzle-orm';
+import { eq, count, sql, and } from 'drizzle-orm';
 import {
   Document,
   DocumentInput,
   DocumentStatus,
+  PaginatedDocument,
   RetentionPolicy,
 } from './models/document.model';
 import { GcsService } from './gcs.service';
 import { type EnvConfig, envConfig } from 'src/config/env';
+import { PaginationInput } from '../common/models';
 
 @Injectable()
 export class DocumentService {
@@ -200,10 +202,15 @@ export class DocumentService {
     }
   }
 
-  async findDocOrThrow(id: string): Promise<Document> {
+  async findDocOrThrow(id: string, userId?: string): Promise<Document> {
+    const conditions = userId 
+      ? and(eq(documents.id, id), eq(documents.userId, userId))
+      : eq(documents.id, id);
+
     const doc = await this.db.query.documents.findFirst({
-      where: eq(documents.id, id),
+      where: conditions,
     });
+
     if (!doc) throw new NotFoundException(`Document ${id} not found`);
     return this.mapDBDocToModel(doc);
   }
@@ -226,6 +233,40 @@ export class DocumentService {
     const decrypted = CipherUtil.decrypt(document.extractedData, dek);
 
     return decrypted.toString('utf8'); // Returns the JSON string to the caller
+  }
+
+  async documentsByEntityId(entityId: string, userId: string, { skip = 0, take = 10 }: PaginationInput): Promise<PaginatedDocument> {
+    // Fetch one extra item to check if there are more pages
+    const docs = await this.db.query.documents.findMany({
+      where: and(eq(documents.entityId, entityId), eq(documents.userId, userId)),
+      limit: take + 1,
+      offset: skip,
+    });
+
+    const hasMore = docs.length > take;
+    const items = hasMore ? docs.slice(0, take) : docs;
+
+    // For total, we could either:
+    // 1. Set it to null/undefined (most performant - no COUNT query)
+    // 2. Only run COUNT on first page (skip === 0)
+    // 3. Return an estimate based on hasMore
+    const total = skip === 0 && !hasMore ? items.length : null;
+
+    return {
+      items: items.map((doc) => this.mapDBDocToModel(doc)),
+      total: total ?? skip + items.length + (hasMore ? 1 : 0), // Estimate
+      skip,
+      take,
+      hasMore,
+    };
+  }
+
+  async fetchDocumentById(id: string, userId: string): Promise<Document | null> {
+    const doc = await this.db.query.documents.findFirst({
+      where: and(eq(documents.id, id), eq(documents.userId, userId)),
+    });
+    if (!doc) return null;
+    return this.mapDBDocToModel(doc);
   }
 
   private mapDBDocToModel(doc: typeof documents.$inferSelect): Document {

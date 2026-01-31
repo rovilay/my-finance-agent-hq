@@ -29,6 +29,13 @@ export default function EntitiesPage() {
   const { user } = useAuth();
   const [filterType, setFilterType] = useState<FiscalEntityType | 'all'>('all');
   const { data, loading, error } = useGetFiscalEntitiesQuery({
+    variables: {
+      type: filterType === 'all' ? undefined : (filterType as FiscalEntityType),
+      pagination: {
+        skip: 0,
+        take: 50,
+      },
+    },
     skip: !user,
   });
 
@@ -46,9 +53,7 @@ export default function EntitiesPage() {
     );
   }
 
-  const entities = data?.getFiscalEntities || [];
-  const filteredEntities =
-    filterType === 'all' ? entities : entities.filter(e => e.type === filterType);
+  const entities = data?.fiscalEntities?.items || [];
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -99,7 +104,7 @@ export default function EntitiesPage() {
           </div>
 
           {/* Entities Grid */}
-          {filteredEntities.length === 0 ? (
+          {entities.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="text-neutral-500">
@@ -111,7 +116,7 @@ export default function EntitiesPage() {
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEntities.map(entity => {
+              {entities.map(entity => {
                 const Icon = entityTypeIcons[entity.type];
                 return (
                   <Link key={entity.id} href={`/entities/${entity.id}`}>

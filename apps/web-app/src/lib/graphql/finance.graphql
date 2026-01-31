@@ -1,31 +1,26 @@
-query GetFiscalEntities {
-  getFiscalEntities {
-    id
-    name
-    type
-    country
-    province
-    userId
-    createdAt
-    updatedAt
+query GetLedger($entityId: ID!, $pagination: PaginationInput, $taxYear: String) {
+  financialEntries(entityId: $entityId, pagination: $pagination, taxYear: $taxYear) {
+    items {
+      id
+      amount
+      category
+      currency
+      date
+      entityId
+      taxYear
+      type
+      createdAt
+      updatedAt
+    }
+    total
+    skip
+    take
+    hasMore
   }
 }
 
-mutation CreateFiscalEntity($input: FiscalEntityInput!) {
-  createFiscalEntity(input: $input) {
-    id
-    name
-    type
-    country
-    province
-    userId
-    createdAt
-    updatedAt
-  }
-}
-
-query GetLedger($entityId: String!, $taxYear: String) {
-  ledger(entityId: $entityId, taxYear: $taxYear) {
+query GetFinancialEntry($id: ID!) {
+  financialEntry(id: $id) {
     id
     amount
     category

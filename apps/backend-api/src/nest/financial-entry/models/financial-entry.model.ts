@@ -6,6 +6,7 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
+import { Paginated } from '../../common/models';
 
 export enum FinancialType {
   income = 'income',
@@ -72,3 +73,6 @@ export class CreateFinancialEntryInput {
   @Field()
   taxYear: string;
 }
+
+@ObjectType()
+export class PaginatedFinancialEntry extends Paginated(FinancialEntry) {}

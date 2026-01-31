@@ -14,3 +14,47 @@ mutation UploadDocument($input: DocumentInput!) {
     }
   }
 }
+
+mutation VerifyAndFinalizeDocument($documentId: ID!, $approved: Boolean!, $shouldKeepFile: Boolean!) {
+  verifyDocument(documentId: $documentId, approved: $approved, shouldKeepFile: $shouldKeepFile)
+}
+
+query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput) {
+  documentsByEntity(entityId: $entityId, pagination: $pagination) {
+    items {
+      id
+      fileName
+      status
+      retentionPolicy
+      storagePath
+      purgedAt
+      createdAt
+      updatedAt
+      fileMetadata {
+        mimeType
+        sizeInKb
+      }
+    }
+    total
+    skip
+    take
+    hasMore
+  }
+}
+
+query GetDocument($id: ID!) {
+  document(id: $id) {
+    id
+    fileName
+    status
+    retentionPolicy
+    storagePath
+    purgedAt
+    createdAt
+    updatedAt
+    fileMetadata {
+      mimeType
+      sizeInKb
+    }
+  }
+}
