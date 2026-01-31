@@ -1,14 +1,28 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AiService } from './ai.service';
-import { TaxService } from '../tax/tax.service';
 import { AiResolver } from './ai.resolver';
 import { DocumentModule } from '../document/document.module';
 import { ExtractionWorkflow } from './workflows/extraction.workflow';
 import { AiOrchestrator } from './ai.orchestrator';
+import { TaxModule } from '../tax/tax.module';
+import { DatabaseModule } from '../database/database.module';
+import { GeminiService } from './gemini.service';
+import { EncryptionModule } from '../encryption/encryption.module';
 
 @Module({
-  imports: [TaxService, forwardRef(() => DocumentModule)],
-  providers: [AiService, AiResolver, ExtractionWorkflow, AiOrchestrator],
+  imports: [
+    EncryptionModule,
+    DatabaseModule,
+    TaxModule,
+    forwardRef(() => DocumentModule),
+  ],
+  providers: [
+    GeminiService,
+    AiService,
+    AiResolver,
+    ExtractionWorkflow,
+    AiOrchestrator,
+  ],
   exports: [ExtractionWorkflow, AiService, AiOrchestrator],
 })
 export class AiModule {}

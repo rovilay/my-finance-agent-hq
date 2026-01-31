@@ -1,0 +1,147 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateFinancialEntryInput {
+  amount: Float!
+  category: String!
+  currency: String! = "CAD"
+  date: DateTime!
+  entityId: String!
+  taxYear: String!
+  type: FinancialType!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Document {
+  createdAt: DateTime!
+  decryptedData: String
+  fileName: String!
+  id: ID!
+  mimeType: String!
+  purgedAt: DateTime
+  retentionPolicy: RetentionPolicy!
+  status: DocumentStatus!
+  storagePath: String
+  updatedAt: DateTime!
+}
+
+input DocumentInput {
+  entityId: String!
+  fileBuffer: String!
+  fileName: String!
+  mimeType: String!
+  retentionPolicy: RetentionPolicy!
+  userId: String!
+}
+
+enum DocumentStatus {
+  failed
+  processed
+  purged
+  uploaded
+  verified
+}
+
+type FinancialEntry {
+  amount: Float!
+  category: String!
+  createdAt: DateTime!
+  currency: String!
+  date: DateTime!
+  entityId: ID!
+  id: ID!
+  taxYear: String!
+  type: FinancialType!
+  updatedAt: DateTime!
+}
+
+enum FinancialType {
+  credit
+  deduction
+  income
+  tax_paid
+}
+
+type FiscalEntity {
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  province: String!
+  type: FiscalEntityType!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+input FiscalEntityInput {
+  name: String!
+}
+
+enum FiscalEntityType {
+  business
+  household
+  individual
+}
+
+type Mutation {
+  addFinancialEntry(input: CreateFinancialEntryInput!): FinancialEntry!
+  createFiscalEntity(input: FiscalEntityInput!): FiscalEntity!
+  syncUser(input: UserInput!): User!
+  uploadDocument(input: DocumentInput!): Document!
+  verifyAndFinalize(documentId: ID!, shouldKeep: Boolean!): Document!
+  verifyDocument(approved: Boolean!, documentId: ID!, shouldKeepFile: Boolean!): Boolean!
+}
+
+type Query {
+  document(id: ID!): Document!
+  getFiscalEntities: [FiscalEntity!]!
+  getTaxProjection(entityId: String!, taxYear: String!): TaxProjection!
+  ledger(entityId: String!, taxYear: String): [FinancialEntry!]!
+  me: User!
+}
+
+enum RetentionPolicy {
+  ephemeral
+  permanent
+  verify_and_purge
+}
+
+type TaxProjection {
+  effectiveTaxRate: Float!
+  entityId: ID!
+  federalTax: Float!
+  provincialTax: Float!
+  taxYear: String!
+  taxableIncome: Float!
+  totalIncome: Float!
+
+  """Federal + Provincial tax before credits"""
+  totalTax: Float!
+
+  """Final amount owed to CRA after credits and prepayments"""
+  totalTaxLiability: Float!
+}
+
+type User {
+  avatarUrl: String
+  bio: String
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  updatedAt: DateTime!
+}
+
+input UserInput {
+  avatarUrl: String
+  bio: String
+  email: String!
+  firstName: String!
+  lastName: String!
+}

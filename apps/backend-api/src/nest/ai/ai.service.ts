@@ -1,16 +1,17 @@
-import { type MastraStore } from '@hq/database';
+import { MASTRA_STORE, type MastraStore } from '@hq/database';
 import { createFinanceAgent } from '@hq/tools';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ExtractionWorkflow,
   ExtractionWorkflowSteps,
 } from './workflows/extraction.workflow';
+import { type EnvConfig, envConfig } from 'src/config/env';
 
 @Injectable()
 export class AiService {
   constructor(
-    private readonly apiKey: string,
-    private readonly mastraStore: MastraStore,
+    @Inject(envConfig.KEY) private readonly config: EnvConfig,
+    @Inject(MASTRA_STORE) private readonly mastraStore: MastraStore,
     private readonly extractionWorkflow: ExtractionWorkflow,
   ) {}
 
@@ -32,7 +33,7 @@ export class AiService {
 
     const financeAgent = createFinanceAgent({
       mastraStore: this.mastraStore,
-      apiKey: this.apiKey,
+      apiKey: this.config.AI_API_KEY,
       id: threadId,
       name: 'Finance-Tax Advisor Agent',
       additionalInstructions: systemContext,

@@ -16,3 +16,4 @@ export type DatabaseClient = NodePgDatabase<typeof schema>;
 export type MastraStore = PostgresStore;
 
 export const DATABASE_CONNECTION = 'DATABASE_CONNECTION' as const;
+export const MASTRA_STORE = 'MASTRA_STORE' as const;

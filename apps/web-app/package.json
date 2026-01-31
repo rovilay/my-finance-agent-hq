@@ -1,0 +1,44 @@
+{
+  "name": "@hq/web-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "codegen": "graphql-codegen --config codegen.config.ts"
+  },
+  "dependencies": {
+    "@apollo/client": "catalog:",
+    "@hq/validation-schema": "workspace:*",
+    "@mantine/core": "catalog:",
+    "@mantine/hooks": "catalog:",
+    "clsx": "catalog:",
+    "firebase": "catalog:",
+    "graphql": "catalog:",
+    "lucide-react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "catalog:",
+    "@graphql-codegen/client-preset": "catalog:",
+    "@graphql-codegen/typescript": "catalog:",
+    "@graphql-codegen/typescript-operations": "catalog:",
+    "@graphql-codegen/typescript-react-apollo": "catalog:",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

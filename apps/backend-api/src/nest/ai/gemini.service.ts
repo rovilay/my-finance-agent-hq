@@ -17,7 +17,7 @@ export class GeminiService {
     private readonly kmsService: KmsService,
     private readonly gcsService: GcsService,
   ) {
-    this.genAI = new GoogleGenerativeAI(this.config.GEMINI_API_KEY);
+    this.genAI = new GoogleGenerativeAI(this.config.AI_API_KEY);
   }
 
   async extractTaxData(

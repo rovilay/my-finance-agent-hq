@@ -77,6 +77,6 @@ export class DocumentInput {
   @Field()
   entityId: string;
 
-  @Field(() => Buffer)
-  fileBuffer: Buffer;
+  @Field()
+  fileBuffer: string; // base64 encoded file data
 }

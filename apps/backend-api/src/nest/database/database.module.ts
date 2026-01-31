@@ -1,6 +1,6 @@
-import { DATABASE_CONNECTION } from '@hq/database';
+import { DATABASE_CONNECTION, MASTRA_STORE } from '@hq/database';
 import { Global, Module } from '@nestjs/common';
-import { db } from 'src/db';
+import { db, mastraStore } from 'src/db';
 
 @Global()
 @Module({
@@ -9,7 +9,11 @@ import { db } from 'src/db';
       provide: DATABASE_CONNECTION,
       useValue: db,
     },
+    {
+      provide: MASTRA_STORE,
+      useValue: mastraStore,
+    },
   ],
-  exports: [DATABASE_CONNECTION],
+  exports: [DATABASE_CONNECTION, MASTRA_STORE],
 })
 export class DatabaseModule {}

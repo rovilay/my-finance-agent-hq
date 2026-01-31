@@ -1,0 +1,13 @@
+mutation UploadDocument($input: DocumentInput!) {
+  uploadDocument(input: $input) {
+    id
+    fileName
+    status
+    retentionPolicy
+    storagePath
+    purgedAt
+    createdAt
+    updatedAt
+    mimeType
+  }
+}

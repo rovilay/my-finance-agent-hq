@@ -12,7 +12,7 @@ export enum agent_models {
 
 const createAgentMemory = (mastraStore: PostgresStore) => {
   return new Memory({
-    storage: mastraStore,
+    storage: mastraStore as any,
     options: {
       lastMessages: 10,
       workingMemory: {

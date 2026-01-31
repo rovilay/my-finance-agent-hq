@@ -1,0 +1,25 @@
+query Me {
+  me {
+    id
+    email
+    firstName
+    lastName
+    avatarUrl
+    bio
+    createdAt
+    updatedAt
+  }
+}
+
+mutation SyncUser($input: UserInput!) {
+  syncUser(input: $input) {
+    id
+    email
+    firstName
+    lastName
+    avatarUrl
+    bio
+    createdAt
+    updatedAt
+  }
+}

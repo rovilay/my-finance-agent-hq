@@ -25,8 +25,8 @@ export class DocumentService {
   constructor(
     @Inject(DATABASE_CONNECTION) private readonly db: DatabaseClient,
     @Inject(envConfig.KEY) private readonly config: EnvConfig,
-    private readonly kmsService: KmsService,
     private readonly gcsService: GcsService,
+    private readonly kmsService: KmsService,
   ) {}
 
   async handleUpload({

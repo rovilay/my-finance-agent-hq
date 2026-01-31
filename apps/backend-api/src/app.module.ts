@@ -11,6 +11,8 @@ import './types/express';
 import { DatabaseModule } from './nest/database/database.module';
 import { envConfig } from './config/env';
 import { FiscalEntityModule } from './nest/fiscal-entity/fiscal-entity.module';
+import { DocumentModule } from './nest/document/document.module';
+import { AiModule } from './nest/ai/ai.module';
 
 @Module({
   imports: [
@@ -20,12 +22,14 @@ import { FiscalEntityModule } from './nest/fiscal-entity/fiscal-entity.module';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), 'src/gql/schema.gql'),
       sortSchema: true,
     }),
     DatabaseModule,
     AuthModule,
     FiscalEntityModule,
+    AiModule,
+    DocumentModule,
     TaxModule,
   ],
   controllers: [AppController],

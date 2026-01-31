@@ -1,0 +1,69 @@
+query GetFiscalEntities {
+  getFiscalEntities {
+    id
+    name
+    type
+    country
+    province
+    userId
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateFiscalEntity($input: FiscalEntityInput!) {
+  createFiscalEntity(input: $input) {
+    id
+    name
+    type
+    country
+    province
+    userId
+    createdAt
+    updatedAt
+  }
+}
+
+query GetLedger($entityId: String!, $taxYear: String) {
+  ledger(entityId: $entityId, taxYear: $taxYear) {
+    id
+    amount
+    category
+    currency
+    date
+    entityId
+    taxYear
+    type
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AddFinancialEntry($input: CreateFinancialEntryInput!) {
+  addFinancialEntry(input: $input) {
+    id
+    amount
+    category
+    currency
+    date
+    entityId
+    taxYear
+    type
+    createdAt
+    updatedAt
+  }
+}
+
+query GetTaxProjection($entityId: String!, $taxYear: String!) {
+  getTaxProjection(entityId: $entityId, taxYear: $taxYear) {
+    entityId
+    taxYear
+    totalIncome
+    taxableIncome
+    federalTax
+    provincialTax
+    totalTax
+    totalTaxLiability
+    effectiveTaxRate
+  }
+}

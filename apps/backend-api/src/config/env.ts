@@ -8,13 +8,16 @@ declare const process: {
     DATABASE_URL: string;
     GOOGLE_GENERATIVE_AI_API_KEY: string;
     NODE_ENV?: string;
-    JWT_SECRET: string;
+    // JWT_SECRET: string;
     FIREBASE_PROJECT_ID: string;
     JWT_ISSUER: string;
     JWT_AUDIENCE: string;
     GCS_BUCKET_NAME: string;
     GCP_KMS_KEY_ID: string;
-    GEMINI_API_KEY: string;
+    GCP_KMS_PROJECT_ID: string;
+    GCP_KMS_LOCATION_ID: string;
+    GCP_KMS_KEY_RING_ID: string;
+    AI_API_KEY: string;
   };
   cwd: () => string;
 };
@@ -46,13 +49,16 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
-  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+  // JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   FIREBASE_PROJECT_ID: z.string().min(1, 'FIREBASE_PROJECT_ID is required'),
   JWT_ISSUER: z.string().min(1, 'JWT_ISSUER is required'),
   JWT_AUDIENCE: z.string().min(1, 'JWT_AUDIENCE is required'),
   GCS_BUCKET_NAME: z.string().min(1, 'GCS_BUCKET_NAME is required'),
   GCP_KMS_KEY_ID: z.string().min(1, 'GCP_KMS_KEY_ID is required'),
-  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
+  GCP_KMS_PROJECT_ID: z.string().min(1, 'GCP_KMS_PROJECT_ID is required'),
+  GCP_KMS_LOCATION_ID: z.string().min(1, 'GCP_KMS_LOCATION_ID is required'),
+  GCP_KMS_KEY_RING_ID: z.string().min(1, 'GCP_KMS_KEY_RING_ID is required'),
+  AI_API_KEY: z.string().min(1, 'AI_API_KEY is required'),
 });
 export type EnvSchema = z.infer<typeof envSchema>;
 
@@ -65,13 +71,16 @@ export const envConfig = registerAs('envConfig', (): EnvSchema => {
       DATABASE_URL: parsedEnv.DATABASE_URL,
       GOOGLE_GENERATIVE_AI_API_KEY: parsedEnv.GOOGLE_GENERATIVE_AI_API_KEY,
       NODE_ENV: parsedEnv.NODE_ENV,
-      JWT_SECRET: parsedEnv.JWT_SECRET,
+      // JWT_SECRET: parsedEnv.JWT_SECRET,
       FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
       JWT_ISSUER: process.env.JWT_ISSUER,
       JWT_AUDIENCE: process.env.JWT_AUDIENCE,
       GCS_BUCKET_NAME: process.env.GCS_BUCKET_NAME,
       GCP_KMS_KEY_ID: process.env.GCP_KMS_KEY_ID,
-      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      GCP_KMS_PROJECT_ID: process.env.GCP_KMS_PROJECT_ID,
+      GCP_KMS_LOCATION_ID: process.env.GCP_KMS_LOCATION_ID,
+      GCP_KMS_KEY_RING_ID: process.env.GCP_KMS_KEY_RING_ID,
+      AI_API_KEY: process.env.AI_API_KEY,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

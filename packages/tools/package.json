@@ -15,10 +15,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ai-sdk/google": "^3.0.13",
+    "@ai-sdk/google": "catalog:",
     "@mastra/core": "catalog:",
     "@mastra/memory": "catalog:",
-    "@mastra/pg": "^1.0.0",
+    "@mastra/pg": "catalog:",
     "ai": "catalog:",
     "zod": "catalog:"
   }
