@@ -37,7 +37,7 @@ export default function DocumentsPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-neutral-50">
         {/* Main Content */}
-        <div className="container-custom py-12">
+        <div className="max-w-6xl mx-auto py-12">
           <div className="mb-8">
             <h1 className="text-3xl font-display font-bold text-neutral-900 mb-2">
               Document Dashboard

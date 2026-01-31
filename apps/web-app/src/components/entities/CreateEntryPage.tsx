@@ -28,7 +28,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="container-custom py-12">
+      <div className="max-w-6xl mx-auto py-12">
         <div className="max-w-3xl mx-auto">
           <button
             onClick={onBack}

@@ -57,7 +57,7 @@ export default function EntitiesPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="container-custom py-12">
+      <div className="max-w-6xl mx-auto py-12">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
@@ -75,7 +75,7 @@ export default function EntitiesPage() {
 
           {/* Filters */}
           <div className="flex gap-3 mb-6">
-            <button
+            <Button
               onClick={() => setFilterType('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 filterType === 'all'
@@ -84,11 +84,11 @@ export default function EntitiesPage() {
               }`}
             >
               All ({entities.length})
-            </button>
+            </Button>
             {Object.entries(entityTypeLabels).map(([type, label]) => {
               const count = entities.filter(e => e.type === type).length;
               return (
-                <button
+                <Button
                   key={type}
                   onClick={() => setFilterType(type as FiscalEntityType)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all ${
@@ -98,7 +98,7 @@ export default function EntitiesPage() {
                   }`}
                 >
                   {label} ({count})
-                </button>
+                </Button>
               );
             })}
           </div>

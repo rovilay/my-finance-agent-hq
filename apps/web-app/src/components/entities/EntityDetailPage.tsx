@@ -11,7 +11,7 @@ interface EntityDetailPageProps {
 export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="container-custom py-12">
+      <div className="max-w-6xl mx-auto py-12">
         <div className="max-w-6xl mx-auto">
           {/* Entity Header */}
           <div className="mb-8">

@@ -48,7 +48,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-linear-to-br from-neutral-50 via-primary-50 to-secondary-50">
       {/* Hero Section */}
       <section className="py-20">
-        <div className="container-custom">
+        <div className="max-w-6xl mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6 animate-fade-in">
               <Shield className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function HomePage() {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="container-custom">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-neutral-900 mb-4">
               Why Choose Finance Agent HQ?
@@ -135,7 +135,7 @@ export default function HomePage() {
 
       {/* How It Works */}
       <section className="py-20 bg-neutral-50">
-        <div className="container-custom">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-neutral-900 mb-4">
               How It Works
@@ -160,7 +160,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="py-20 bg-linear-to-r from-primary-600 to-primary-700">
-        <div className="container-custom text-center">
+        <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
             Ready to secure your tax documents?
           </h2>
@@ -177,7 +177,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-neutral-200 bg-white py-12">
-        <div className="container-custom">
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <LogoWithText />
             <p className="text-sm text-neutral-500">

@@ -12,7 +12,7 @@ interface EntityEntriesPageProps {
 export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPageProps) {
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="container-custom py-12">
+      <div className="max-w-6xl mx-auto py-12">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">

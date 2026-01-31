@@ -70,7 +70,7 @@ export const AppHeader = () => {
   return (
     <header>
       <nav className="border-b border-neutral-200 bg-white">
-        <div className="container-custom">
+        <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between h-16">
             <Link href={HOME_ROUTE}>
               <LogoWithText />

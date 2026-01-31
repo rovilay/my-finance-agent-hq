@@ -3,12 +3,12 @@ import { Button, Input, PageLoader } from '@/components/ui';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
+import { signUpWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
-import { ENTITIES_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
+import { ENTITIES_ROUTE, LOGIN_ROUTE } from '@/lib/constants';
 import { useAuth } from '@/contexts';
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -16,16 +16,16 @@ export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      await signInWithEmail(email, password);
+      await signUpWithEmail(email, password);
       router.push(ENTITIES_ROUTE);
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in. Please check your credentials.');
+      setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +39,7 @@ export default function LoginPage() {
       await signInWithGoogle();
       router.push(ENTITIES_ROUTE);
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google.');
+      setError(err.message || 'Failed to sign up with Google.');
     } finally {
       setIsLoading(false);
     }
@@ -59,13 +59,13 @@ export default function LoginPage() {
         <PageLoader />
       ) : (
         <div className="w-full max-w-md">
-          {/* Login Card */}
+          {/* Sign Up Card */}
           <div className="card p-8 animate-scale-in">
             <div className="text-center mb-8">
               <h1 className="text-2xl font-display font-bold text-neutral-900 mb-2">
-                Welcome Back
+                Create Your Account
               </h1>
-              <p className="text-neutral-600">Sign in to access your secure tax documents</p>
+              <p className="text-neutral-600">Get started with secure tax document management</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -90,17 +90,9 @@ export default function LoginPage() {
 
               {/* Password Input */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
-                    Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   <Input
@@ -111,21 +103,13 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     required
                     className="pl-10"
+                    minLength={6}
                   />
                 </div>
+                <p className="mt-2 text-xs text-neutral-500">
+                  Password must be at least 6 characters long
+                </p>
               </div>
-
-              {/* Remember Me */}
-              {/* <div className="flex items-center">
-              <input
-                id="remember"
-                type="checkbox"
-                className="w-4 h-4 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
-              />
-              <label htmlFor="remember" className="ml-2 text-sm text-neutral-700">
-                Remember me for 30 days
-              </label>
-            </div> */}
 
               {/* Error Message */}
               {error && (
@@ -143,10 +127,10 @@ export default function LoginPage() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  'Signing in...'
+                  'Creating account...'
                 ) : (
                   <>
-                    Sign In
+                    Create Account
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </>
                 )}
@@ -193,16 +177,28 @@ export default function LoginPage() {
                 Google
               </Button>
             </div>
+
+            {/* Terms */}
+            <p className="mt-6 text-xs text-center text-neutral-500">
+              By creating an account, you agree to our{' '}
+              <Link href="/terms" className="text-primary-600 hover:text-primary-700">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="text-primary-600 hover:text-primary-700">
+                Privacy Policy
+              </Link>
+            </p>
           </div>
 
-          {/* Sign Up Link */}
+          {/* Sign In Link */}
           <p className="text-center mt-6 text-neutral-600">
-            Don't have an account?{' '}
+            Already have an account?{' '}
             <Link
-              href={SIGNUP_ROUTE}
+              href={LOGIN_ROUTE}
               className="text-primary-600 hover:text-primary-700 font-medium"
             >
-              Sign up for free
+              Sign in
             </Link>
           </p>
 
