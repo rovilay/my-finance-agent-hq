@@ -20,9 +20,9 @@ scalar DateTime
 type Document {
   createdAt: DateTime!
   decryptedData: String
+  fileMetadata: FileMetadata!
   fileName: String!
   id: ID!
-  mimeType: String!
   purgedAt: DateTime
   retentionPolicy: RetentionPolicy!
   status: DocumentStatus!
@@ -33,8 +33,8 @@ type Document {
 input DocumentInput {
   entityId: String!
   fileBuffer: String!
+  fileMetadata: FileMetadataInput!
   fileName: String!
-  mimeType: String!
   retentionPolicy: RetentionPolicy!
   userId: String!
 }
@@ -45,6 +45,16 @@ enum DocumentStatus {
   purged
   uploaded
   verified
+}
+
+type FileMetadata {
+  mimeType: String!
+  sizeInKb: Int!
+}
+
+input FileMetadataInput {
+  mimeType: String!
+  sizeInKb: Int!
 }
 
 type FinancialEntry {

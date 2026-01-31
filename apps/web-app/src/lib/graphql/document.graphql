@@ -8,6 +8,9 @@ mutation UploadDocument($input: DocumentInput!) {
     purgedAt
     createdAt
     updatedAt
-    mimeType
+    fileMetadata {
+      mimeType
+      sizeInKb
+    }
   }
 }

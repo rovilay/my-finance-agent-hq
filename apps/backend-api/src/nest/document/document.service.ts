@@ -35,7 +35,7 @@ export class DocumentService {
     retentionPolicy,
     fileBuffer,
     fileName,
-    mimeType,
+    fileMetadata,
   }: DocumentInput): Promise<Document> {
     console.log(
       `[DocumentService] 🛡️ Starting secure upload for user: ${userId}`,
@@ -66,7 +66,7 @@ export class DocumentService {
           userId,
           entityId,
           fileName,
-          mimeType,
+          fileMetadata,
           status: DocumentStatus.uploaded,
           retentionPolicy,
           storagePath,
@@ -238,7 +238,7 @@ export class DocumentService {
       purgedAt: doc.purgedAt || undefined,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      mimeType: doc.mimeType,
+      fileMetadata: doc.fileMetadata as any,
       wrappedDek: doc.wrappedDek ?? undefined,
       extractedData: (doc.extractedData as string | null) ?? undefined,
     };

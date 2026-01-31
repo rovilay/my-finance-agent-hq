@@ -45,7 +45,7 @@ export class ExtractionWorkflow {
           documentId: inputData.documentId,
           wrappedDek: doc.wrappedDek ?? null,
           storagePath: doc.storagePath,
-          mimeType: doc.mimeType,
+          mimeType: doc.fileMetadata.mimeType,
         };
       },
     });

@@ -4,4 +4,5 @@ export {
   fiscalEntities,
   financialEntries,
   taxDocuments,
+  documents,
 } from '@hq/database';

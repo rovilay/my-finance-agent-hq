@@ -1,6 +1,9 @@
 // Enums
 export * from './enums';
 
+// Document Schemas
+export * from './document.schema';
+
 // Financial Entry Schemas
 export * from './financial-entry.schema';
 

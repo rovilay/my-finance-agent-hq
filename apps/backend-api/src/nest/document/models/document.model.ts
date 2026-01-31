@@ -4,6 +4,7 @@ import {
   ID,
   registerEnumType,
   InputType,
+  Int,
 } from '@nestjs/graphql';
 
 export enum DocumentStatus {
@@ -22,6 +23,24 @@ export enum RetentionPolicy {
 
 registerEnumType(DocumentStatus, { name: 'DocumentStatus' });
 registerEnumType(RetentionPolicy, { name: 'RetentionPolicy' });
+
+@ObjectType()
+export class FileMetadata {
+  @Field()
+  mimeType: string;
+
+  @Field(() => Int)
+  sizeInKb: number;
+}
+
+@InputType()
+export class FileMetadataInput {
+  @Field()
+  mimeType: string;
+
+  @Field(() => Int)
+  sizeInKb: number;
+}
 
 @ObjectType()
 export class Document {
@@ -49,8 +68,8 @@ export class Document {
   @Field()
   updatedAt: Date;
 
-  @Field()
-  mimeType: string;
+  @Field(() => FileMetadata)
+  fileMetadata: FileMetadata;
 
   @Field({ nullable: true })
   decryptedData?: string;
@@ -68,8 +87,8 @@ export class DocumentInput {
   @Field(() => RetentionPolicy)
   retentionPolicy: RetentionPolicy;
 
-  @Field()
-  mimeType: string;
+  @Field(() => FileMetadataInput)
+  fileMetadata: FileMetadataInput;
 
   @Field()
   userId: string;

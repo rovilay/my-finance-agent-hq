@@ -3,23 +3,22 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } fro
 import { Upload, FileText, Shield, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { DOCUMENT_ROUTE } from '@/lib/constants';
+import { RetentionPolicy, useUploadDocumentMutation } from '@/lib/graphql/generated';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export default function UploadPage() {
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
-  const [retentionPolicy, setRetentionPolicy] = useState<'purge_after_extraction' | 'permanent'>(
-    'purge_after_extraction'
+  const [retentionPolicy, setRetentionPolicy] = useState<RetentionPolicy>(
+    RetentionPolicy.VerifyAndPurge
   );
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<{
-    uploadDocument: { id: string; fileName: string; status: string };
-  } | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [uploadDocument, { loading, data, error }] = useUploadDocumentMutation();
+  const router = useRouter();
 
   const handleReload = () => {
-    if (typeof window !== 'undefined') {
-      // eslint-disable-next-line no-undef
-      window.location.reload();
-    }
+    router.refresh();
+    router.push('/documents/upload');
   };
 
   // eslint-disable-next-line no-undef
@@ -30,37 +29,36 @@ export default function UploadPage() {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !user) return;
 
-    setLoading(true);
-    setError(null);
-
-    // eslint-disable-next-line no-undef
+    // Read file as base64
     const reader = new FileReader();
     reader.onload = async e => {
       const base64 = e.target?.result?.toString().split(',')[1];
 
+      if (!base64) {
+        console.error('Failed to read file');
+        return;
+      }
+
       try {
-        // TODO: Implement document upload mutation when backend is ready
-        // For now, simulate upload
-        console.log('Upload payload:', {
-          userId: 'user-1', // TODO: Get from auth
-          entityId: 'entity-1', // TODO: Get from context
-          fileName: file.name,
-          mimeType: file.type,
-          fileBuffer: base64?.substring(0, 50) + '...', // Log preview only
-          retentionPolicy,
+        await uploadDocument({
+          variables: {
+            input: {
+              userId: user.id,
+              entityId: 'default-entity', // TODO: Get from context/selection
+              fileName: file.name,
+              fileMetadata: {
+                mimeType: file.type,
+                sizeInKb: Math.round(file.size / 1024),
+              },
+              fileBuffer: base64,
+              retentionPolicy,
+            },
+          },
         });
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        setData({ uploadDocument: { id: 'temp-id', fileName: file.name, status: 'uploaded' } });
-        setLoading(false);
       } catch (err) {
         console.error('Upload error:', err);
-        setError(err as Error);
-        setLoading(false);
       }
     };
     reader.readAsDataURL(file);
@@ -125,16 +123,16 @@ export default function UploadPage() {
                   </label>
                   <div className="grid grid-cols-2 gap-4">
                     <button
-                      onClick={() => setRetentionPolicy('purge_after_extraction')}
+                      onClick={() => setRetentionPolicy(RetentionPolicy.VerifyAndPurge)}
                       className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        retentionPolicy === 'purge_after_extraction'
+                        retentionPolicy === RetentionPolicy.VerifyAndPurge
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-neutral-200 hover:border-neutral-300'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <Shield className="w-5 h-5 text-accent-600" />
-                        {retentionPolicy === 'purge_after_extraction' && (
+                        {retentionPolicy === RetentionPolicy.VerifyAndPurge && (
                           <CheckCircle className="w-5 h-5 text-primary-600" />
                         )}
                       </div>
@@ -145,16 +143,16 @@ export default function UploadPage() {
                     </button>
 
                     <button
-                      onClick={() => setRetentionPolicy('permanent')}
+                      onClick={() => setRetentionPolicy(RetentionPolicy.Permanent)}
                       className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        retentionPolicy === 'permanent'
+                        retentionPolicy === RetentionPolicy.Permanent
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-neutral-200 hover:border-neutral-300'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <FileText className="w-5 h-5 text-secondary-600" />
-                        {retentionPolicy === 'permanent' && (
+                        {retentionPolicy === RetentionPolicy.Permanent && (
                           <CheckCircle className="w-5 h-5 text-primary-600" />
                         )}
                       </div>
@@ -188,7 +186,7 @@ export default function UploadPage() {
                 {/* Upload Button */}
                 <Button
                   onClick={handleUpload}
-                  disabled={!file || loading}
+                  disabled={!file || loading || !user}
                   isLoading={loading}
                   className="w-full"
                   size="lg"

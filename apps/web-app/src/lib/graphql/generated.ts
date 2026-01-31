@@ -33,9 +33,9 @@ export type Document = {
   __typename?: 'Document';
   createdAt: Scalars['DateTime']['output'];
   decryptedData?: Maybe<Scalars['String']['output']>;
+  fileMetadata: FileMetadata;
   fileName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
-  mimeType: Scalars['String']['output'];
   purgedAt?: Maybe<Scalars['DateTime']['output']>;
   retentionPolicy: RetentionPolicy;
   status: DocumentStatus;
@@ -46,8 +46,8 @@ export type Document = {
 export type DocumentInput = {
   entityId: Scalars['String']['input'];
   fileBuffer: Scalars['String']['input'];
+  fileMetadata: FileMetadataInput;
   fileName: Scalars['String']['input'];
-  mimeType: Scalars['String']['input'];
   retentionPolicy: RetentionPolicy;
   userId: Scalars['String']['input'];
 };
@@ -59,6 +59,17 @@ export enum DocumentStatus {
   Uploaded = 'uploaded',
   Verified = 'verified'
 }
+
+export type FileMetadata = {
+  __typename?: 'FileMetadata';
+  mimeType: Scalars['String']['output'];
+  sizeInKb: Scalars['Int']['output'];
+};
+
+export type FileMetadataInput = {
+  mimeType: Scalars['String']['input'];
+  sizeInKb: Scalars['Int']['input'];
+};
 
 export type FinancialEntry = {
   __typename?: 'FinancialEntry';
@@ -218,7 +229,7 @@ export type UploadDocumentMutationVariables = Exact<{
 }>;
 
 
-export type UploadDocumentMutation = { __typename?: 'Mutation', uploadDocument: { __typename?: 'Document', id: string, fileName: string, status: DocumentStatus, retentionPolicy: RetentionPolicy, storagePath?: string | null, purgedAt?: any | null, createdAt: any, updatedAt: any, mimeType: string } };
+export type UploadDocumentMutation = { __typename?: 'Mutation', uploadDocument: { __typename?: 'Document', id: string, fileName: string, status: DocumentStatus, retentionPolicy: RetentionPolicy, storagePath?: string | null, purgedAt?: any | null, createdAt: any, updatedAt: any, fileMetadata: { __typename?: 'FileMetadata', mimeType: string, sizeInKb: number } } };
 
 export type GetFiscalEntitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -279,7 +290,10 @@ export const UploadDocumentDocument = gql`
     purgedAt
     createdAt
     updatedAt
-    mimeType
+    fileMetadata {
+      mimeType
+      sizeInKb
+    }
   }
 }
     `;

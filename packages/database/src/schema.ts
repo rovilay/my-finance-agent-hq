@@ -122,7 +122,7 @@ export const documents = pgTable('documents', {
 
   // Storage & Identification
   fileName: text('file_name').notNull(),
-  mimeType: text('mime_type').notNull(),
+  fileMetadata: jsonb('file_metadata').notNull(), // { mimeType: string, size: number }
   storagePath: text('storage_path'), // Will be NULL if purged
 
   // Security (The $5/mo Robust Layer)
