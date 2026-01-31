@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@apollo/client": "catalog:",
+    "@headlessui/react": "^2.2.9",
     "@hq/validation-schema": "workspace:*",
     "@mantine/core": "catalog:",
     "@mantine/hooks": "catalog:",

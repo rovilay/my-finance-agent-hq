@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
-import { DOCUMENT_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
+import { ENTITIES_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
 import { useAuth } from '@/contexts';
 
 export default function LoginPage() {
@@ -23,7 +23,7 @@ export default function LoginPage() {
 
     try {
       await signInWithEmail(email, password);
-      router.push(DOCUMENT_ROUTE);
+      router.push(ENTITIES_ROUTE);
     } catch (err: any) {
       setError(err.message || 'Failed to sign in. Please check your credentials.');
     } finally {
@@ -37,7 +37,7 @@ export default function LoginPage() {
 
     try {
       await signInWithGoogle();
-      router.push(DOCUMENT_ROUTE);
+      router.push(ENTITIES_ROUTE);
     } catch (err: any) {
       setError(err.message || 'Failed to sign in with Google.');
     } finally {
@@ -49,7 +49,7 @@ export default function LoginPage() {
     if (loading) return; // Wait until loading finishes
 
     if (isAuthenticated) {
-      router.push(DOCUMENT_ROUTE);
+      router.push(ENTITIES_ROUTE);
     }
   }, [isAuthenticated, loading, router]);
 

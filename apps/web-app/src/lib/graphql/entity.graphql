@@ -1,0 +1,37 @@
+# Note: documentsByEntity query needs to be implemented in the backend
+# Temporarily commented out until backend is ready
+# query GetDocumentsByEntity($entityId: String!, $skip: Int, $take: Int) {
+#   documentsByEntity(entityId: $entityId, skip: $skip, take: $take) {
+#     documents {
+#       id
+#       fileName
+#       status
+#       retentionPolicy
+#       storagePath
+#       purgedAt
+#       createdAt
+#       updatedAt
+#       fileMetadata {
+#         mimeType
+#         sizeInKb
+#       }
+#     }
+#     total
+#   }
+# }
+
+# Use existing ledger query (no pagination support yet in backend)
+query GetFinancialEntries($entityId: String!, $taxYear: String) {
+  ledger(entityId: $entityId, taxYear: $taxYear) {
+    id
+    amount
+    category
+    currency
+    date
+    entityId
+    taxYear
+    type
+    createdAt
+    updatedAt
+  }
+}
