@@ -1,4 +1,3 @@
-import { LogoWithText } from '@/components/Logo';
 import { Button, Input, PageLoader } from '@/components/ui';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -90,7 +89,10 @@ export default function SignUpPage() {
 
               {/* Password Input */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-neutral-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">

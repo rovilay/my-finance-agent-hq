@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { Card, CardContent, Button } from '@/components/ui';
-import { FileText, Upload as UploadIcon, ArrowLeft } from 'lucide-react';
+import { FileText, Upload as UploadIcon } from 'lucide-react';
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
+import { BackButton } from '../BackButton';
 
 interface EntityDocumentsPageProps {
   entityId: string;
@@ -19,13 +20,7 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Entity
-            </button>
+            <BackButton onClick={onBack} text="Back to Entity" />
 
             <div className="flex items-center justify-between">
               <div>

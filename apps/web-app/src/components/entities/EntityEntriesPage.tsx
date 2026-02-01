@@ -1,8 +1,9 @@
 'use client';
 
 import { Card, CardContent, Button } from '@/components/ui';
-import { Plus, ArrowLeft, Package } from 'lucide-react';
+import { Plus, Package } from 'lucide-react';
 import Link from 'next/link';
+import { BackButton } from '../BackButton';
 
 interface EntityEntriesPageProps {
   entityId: string;
@@ -16,13 +17,7 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Entity
-            </button>
+            <BackButton onClick={onBack} text="Back to Entity" />
 
             <div className="flex items-center justify-between">
               <div>

@@ -90,6 +90,7 @@ type FiscalEntity {
 
 input FiscalEntityInput {
   name: String!
+  type: FiscalEntityType!
 }
 
 enum FiscalEntityType {
@@ -101,7 +102,9 @@ enum FiscalEntityType {
 type Mutation {
   addFinancialEntry(input: CreateFinancialEntryInput!): FinancialEntry!
   createFiscalEntity(input: FiscalEntityInput!): FiscalEntity!
+  deleteFiscalEntity(id: ID!): Boolean!
   syncUser(input: UserInput!): User!
+  updateFiscalEntity(id: ID!, input: UpdateFiscalEntityInput!): FiscalEntity!
   uploadDocument(input: DocumentInput!): Document!
   verifyAndFinalize(documentId: ID!, shouldKeep: Boolean!): Document!
   verifyDocument(approved: Boolean!, documentId: ID!, shouldKeepFile: Boolean!): Boolean!
@@ -167,6 +170,11 @@ type TaxProjection {
 
   """Final amount owed to CRA after credits and prepayments"""
   totalTaxLiability: Float!
+}
+
+input UpdateFiscalEntityInput {
+  name: String
+  type: FiscalEntityType
 }
 
 type User {

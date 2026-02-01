@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Input } from '@/components/ui';
+import { Loader } from 'lucide-react';
+import { useUpdateFiscalEntityMutation, FiscalEntityType } from '@/lib/graphql/generated';
+import { entityTypes } from './constants';
+
+interface EditEntityModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  entity: {
+    id: string;
+    name: string;
+    type: FiscalEntityType;
+  };
+}
+
+export function EditEntityModal({ isOpen, onClose, onSuccess, entity }: EditEntityModalProps) {
+  const [name, setName] = useState(entity.name);
+  const [selectedType, setSelectedType] = useState<FiscalEntityType>(entity.type);
+  const [error, setError] = useState('');
+
+  // Reset form when entity changes
+  useEffect(() => {
+    setName(entity.name);
+    setSelectedType(entity.type);
+    setError('');
+  }, [entity]);
+
+  const [updateEntity, { loading }] = useUpdateFiscalEntityMutation({
+    onCompleted: () => {
+      setError('');
+      onSuccess?.();
+      onClose();
+    },
+    onError: err => {
+      setError(err.message || 'Failed to update entity. Please try again.');
+    },
+    refetchQueries: ['GetFiscalEntities', 'GetFiscalEntity'],
+  });
+
+  const handleSubmit = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!name.trim()) {
+      setError('Please enter an entity name');
+      return;
+    }
+
+    // Only send changed fields
+    const input: { name?: string; type?: FiscalEntityType } = {};
+    if (name.trim() !== entity.name) {
+      input.name = name.trim();
+    }
+    if (selectedType !== entity.type) {
+      input.type = selectedType;
+    }
+
+    // If nothing changed, just close
+    if (Object.keys(input).length === 0) {
+      onClose();
+      return;
+    }
+
+    try {
+      await updateEntity({
+        variables: {
+          id: entity.id,
+          input,
+        },
+      });
+    } catch {
+      // Error handled by onError callback
+    }
+  };
+
+  const handleClose = () => {
+    if (!loading) {
+      setName(entity.name);
+      setSelectedType(entity.type);
+      setError('');
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Edit Entity"
+      description="Update your entity details"
+      size="md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Entity Name */}
+        <div>
+          <label htmlFor="entity-name" className="block text-sm font-medium text-neutral-700 mb-2">
+            Entity Name
+          </label>
+          <Input
+            id="entity-name"
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="e.g., John Doe, Acme Corp"
+            required
+            disabled={loading}
+            className="w-full"
+          />
+        </div>
+
+        {/* Entity Type Selection */}
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-3">Entity Type</label>
+          <div className="grid gap-3">
+            {entityTypes.map(({ type, label, description, icon: Icon, color, activeColor }) => (
+              <Button
+                key={type}
+                type="button"
+                onClick={() => setSelectedType(type)}
+                disabled={loading}
+                className={`flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left ${
+                  selectedType === type
+                    ? activeColor
+                    : `${color} border-transparent hover:border-current`
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <div className="shrink-0">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold mb-1">{label}</div>
+                  <div
+                    className={`text-sm ${selectedType === type ? 'text-white/90' : 'opacity-75'}`}
+                  >
+                    {description}
+                  </div>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-error-light border border-error text-error-dark px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClose}
+            disabled={loading}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" disabled={loading} className="flex-1">
+            {loading ? (
+              <>
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}

@@ -106,6 +106,7 @@ export type FiscalEntity = {
 
 export type FiscalEntityInput = {
   name: Scalars['String']['input'];
+  type: FiscalEntityType;
 };
 
 export enum FiscalEntityType {
@@ -118,7 +119,9 @@ export type Mutation = {
   __typename?: 'Mutation';
   addFinancialEntry: FinancialEntry;
   createFiscalEntity: FiscalEntity;
+  deleteFiscalEntity: Scalars['Boolean']['output'];
   syncUser: User;
+  updateFiscalEntity: FiscalEntity;
   uploadDocument: Document;
   verifyAndFinalize: Document;
   verifyDocument: Scalars['Boolean']['output'];
@@ -135,8 +138,19 @@ export type MutationCreateFiscalEntityArgs = {
 };
 
 
+export type MutationDeleteFiscalEntityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationSyncUserArgs = {
   input: UserInput;
+};
+
+
+export type MutationUpdateFiscalEntityArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateFiscalEntityInput;
 };
 
 
@@ -262,6 +276,11 @@ export type TaxProjection = {
   totalTaxLiability: Scalars['Float']['output'];
 };
 
+export type UpdateFiscalEntityInput = {
+  name?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<FiscalEntityType>;
+};
+
 export type User = {
   __typename?: 'User';
   avatarUrl?: Maybe<Scalars['String']['output']>;
@@ -334,6 +353,21 @@ export type CreateFiscalEntityMutationVariables = Exact<{
 
 
 export type CreateFiscalEntityMutation = { __typename?: 'Mutation', createFiscalEntity: { __typename?: 'FiscalEntity', id: string, name: string, type: FiscalEntityType, country: string, province: string, userId: string, createdAt: any, updatedAt: any } };
+
+export type UpdateFiscalEntityMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateFiscalEntityInput;
+}>;
+
+
+export type UpdateFiscalEntityMutation = { __typename?: 'Mutation', updateFiscalEntity: { __typename?: 'FiscalEntity', id: string, name: string, type: FiscalEntityType, country: string, province: string, userId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteFiscalEntityMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteFiscalEntityMutation = { __typename?: 'Mutation', deleteFiscalEntity: boolean };
 
 export type GetLedgerQueryVariables = Exact<{
   entityId: Scalars['ID']['input'];
@@ -722,6 +756,78 @@ export function useCreateFiscalEntityMutation(baseOptions?: Apollo.MutationHookO
 export type CreateFiscalEntityMutationHookResult = ReturnType<typeof useCreateFiscalEntityMutation>;
 export type CreateFiscalEntityMutationResult = Apollo.MutationResult<CreateFiscalEntityMutation>;
 export type CreateFiscalEntityMutationOptions = Apollo.BaseMutationOptions<CreateFiscalEntityMutation, CreateFiscalEntityMutationVariables>;
+export const UpdateFiscalEntityDocument = gql`
+    mutation UpdateFiscalEntity($id: ID!, $input: UpdateFiscalEntityInput!) {
+  updateFiscalEntity(id: $id, input: $input) {
+    id
+    name
+    type
+    country
+    province
+    userId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateFiscalEntityMutationFn = Apollo.MutationFunction<UpdateFiscalEntityMutation, UpdateFiscalEntityMutationVariables>;
+
+/**
+ * __useUpdateFiscalEntityMutation__
+ *
+ * To run a mutation, you first call `useUpdateFiscalEntityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateFiscalEntityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateFiscalEntityMutation, { data, loading, error }] = useUpdateFiscalEntityMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateFiscalEntityMutation(baseOptions?: Apollo.MutationHookOptions<UpdateFiscalEntityMutation, UpdateFiscalEntityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateFiscalEntityMutation, UpdateFiscalEntityMutationVariables>(UpdateFiscalEntityDocument, options);
+      }
+export type UpdateFiscalEntityMutationHookResult = ReturnType<typeof useUpdateFiscalEntityMutation>;
+export type UpdateFiscalEntityMutationResult = Apollo.MutationResult<UpdateFiscalEntityMutation>;
+export type UpdateFiscalEntityMutationOptions = Apollo.BaseMutationOptions<UpdateFiscalEntityMutation, UpdateFiscalEntityMutationVariables>;
+export const DeleteFiscalEntityDocument = gql`
+    mutation DeleteFiscalEntity($id: ID!) {
+  deleteFiscalEntity(id: $id)
+}
+    `;
+export type DeleteFiscalEntityMutationFn = Apollo.MutationFunction<DeleteFiscalEntityMutation, DeleteFiscalEntityMutationVariables>;
+
+/**
+ * __useDeleteFiscalEntityMutation__
+ *
+ * To run a mutation, you first call `useDeleteFiscalEntityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFiscalEntityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFiscalEntityMutation, { data, loading, error }] = useDeleteFiscalEntityMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteFiscalEntityMutation(baseOptions?: Apollo.MutationHookOptions<DeleteFiscalEntityMutation, DeleteFiscalEntityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteFiscalEntityMutation, DeleteFiscalEntityMutationVariables>(DeleteFiscalEntityDocument, options);
+      }
+export type DeleteFiscalEntityMutationHookResult = ReturnType<typeof useDeleteFiscalEntityMutation>;
+export type DeleteFiscalEntityMutationResult = Apollo.MutationResult<DeleteFiscalEntityMutation>;
+export type DeleteFiscalEntityMutationOptions = Apollo.BaseMutationOptions<DeleteFiscalEntityMutation, DeleteFiscalEntityMutationVariables>;
 export const GetLedgerDocument = gql`
     query GetLedger($entityId: ID!, $pagination: PaginationInput, $taxYear: String) {
   financialEntries(

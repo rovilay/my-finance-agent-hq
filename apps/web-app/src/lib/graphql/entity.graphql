@@ -42,3 +42,20 @@ mutation CreateFiscalEntity($input: FiscalEntityInput!) {
     updatedAt
   }
 }
+
+mutation UpdateFiscalEntity($id: ID!, $input: UpdateFiscalEntityInput!) {
+  updateFiscalEntity(id: $id, input: $input) {
+    id
+    name
+    type
+    country
+    province
+    userId
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteFiscalEntity($id: ID!) {
+  deleteFiscalEntity(id: $id)
+}

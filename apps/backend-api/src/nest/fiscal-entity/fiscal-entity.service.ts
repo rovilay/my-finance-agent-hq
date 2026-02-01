@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { DATABASE_CONNECTION, fiscalEntities } from '@hq/database';
 import { and, eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -7,6 +12,7 @@ import {
   FiscalEntityInput,
   FiscalEntityType,
   PaginatedFiscalEntity,
+  UpdateFiscalEntityInput,
 } from './models/fiscal-entity.model';
 import { PaginationInput } from '../common/models';
 
@@ -25,7 +31,7 @@ export class FiscalEntityService {
         name: input.name,
         province: 'Ontario', // Default for Phase 1
         country: 'Canada', // Default for Phase 1
-        type: FiscalEntityType.individual, // Default for Phase 1
+        type: input.type, // Default for Phase 1
       })
       .returning();
 
@@ -55,7 +61,12 @@ export class FiscalEntityService {
       const entities = await this.db
         .select()
         .from(fiscalEntities)
-        .where(and(eq(fiscalEntities.userId, userId), type ? eq(fiscalEntities.type, type) : undefined))
+        .where(
+          and(
+            eq(fiscalEntities.userId, userId),
+            type ? eq(fiscalEntities.type, type) : undefined,
+          ),
+        )
         .limit(take + 1)
         .offset(skip);
 
@@ -101,7 +112,12 @@ export class FiscalEntityService {
       const [entity] = await this.db
         .select()
         .from(fiscalEntities)
-        .where(and(eq(fiscalEntities.id, entityId), eq(fiscalEntities.userId, userId)))
+        .where(
+          and(
+            eq(fiscalEntities.id, entityId),
+            eq(fiscalEntities.userId, userId),
+          ),
+        )
         .limit(1);
 
       if (!entity) {
@@ -133,6 +149,110 @@ export class FiscalEntityService {
       }
       console.error(
         `[FiscalEntityService] Error fetching entity by ID: ${entityId} for user: ${userId}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async update(
+    entityId: string,
+    userId: string,
+    input: UpdateFiscalEntityInput,
+  ): Promise<FiscalEntity> {
+    console.log(
+      `[FiscalEntityService] Updating entity ID: ${entityId} for user: ${userId}`,
+    );
+
+    try {
+      // Build update object with only provided fields
+      const updateData: any = {
+        updatedAt: new Date(),
+      };
+
+      if (input.name !== undefined) updateData.name = input.name;
+      if (input.type !== undefined) updateData.type = input.type;
+
+      const [updated] = await this.db
+        .update(fiscalEntities)
+        .set(updateData)
+        .where(
+          and(
+            eq(fiscalEntities.id, entityId),
+            eq(fiscalEntities.userId, userId),
+          ),
+        )
+        .returning();
+
+      console.log(
+        `[FiscalEntityService] Successfully updated entity ID: ${entityId}`,
+      );
+
+      return {
+        id: updated.id,
+        name: updated.name,
+        type: updated.type as FiscalEntity['type'],
+        country: updated.country,
+        province: updated.province,
+        userId: updated.userId,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      console.error(
+        `[FiscalEntityService] Error updating entity ID: ${entityId}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async delete(entityId: string, userId: string): Promise<boolean> {
+    console.log(
+      `[FiscalEntityService] Soft deleting entity ID: ${entityId} for user: ${userId}`,
+    );
+
+    try {
+      // For now, we'll do a hard delete since we don't have deletedAt in schema
+      // TODO: Add deletedAt column to schema for proper soft delete
+      // Soft delete would be: UPDATE fiscal_entities SET deleted_at = NOW() WHERE id = entityId
+
+      const result = await this.db
+        .delete(fiscalEntities)
+        .where(
+          and(
+            eq(fiscalEntities.id, entityId),
+            eq(fiscalEntities.userId, userId),
+          ),
+        )
+        .returning();
+
+      if (result.length === 0) {
+        throw new NotFoundException(
+          `Fiscal entity with ID ${entityId} not found`,
+        );
+      }
+
+      console.log(
+        `[FiscalEntityService] Successfully deleted entity ID: ${entityId}`,
+      );
+
+      return true;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      console.error(
+        `[FiscalEntityService] Error deleting entity ID: ${entityId}`,
         error,
       );
       throw error;

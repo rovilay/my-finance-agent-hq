@@ -6,6 +6,7 @@ import {
   FiscalEntityInput,
   FiscalEntityType,
   PaginatedFiscalEntity,
+  UpdateFiscalEntityInput,
 } from './models/fiscal-entity.model';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -20,10 +21,15 @@ export class FiscalEntityResolver {
   @Query(() => PaginatedFiscalEntity, { name: 'fiscalEntities' })
   async getFiscalEntities(
     @CurrentUser() user: User,
-    @Args('fiscalEntityType', { type: () => FiscalEntityType, nullable: true }) fiscalEntityType?: FiscalEntityType,
+    @Args('fiscalEntityType', { type: () => FiscalEntityType, nullable: true })
+    fiscalEntityType?: FiscalEntityType,
     @Args('pagination', { nullable: true }) pagination?: PaginationInput,
   ): Promise<PaginatedFiscalEntity> {
-    return this.service.findAllForUser(user.id, fiscalEntityType, pagination ?? {});
+    return this.service.findAllForUser(
+      user.id,
+      fiscalEntityType,
+      pagination ?? {},
+    );
   }
 
   @Query(() => FiscalEntity, { name: 'fiscalEntity' })
@@ -46,5 +52,22 @@ export class FiscalEntityResolver {
       input,
     );
     return this.service.create(user.id, input);
+  }
+
+  @Mutation(() => FiscalEntity)
+  async updateFiscalEntity(
+    @CurrentUser() user: User,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('input') input: UpdateFiscalEntityInput,
+  ): Promise<FiscalEntity> {
+    return this.service.update(id, user.id, input);
+  }
+
+  @Mutation(() => Boolean)
+  async deleteFiscalEntity(
+    @CurrentUser() user: User,
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<boolean> {
+    return this.service.delete(id, user.id);
   }
 }

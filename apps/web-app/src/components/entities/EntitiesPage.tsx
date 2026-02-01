@@ -3,31 +3,16 @@
 import { useState } from 'react';
 import { useGetFiscalEntitiesQuery, FiscalEntityType } from '@/lib/graphql/generated';
 import { Card, CardContent, Button, PageLoader } from '@/components/ui';
-import { Building2, Home, User, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-
-const entityTypeIcons = {
-  [FiscalEntityType.Individual]: User,
-  [FiscalEntityType.Household]: Home,
-  [FiscalEntityType.Business]: Building2,
-};
-
-const entityTypeLabels = {
-  [FiscalEntityType.Individual]: 'Individual',
-  [FiscalEntityType.Household]: 'Household',
-  [FiscalEntityType.Business]: 'Business',
-};
-
-const entityTypeColors = {
-  [FiscalEntityType.Individual]: 'bg-blue-100 text-blue-700',
-  [FiscalEntityType.Household]: 'bg-green-100 text-green-700',
-  [FiscalEntityType.Business]: 'bg-purple-100 text-purple-700',
-};
+import { NewEntityModal } from './NewEntityModal';
+import { entityTypeColors, entityTypeIcons, entityTypeLabels } from './constants';
 
 export default function EntitiesPage() {
   const { user } = useAuth();
   const [filterType, setFilterType] = useState<FiscalEntityType | 'all'>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { data, loading, error } = useGetFiscalEntitiesQuery({
     variables: {
       type: filterType === 'all' ? undefined : (filterType as FiscalEntityType),
@@ -67,7 +52,7 @@ export default function EntitiesPage() {
                 Manage your tax entities and view their financial data
               </p>
             </div>
-            <Button variant="primary" size="lg">
+            <Button variant="primary" size="lg" onClick={() => setIsModalOpen(true)}>
               <Plus className="w-5 h-5 mr-2" />
               New Entity
             </Button>
@@ -83,10 +68,9 @@ export default function EntitiesPage() {
                   : 'bg-white text-neutral-700 hover:bg-neutral-100'
               }`}
             >
-              All ({entities.length})
+              All
             </Button>
             {Object.entries(entityTypeLabels).map(([type, label]) => {
-              const count = entities.filter(e => e.type === type).length;
               return (
                 <Button
                   key={type}
@@ -97,7 +81,7 @@ export default function EntitiesPage() {
                       : 'bg-white text-neutral-700 hover:bg-neutral-100'
                   }`}
                 >
-                  {label} ({count})
+                  {label}
                 </Button>
               );
             })}
@@ -149,6 +133,9 @@ export default function EntitiesPage() {
           )}
         </div>
       </div>
+
+      {/* New Entity Modal */}
+      <NewEntityModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 }

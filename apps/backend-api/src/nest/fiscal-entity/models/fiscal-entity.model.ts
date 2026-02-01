@@ -50,4 +50,16 @@ export class PaginatedFiscalEntity extends Paginated(FiscalEntity) {}
 export class FiscalEntityInput {
   @Field()
   name: string;
+
+  @Field(() => FiscalEntityType)
+  type: FiscalEntityType;
+}
+
+@InputType()
+export class UpdateFiscalEntityInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => FiscalEntityType, { nullable: true })
+  type?: FiscalEntityType;
 }
