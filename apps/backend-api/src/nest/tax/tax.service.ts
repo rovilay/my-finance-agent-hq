@@ -27,7 +27,7 @@ export class TaxService {
 
       const totalIncome = this.sumByType(entries, FinancialType.income);
       const totalDeductions = this.sumByType(entries, FinancialType.deduction);
-      const taxAlreadyPaid = this.sumByType(entries, FinancialType.tax_paid);
+      const taxAlreadyPaid = this.sumByType(entries, FinancialType.taxPaid);
 
       const taxableIncome = Math.max(0, totalIncome - totalDeductions);
 

@@ -16,7 +16,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hq/tools": "workspace:^",
     "zod": "catalog:"
   },
   "devDependencies": {

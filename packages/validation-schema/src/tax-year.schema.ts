@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { supportedTaxYears } from '@hq/tools';
+
+export const supportedTaxYears = [2025, 2026] as const;
+export type SupportedTaxYear = (typeof supportedTaxYears)[number];
 
 export const taxYearSchema = z.enum(supportedTaxYears.map(String) as [string, ...string[]], {
   errorMap: () => ({

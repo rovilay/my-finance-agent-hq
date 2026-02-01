@@ -1,14 +1,19 @@
+import { SupportedTaxYear } from '@hq/validation-schema';
 import { tool } from 'ai';
 import z from 'zod';
-
-export const supportedTaxYears = [2026] as const;
-type SupportedTaxYear = (typeof supportedTaxYears)[number];
 
 /**
  * Simplified 2026 Combined Tax Brackets (Federal + Ontario)
  * Note: These are representative of the progressive brackets for 2026.
  */
 const INCOME_TAX_BRACKETS: Record<SupportedTaxYear, { threshold: number; rate: number }[]> = {
+  2025: [
+    { threshold: 53891, rate: 0.1905 }, // Combined rate for first bracket
+    { threshold: 58523, rate: 0.2315 },
+    { threshold: 107785, rate: 0.2965 },
+    { threshold: 117045, rate: 0.3148 },
+    { threshold: Infinity, rate: 0.3389 },
+  ],
   2026: [
     { threshold: 53891, rate: 0.1905 }, // Combined rate for first bracket
     { threshold: 58523, rate: 0.2315 },
@@ -22,6 +27,12 @@ const CANADA_FEDERAL_INCOME_TAX_BRACKETS: Record<
   SupportedTaxYear,
   { threshold: number; rate: number }[]
 > = {
+  2025: [
+    { threshold: 173205, rate: 0.29 },
+    { threshold: 111733, rate: 0.26 },
+    { threshold: 55867, rate: 0.205 },
+    { threshold: 0, rate: 0.15 },
+  ],
   2026: [
     { threshold: 173205, rate: 0.29 },
     { threshold: 111733, rate: 0.26 },
@@ -32,6 +43,12 @@ const CANADA_FEDERAL_INCOME_TAX_BRACKETS: Record<
 
 const ONTARIO_INCOME_TAX_BRACKETS: Record<SupportedTaxYear, { threshold: number; rate: number }[]> =
   {
+    2025: [
+      { threshold: 173205, rate: 0.29 },
+      { threshold: 111733, rate: 0.26 },
+      { threshold: 55867, rate: 0.205 },
+      { threshold: 0, rate: 0.15 },
+    ],
     2026: [
       { threshold: 173205, rate: 0.29 },
       { threshold: 111733, rate: 0.26 },

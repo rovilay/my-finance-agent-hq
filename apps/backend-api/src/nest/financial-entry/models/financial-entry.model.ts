@@ -12,7 +12,7 @@ export enum FinancialType {
   income = 'income',
   deduction = 'deduction',
   credit = 'credit',
-  tax_paid = 'tax_paid',
+  taxPaid = 'tax_paid',
 }
 
 registerEnumType(FinancialType, { name: 'FinancialType' });

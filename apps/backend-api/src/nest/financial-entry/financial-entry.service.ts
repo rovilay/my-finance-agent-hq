@@ -24,7 +24,10 @@ export class FinancialEntryService {
     @Inject(DATABASE_CONNECTION) private readonly db: DatabaseClient,
   ) {}
 
-  async create(input: CreateFinancialEntryInput): Promise<FinancialEntry> {
+  async create(
+    input: CreateFinancialEntryInput,
+    userId: string,
+  ): Promise<FinancialEntry> {
     const { entityId, type, category, taxYear } = input;
 
     // START LOG: Detailed trace of the initiation
@@ -33,6 +36,24 @@ export class FinancialEntryService {
     );
 
     try {
+      // ensure the fiscal entity exists and belongs to the user
+      const [entity] = await this.db
+        .select()
+        .from(fiscalEntities)
+        .where(
+          and(
+            eq(fiscalEntities.id, entityId),
+            eq(fiscalEntities.userId, userId),
+          ),
+        )
+        .limit(1);
+
+      if (!entity) {
+        throw new NotFoundException(
+          `Fiscal entity: ${entityId} not found for user ID: ${userId}`,
+        );
+      }
+
       const [entry] = await this.db
         .insert(financialEntries)
         .values({
@@ -141,9 +162,7 @@ export class FinancialEntryService {
   }
 
   async findById(entryId: string, userId: string): Promise<FinancialEntry> {
-    console.log(
-      `[FinancialEntryService] Fetching entry by ID: ${entryId}`,
-    );
+    console.log(`[FinancialEntryService] Fetching entry by ID: ${entryId}`);
 
     try {
       const result = await this.db

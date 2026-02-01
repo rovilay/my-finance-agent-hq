@@ -20,17 +20,19 @@ export class FinancialEntryResolver {
 
   @Mutation(() => FinancialEntry)
   async addFinancialEntry(
+    @CurrentUser() user: User,
     @Args('input', new ZodValidationPipe(createFinancialEntrySchema))
     input: CreateFinancialEntryInput,
   ) {
-    return this.financialEntryService.create(input);
+    return this.financialEntryService.create(input, user.id);
   }
 
   @Query(() => PaginatedFinancialEntry, { name: 'financialEntries' })
   async ledger(
     @Args('entityId', { type: () => ID }) entityId: string,
     @Args('taxYear', { nullable: true }) taxYear?: string,
-    @Args('pagination', { type: () => PaginationInput, nullable: true }) paginationArgs?: PaginationInput,
+    @Args('pagination', { type: () => PaginationInput, nullable: true })
+    paginationArgs?: PaginationInput,
   ): Promise<PaginatedFinancialEntry> {
     return this.financialEntryService.findByEntityPaginated(
       entityId,

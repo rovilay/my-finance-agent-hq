@@ -1,6 +1,6 @@
-import { FiscalEntityType } from '@/lib/graphql';
+import { FinancialType, FiscalEntityType } from '@/lib/graphql';
 import clsx from 'clsx';
-import { Building2, Home, User } from 'lucide-react';
+import { Building2, Home, TrendingDown, TrendingUp, User } from 'lucide-react';
 
 export const entityTypeIcons = {
   [FiscalEntityType.Individual]: User,
@@ -46,3 +46,81 @@ export const entityTypes = [
     activeColor: 'bg-purple-600 text-white border-purple-600',
   },
 ];
+
+// Popular categories organized by entry type
+export const CATEGORIES_BY_TYPE = {
+  income: [
+    'Employment Income',
+    'Self-Employment Income',
+    'Investment Income',
+    'Rental Income',
+    'Capital Gains',
+    'Pension Income',
+    'Business Income',
+    'RRSP Withdrawals',
+    'Foreign Income',
+  ],
+  deduction: [
+    'RRSP Contributions',
+    'Medical Expenses',
+    'Charitable Donations',
+    'Professional Fees',
+    'Union Dues',
+    'Childcare Expenses',
+    'Moving Expenses',
+    'Student Loan Interest',
+    'Investment Expenses',
+    'Home Office Expenses',
+  ],
+  credit: [
+    'Basic Personal Amount',
+    'Spousal Amount',
+    'Disability Credit',
+    'Tuition Credit',
+    'Medical Expenses Credit',
+    'Charitable Donations Credit',
+    'First-Time Home Buyer',
+    'Canada Employment Credit',
+    'Public Transit Credit',
+    'Digital News Credit',
+  ],
+  tax_paid: [
+    'Federal Tax Withheld',
+    'Provincial Tax Withheld',
+    'CPP Contributions',
+    'EI Premiums',
+    'Installment Payments',
+    'Foreign Tax Paid',
+    'Quebec Tax Withheld',
+    'Prior Year Balance',
+    'Penalties Paid',
+    'Interest Paid',
+  ],
+} as const;
+
+export const TYPE_CONFIG = {
+  [FinancialType.Income]: {
+    label: 'Income',
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    icon: TrendingUp,
+  },
+  [FinancialType.Deduction]: {
+    label: 'Deduction',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    icon: TrendingDown,
+  },
+  [FinancialType.Credit]: {
+    label: 'Credit',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    icon: TrendingDown,
+  },
+  [FinancialType.TaxPaid]: {
+    label: 'Tax Paid',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    icon: TrendingDown,
+  },
+};

@@ -12,17 +12,19 @@
   },
   "dependencies": {
     "@apollo/client": "catalog:",
-    "@headlessui/react": "^2.2.9",
+    "@headlessui/react": "catalog:",
     "@hq/validation-schema": "workspace:*",
     "@mantine/core": "catalog:",
     "@mantine/hooks": "catalog:",
     "clsx": "catalog:",
+    "date-fns": "catalog:",
     "firebase": "catalog:",
     "graphql": "catalog:",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "tailwind-merge": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
