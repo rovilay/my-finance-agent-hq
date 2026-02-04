@@ -3,6 +3,5 @@ export {
   users,
   fiscalEntities,
   financialEntries,
-  taxDocuments,
   documents,
 } from '@hq/database';

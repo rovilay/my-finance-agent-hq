@@ -60,4 +60,8 @@ export class GcsService {
       );
     }
   }
+
+  async downloadFile(path: string): Promise<Buffer> {
+    return this.download(path);
+  }
 }

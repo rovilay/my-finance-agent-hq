@@ -3,6 +3,7 @@ import {
   financialEntries,
   fiscalEntities,
   type DatabaseClient,
+  documents,
 } from '@hq/database';
 import {
   Inject,
@@ -14,14 +15,27 @@ import {
   CreateFinancialEntryInput,
   FinancialEntry,
   PaginatedFinancialEntry,
+  ExtractedFinancialEntry,
 } from './models/financial-entry.model';
 import { and, eq } from 'drizzle-orm';
 import { PaginationInput } from '../common/models';
+import { AiService } from '../ai/ai.service';
+import { GcsService } from '../document/gcs.service';
+import { DocumentService } from '../document/document.service';
+import { z } from 'zod';
+import { financialTypeSchema, taxYearSchema } from '@hq/validation-schema';
+import { PDFParse } from 'pdf-parse';
+import { KmsService } from '@hq/encryption';
+import { CipherUtil } from '@hq/encryption';
 
 @Injectable()
 export class FinancialEntryService {
   constructor(
     @Inject(DATABASE_CONNECTION) private readonly db: DatabaseClient,
+    private readonly aiService: AiService,
+    private readonly gcsService: GcsService,
+    private readonly documentService: DocumentService,
+    private readonly kmsService: KmsService,
   ) {}
 
   async create(
@@ -203,6 +217,149 @@ export class FinancialEntryService {
         error,
       );
       throw error;
+    }
+  }
+
+  async extractFromDocument(
+    documentId: string,
+    userId: string,
+  ): Promise<ExtractedFinancialEntry> {
+    console.log(
+      `[FinancialEntryService] Extracting financial entry from document ${documentId} for user: ${userId}`,
+    );
+
+    try {
+      // Fetch document from database
+      const [document] = await this.db
+        .select()
+        .from(documents)
+        .where(and(eq(documents.id, documentId), eq(documents.userId, userId)))
+        .limit(1);
+
+      if (!document || !document.storagePath) {
+        throw new NotFoundException(
+          `Document with ID ${documentId} not found or has no storage path`,
+        );
+      }
+
+      // Download encrypted file from GCS
+      console.log(
+        `[FinancialEntryService] Downloading file from GCS: ${document.storagePath}`,
+      );
+      const encryptedBuffer = await this.gcsService.downloadFile(
+        document.storagePath,
+      );
+
+      // Decrypt the file using the wrapped DEK
+      console.log('[FinancialEntryService] Decrypting file...');
+      if (!document.wrappedDek) {
+        throw new InternalServerErrorException(
+          'Document is missing encryption key',
+        );
+      }
+      const dek = await this.kmsService.unwrapKey(document.wrappedDek);
+      const decryptedBuffer = CipherUtil.decrypt(
+        encryptedBuffer.toString('base64'),
+        dek,
+      );
+
+      let documentContent: string;
+
+      // Check if file is PDF by mime type or file extension
+      if (
+        document.fileName.toLowerCase().endsWith('.pdf') ||
+        document.fileName.toLowerCase().includes('.pdf')
+      ) {
+        console.log('[FinancialEntryService] Parsing PDF file...');
+        try {
+          const parser = new PDFParse({ data: decryptedBuffer });
+          const pdfData = await parser.getText();
+          documentContent = pdfData.text;
+          console.log(
+            '[FinancialEntryService] Extracted text from PDF:',
+            documentContent.substring(0, 200),
+          );
+        } catch (error) {
+          console.error('[FinancialEntryService] Failed to parse PDF:', error);
+          throw new InternalServerErrorException(
+            'Failed to parse PDF document. Please ensure the file is a valid PDF.',
+          );
+        }
+      } else {
+        // For text files
+        documentContent = decryptedBuffer.toString('utf8');
+      }
+
+      const extracted = await this.aiService.extractFinancialEntry(
+        documentContent,
+        userId,
+      );
+
+      console.log(
+        `[FinancialEntryService] Successfully extracted data:`,
+        extracted,
+      );
+
+      // Delete the temporary document immediately after extraction
+      try {
+        await this.documentService.finalize(documentId, false);
+        console.log(
+          `[FinancialEntryService] Cleaned up temporary document: ${documentId}`,
+        );
+      } catch (cleanupError) {
+        // Log but don't fail the extraction if cleanup fails
+        console.warn(
+          `[FinancialEntryService] Failed to cleanup document ${documentId}:`,
+          cleanupError,
+        );
+      }
+
+      // Individual field validators
+      const dateValidator = z
+        .string()
+        .datetime()
+        .or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/));
+      const amountValidator = z.number().positive();
+      const currencyValidator = z.string().length(3);
+
+      // Validate each field individually, return null if validation fails
+      return {
+        date: extracted.date
+          ? dateValidator.safeParse(extracted.date).success
+            ? extracted.date
+            : undefined
+          : undefined,
+        amount: extracted.amount
+          ? amountValidator.safeParse(extracted.amount).success
+            ? extracted.amount
+            : undefined
+          : undefined,
+        currency: extracted.currency
+          ? currencyValidator.safeParse(extracted.currency).success
+            ? extracted.currency
+            : undefined
+          : undefined,
+        category: extracted.category ?? undefined,
+        description: extracted.description ?? undefined,
+        taxYear: extracted.taxYear
+          ? taxYearSchema.safeParse(extracted.taxYear).success
+            ? extracted.taxYear
+            : undefined
+          : undefined,
+        type: extracted.type
+          ? financialTypeSchema.safeParse(extracted.type).success
+            ? (extracted.type as any)
+            : undefined
+          : undefined,
+      };
+    } catch (error) {
+      console.error(
+        `[FinancialEntryService] Error extracting from document:`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Failed to extract financial entry from document',
+      );
     }
   }
 

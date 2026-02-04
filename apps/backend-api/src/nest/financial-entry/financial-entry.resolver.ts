@@ -4,6 +4,8 @@ import {
   CreateFinancialEntryInput,
   FinancialEntry,
   PaginatedFinancialEntry,
+  ExtractFinancialEntryInput,
+  ExtractedFinancialEntry,
 } from './models/financial-entry.model';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { createFinancialEntrySchema } from '@hq/validation-schema';
@@ -47,5 +49,16 @@ export class FinancialEntryResolver {
     @Args('id', { type: () => ID }) id: string,
   ): Promise<FinancialEntry> {
     return this.financialEntryService.findById(id, user.id);
+  }
+
+  @Mutation(() => ExtractedFinancialEntry)
+  async extractFinancialEntry(
+    @CurrentUser() user: User,
+    @Args('input') input: ExtractFinancialEntryInput,
+  ): Promise<ExtractedFinancialEntry> {
+    return this.financialEntryService.extractFromDocument(
+      input.documentId,
+      user.id,
+    );
   }
 }

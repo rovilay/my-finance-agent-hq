@@ -1,11 +1,24 @@
 import { MASTRA_STORE, type MastraStore } from '@hq/database';
-import { createFinanceAgent } from '@hq/tools';
+import {
+  createFinanceAgent,
+  createFinanceEntryExtractionAgent,
+} from '@hq/tools';
 import { Inject, Injectable } from '@nestjs/common';
 import {
   ExtractionWorkflow,
   ExtractionWorkflowSteps,
 } from './workflows/extraction.workflow';
 import { type EnvConfig, envConfig } from 'src/config/env';
+
+interface ExtractedEntry {
+  date?: string;
+  amount?: number;
+  currency?: string;
+  category?: string;
+  description?: string;
+  taxYear?: string;
+  type?: string;
+}
 
 @Injectable()
 export class AiService {
@@ -49,6 +62,71 @@ export class AiService {
     });
 
     return result.text;
+  }
+
+  async extractFinancialEntry(
+    documentContent: string,
+    userId: string,
+  ): Promise<ExtractedEntry> {
+    const extractionAgent = createFinanceEntryExtractionAgent({
+      apiKey: this.config.AI_API_KEY,
+      id: `extraction-${userId}-${Date.now()}`,
+      name: 'Financial Entry Extraction Agent',
+    });
+
+    console.log('[AiService] Starting extraction for user:', userId);
+
+    const prompt = `
+Extract financial entry data from the following document:
+
+${documentContent}
+
+Provide the extracted data in the exact JSON format specified in your instructions.
+`;
+
+    const result = await extractionAgent.generate(prompt);
+
+    console.log('[AiService] Extraction result:', result.text);
+
+    try {
+      // Extract JSON from markdown code blocks if present
+      let jsonText = result.text.trim();
+
+      // Remove markdown code fences (```json and ```)
+      const codeBlockMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        jsonText = codeBlockMatch[1].trim();
+      }
+
+      // Parse the JSON response from the agent
+      const parsed = JSON.parse(jsonText);
+
+      // Handle case where AI returns an array of entries (e.g., from a paystub with multiple line items)
+      // For now, we take the first entry. Future enhancement: return all entries and let user choose
+      const extracted: ExtractedEntry = Array.isArray(parsed)
+        ? parsed[0]
+        : parsed;
+
+      if (Array.isArray(parsed) && parsed.length > 1) {
+        console.warn(
+          `[AiService] ⚠️ Multiple entries detected (${parsed.length}). Using first entry. Consider implementing multi-entry selection in the UI.`,
+        );
+      }
+
+      // Return the extracted data with all optional fields
+      return {
+        date: extracted?.date ?? undefined,
+        amount: extracted?.amount ?? undefined,
+        currency: extracted?.currency ?? undefined,
+        category: extracted?.category ?? undefined,
+        description: extracted?.description ?? undefined,
+        taxYear: extracted?.taxYear ?? undefined,
+        type: extracted?.type ?? undefined,
+      };
+    } catch (error) {
+      console.error('[AiService] Failed to parse extraction result:', error);
+      throw new Error('Failed to extract financial entry data from document');
+    }
   }
 
   async verifyDocument(

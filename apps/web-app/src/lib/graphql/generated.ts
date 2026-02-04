@@ -43,15 +43,6 @@ export type Document = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-export type DocumentInput = {
-  entityId: Scalars['String']['input'];
-  fileBuffer: Scalars['String']['input'];
-  fileMetadata: FileMetadataInput;
-  fileName: Scalars['String']['input'];
-  retentionPolicy: RetentionPolicy;
-  userId: Scalars['String']['input'];
-};
-
 export enum DocumentStatus {
   Failed = 'failed',
   Processed = 'processed',
@@ -60,15 +51,25 @@ export enum DocumentStatus {
   Verified = 'verified'
 }
 
+export type ExtractFinancialEntryInput = {
+  documentId: Scalars['String']['input'];
+};
+
+export type ExtractedFinancialEntry = {
+  __typename?: 'ExtractedFinancialEntry';
+  amount?: Maybe<Scalars['Float']['output']>;
+  category?: Maybe<Scalars['String']['output']>;
+  currency?: Maybe<Scalars['String']['output']>;
+  date?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  taxYear?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<FinancialType>;
+};
+
 export type FileMetadata = {
   __typename?: 'FileMetadata';
   mimeType: Scalars['String']['output'];
   sizeInKb: Scalars['Int']['output'];
-};
-
-export type FileMetadataInput = {
-  mimeType: Scalars['String']['input'];
-  sizeInKb: Scalars['Int']['input'];
 };
 
 export type FinancialEntry = {
@@ -89,7 +90,7 @@ export enum FinancialType {
   Credit = 'credit',
   Deduction = 'deduction',
   Income = 'income',
-  TaxPaid = 'tax_paid'
+  TaxPaid = 'taxPaid'
 }
 
 export type FiscalEntity = {
@@ -120,9 +121,9 @@ export type Mutation = {
   addFinancialEntry: FinancialEntry;
   createFiscalEntity: FiscalEntity;
   deleteFiscalEntity: Scalars['Boolean']['output'];
+  extractFinancialEntry: ExtractedFinancialEntry;
   syncUser: User;
   updateFiscalEntity: FiscalEntity;
-  uploadDocument: Document;
   verifyAndFinalize: Document;
   verifyDocument: Scalars['Boolean']['output'];
 };
@@ -143,6 +144,11 @@ export type MutationDeleteFiscalEntityArgs = {
 };
 
 
+export type MutationExtractFinancialEntryArgs = {
+  input: ExtractFinancialEntryInput;
+};
+
+
 export type MutationSyncUserArgs = {
   input: UserInput;
 };
@@ -151,11 +157,6 @@ export type MutationSyncUserArgs = {
 export type MutationUpdateFiscalEntityArgs = {
   id: Scalars['ID']['input'];
   input: UpdateFiscalEntityInput;
-};
-
-
-export type MutationUploadDocumentArgs = {
-  input: DocumentInput;
 };
 
 
@@ -301,13 +302,6 @@ export type UserInput = {
   lastName: Scalars['String']['input'];
 };
 
-export type UploadDocumentMutationVariables = Exact<{
-  input: DocumentInput;
-}>;
-
-
-export type UploadDocumentMutation = { __typename?: 'Mutation', uploadDocument: { __typename?: 'Document', id: string, fileName: string, status: DocumentStatus, retentionPolicy: RetentionPolicy, storagePath?: string | null, purgedAt?: any | null, createdAt: any, updatedAt: any, fileMetadata: { __typename?: 'FileMetadata', mimeType: string, sizeInKb: number } } };
-
 export type VerifyAndFinalizeDocumentMutationVariables = Exact<{
   documentId: Scalars['ID']['input'];
   approved: Scalars['Boolean']['input'];
@@ -392,6 +386,13 @@ export type AddFinancialEntryMutationVariables = Exact<{
 
 export type AddFinancialEntryMutation = { __typename?: 'Mutation', addFinancialEntry: { __typename?: 'FinancialEntry', id: string, amount: number, category: string, currency: string, date: any, entityId: string, taxYear: string, type: FinancialType, createdAt: any, updatedAt: any } };
 
+export type ExtractFinancialEntryMutationVariables = Exact<{
+  input: ExtractFinancialEntryInput;
+}>;
+
+
+export type ExtractFinancialEntryMutation = { __typename?: 'Mutation', extractFinancialEntry: { __typename?: 'ExtractedFinancialEntry', date?: string | null, amount?: number | null, currency?: string | null, category?: string | null, description?: string | null, taxYear?: string | null, type?: FinancialType | null } };
+
 export type GetTaxProjectionQueryVariables = Exact<{
   entityId: Scalars['String']['input'];
   taxYear: Scalars['String']['input'];
@@ -413,50 +414,6 @@ export type SyncUserMutationVariables = Exact<{
 export type SyncUserMutation = { __typename?: 'Mutation', syncUser: { __typename?: 'User', id: string, email: string, firstName: string, lastName: string, avatarUrl?: string | null, bio?: string | null, createdAt: any, updatedAt: any } };
 
 
-export const UploadDocumentDocument = gql`
-    mutation UploadDocument($input: DocumentInput!) {
-  uploadDocument(input: $input) {
-    id
-    fileName
-    status
-    retentionPolicy
-    storagePath
-    purgedAt
-    createdAt
-    updatedAt
-    fileMetadata {
-      mimeType
-      sizeInKb
-    }
-  }
-}
-    `;
-export type UploadDocumentMutationFn = Apollo.MutationFunction<UploadDocumentMutation, UploadDocumentMutationVariables>;
-
-/**
- * __useUploadDocumentMutation__
- *
- * To run a mutation, you first call `useUploadDocumentMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUploadDocumentMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [uploadDocumentMutation, { data, loading, error }] = useUploadDocumentMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useUploadDocumentMutation(baseOptions?: Apollo.MutationHookOptions<UploadDocumentMutation, UploadDocumentMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UploadDocumentMutation, UploadDocumentMutationVariables>(UploadDocumentDocument, options);
-      }
-export type UploadDocumentMutationHookResult = ReturnType<typeof useUploadDocumentMutation>;
-export type UploadDocumentMutationResult = Apollo.MutationResult<UploadDocumentMutation>;
-export type UploadDocumentMutationOptions = Apollo.BaseMutationOptions<UploadDocumentMutation, UploadDocumentMutationVariables>;
 export const VerifyAndFinalizeDocumentDocument = gql`
     mutation VerifyAndFinalizeDocument($documentId: ID!, $approved: Boolean!, $shouldKeepFile: Boolean!) {
   verifyDocument(
@@ -986,6 +943,45 @@ export function useAddFinancialEntryMutation(baseOptions?: Apollo.MutationHookOp
 export type AddFinancialEntryMutationHookResult = ReturnType<typeof useAddFinancialEntryMutation>;
 export type AddFinancialEntryMutationResult = Apollo.MutationResult<AddFinancialEntryMutation>;
 export type AddFinancialEntryMutationOptions = Apollo.BaseMutationOptions<AddFinancialEntryMutation, AddFinancialEntryMutationVariables>;
+export const ExtractFinancialEntryDocument = gql`
+    mutation ExtractFinancialEntry($input: ExtractFinancialEntryInput!) {
+  extractFinancialEntry(input: $input) {
+    date
+    amount
+    currency
+    category
+    description
+    taxYear
+    type
+  }
+}
+    `;
+export type ExtractFinancialEntryMutationFn = Apollo.MutationFunction<ExtractFinancialEntryMutation, ExtractFinancialEntryMutationVariables>;
+
+/**
+ * __useExtractFinancialEntryMutation__
+ *
+ * To run a mutation, you first call `useExtractFinancialEntryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useExtractFinancialEntryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [extractFinancialEntryMutation, { data, loading, error }] = useExtractFinancialEntryMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useExtractFinancialEntryMutation(baseOptions?: Apollo.MutationHookOptions<ExtractFinancialEntryMutation, ExtractFinancialEntryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ExtractFinancialEntryMutation, ExtractFinancialEntryMutationVariables>(ExtractFinancialEntryDocument, options);
+      }
+export type ExtractFinancialEntryMutationHookResult = ReturnType<typeof useExtractFinancialEntryMutation>;
+export type ExtractFinancialEntryMutationResult = Apollo.MutationResult<ExtractFinancialEntryMutation>;
+export type ExtractFinancialEntryMutationOptions = Apollo.BaseMutationOptions<ExtractFinancialEntryMutation, ExtractFinancialEntryMutationVariables>;
 export const GetTaxProjectionDocument = gql`
     query GetTaxProjection($entityId: String!, $taxYear: String!) {
   getTaxProjection(entityId: $entityId, taxYear: $taxYear) {

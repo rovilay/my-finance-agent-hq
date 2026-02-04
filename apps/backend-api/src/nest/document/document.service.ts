@@ -10,7 +10,7 @@ import {
   type DatabaseClient,
 } from '@hq/database';
 import { KmsService, CipherUtil } from '@hq/encryption';
-import { eq, count, sql, and } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import {
   Document,
   DocumentInput,
@@ -203,7 +203,7 @@ export class DocumentService {
   }
 
   async findDocOrThrow(id: string, userId?: string): Promise<Document> {
-    const conditions = userId 
+    const conditions = userId
       ? and(eq(documents.id, id), eq(documents.userId, userId))
       : eq(documents.id, id);
 
@@ -235,10 +235,17 @@ export class DocumentService {
     return decrypted.toString('utf8'); // Returns the JSON string to the caller
   }
 
-  async documentsByEntityId(entityId: string, userId: string, { skip = 0, take = 10 }: PaginationInput): Promise<PaginatedDocument> {
+  async documentsByEntityId(
+    entityId: string,
+    userId: string,
+    { skip = 0, take = 10 }: PaginationInput,
+  ): Promise<PaginatedDocument> {
     // Fetch one extra item to check if there are more pages
     const docs = await this.db.query.documents.findMany({
-      where: and(eq(documents.entityId, entityId), eq(documents.userId, userId)),
+      where: and(
+        eq(documents.entityId, entityId),
+        eq(documents.userId, userId),
+      ),
       limit: take + 1,
       offset: skip,
     });
@@ -261,7 +268,10 @@ export class DocumentService {
     };
   }
 
-  async fetchDocumentById(id: string, userId: string): Promise<Document | null> {
+  async fetchDocumentById(
+    id: string,
+    userId: string,
+  ): Promise<Document | null> {
     const doc = await this.db.query.documents.findFirst({
       where: and(eq(documents.id, id), eq(documents.userId, userId)),
     });

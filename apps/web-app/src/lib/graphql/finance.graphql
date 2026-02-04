@@ -49,6 +49,18 @@ mutation AddFinancialEntry($input: CreateFinancialEntryInput!) {
   }
 }
 
+mutation ExtractFinancialEntry($input: ExtractFinancialEntryInput!) {
+  extractFinancialEntry(input: $input) {
+    date
+    amount
+    currency
+    category
+    description
+    taxYear
+    type
+  }
+}
+
 query GetTaxProjection($entityId: String!, $taxYear: String!) {
   getTaxProjection(entityId: $entityId, taxYear: $taxYear) {
     entityId

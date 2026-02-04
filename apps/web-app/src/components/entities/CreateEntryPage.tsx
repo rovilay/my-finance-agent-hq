@@ -11,11 +11,15 @@ import {
   Input,
 } from '@/components/ui';
 import { Upload, FileText, Plus, AlertCircle, Loader } from 'lucide-react';
-import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
 import { BackButton } from '../BackButton';
 import { CATEGORIES_BY_TYPE } from './constants';
 import { createFinancialEntrySchema, supportedTaxYears } from '@hq/validation-schema';
-import { FinancialType, useAddFinancialEntryMutation } from '@/lib/graphql';
+import {
+  FinancialType,
+  useAddFinancialEntryMutation,
+  useExtractFinancialEntryMutation,
+} from '@/lib/graphql';
+import { uploadDocumentToApi } from '@/lib/utils';
 
 interface CreateEntryPageProps {
   entityId: string;
@@ -23,7 +27,6 @@ interface CreateEntryPageProps {
 }
 
 export default function CreateEntryPage({ entityId, onBack }: CreateEntryPageProps) {
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     amount: 0,
     category: '',
@@ -33,6 +36,10 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
   });
   const [customCategory, setCustomCategory] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [addFinancialEntry, { loading }] = useAddFinancialEntryMutation({
     onCompleted: () => {
@@ -45,7 +52,64 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
     refetchQueries: ['GetFinancialEntries'],
   });
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const [extractFinancialEntry] = useExtractFinancialEntryMutation();
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsExtracting(true);
+    setErrors({});
+    setUploadedFileName(null);
+
+    try {
+      // Step 1: Upload document to API
+      const { id } = await uploadDocumentToApi(file, entityId);
+      setUploadedFileName(file.name);
+
+      // Step 2: Call extraction mutation with documentId
+      const { data } = await extractFinancialEntry({
+        variables: {
+          input: { documentId: id },
+        },
+      });
+
+      const extracted = data?.extractFinancialEntry;
+
+      if (extracted) {
+        // Auto-populate form fields with extracted data
+        setFormData(prev => ({
+          ...prev,
+          amount: extracted.amount ?? prev.amount,
+          category: extracted.category ?? prev.category,
+          type: (extracted.type as FinancialType) ?? prev.type,
+          date: extracted.date ?? prev.date,
+          taxYear: extracted.taxYear ?? prev.taxYear,
+        }));
+
+        // If category was extracted and it's not in the popular list, use "Other"
+        if (extracted.category) {
+          const categoriesForType =
+            CATEGORIES_BY_TYPE[extracted.type as keyof typeof CATEGORIES_BY_TYPE] || [];
+          if (
+            !categoriesForType.find(cat => cat.toLowerCase() === extracted.category?.toLowerCase())
+          ) {
+            setFormData(prev => ({ ...prev, category: 'Other' }));
+            setCustomCategory(extracted.category);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Extraction error:', error);
+      setErrors({ form: 'Failed to extract data from document. Please try again.' });
+    } finally {
+      setIsExtracting(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     console.log('Submitting form data:', formData);
@@ -115,17 +179,69 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
               {/* Upload Option */}
               <div className="mb-8 p-6 border-2 border-dashed border-neutral-300 rounded-lg">
                 <div className="text-center">
-                  <FileText className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
-                  <h3 className="font-semibold text-neutral-900 mb-2">
-                    Upload Document to Auto-Fill
-                  </h3>
-                  <p className="text-sm text-neutral-600 mb-4">
-                    Upload a tax document to automatically extract and fill this form
-                  </p>
-                  <Button onClick={() => setIsUploadModalOpen(true)} variant="outline">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Document
-                  </Button>
+                  {uploadedFileName && !isExtracting ? (
+                    <>
+                      <FileText className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                      <h3 className="font-semibold text-neutral-900 mb-2">
+                        Document uploaded successfully
+                      </h3>
+                      <p className="text-sm text-neutral-600 mb-4">
+                        <span className="font-medium text-neutral-900">{uploadedFileName}</span>
+                        <br />
+                        Data has been extracted and populated in the form below
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setUploadedFileName(null);
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        <span className="flex items-center">
+                          <Upload className="size-4 mr-2" />
+                          Upload Another Document
+                        </span>
+                      </Button>
+                    </>
+                  ) : isExtracting ? (
+                    <>
+                      <Loader className="w-12 h-12 text-primary-500 animate-spin mx-auto mb-3" />
+                      <h3 className="font-semibold text-neutral-900 mb-2">
+                        Extracting data from document...
+                      </h3>
+                      <p className="text-sm text-neutral-600">
+                        Please wait while we analyze your document
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
+                      <h3 className="font-semibold text-neutral-900 mb-2">
+                        Upload Document to Auto-Fill
+                      </h3>
+                      <p className="text-sm text-neutral-600 mb-4">
+                        Upload a financial document to automatically extract and fill this form
+                      </p>
+                      <div>
+                        <label htmlFor="document-upload">
+                          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                            <span className="flex items-center">
+                              <Upload className="size-4 mr-2" />
+                              Upload
+                            </span>
+                          </Button>
+                        </label>
+                        <input
+                          ref={fileInputRef}
+                          id="document-upload"
+                          type="file"
+                          accept=".pdf"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -327,12 +443,6 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
           </Card>
         </div>
       </div>
-
-      <DocumentUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        entityId={entityId}
-      />
     </div>
   );
 }

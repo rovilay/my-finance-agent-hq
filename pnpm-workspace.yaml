@@ -7,6 +7,8 @@ catalog:
   '@ai-sdk/google': ^3.0.10
   '@ai-sdk/openai': ^3.0.12
   ai: ^6.0.41
+  '@google/generative-ai': ^0.24.1
+  '@google-cloud/storage': ^7.18.0
 
   # Validation
   zod: ^3.23.8
@@ -122,3 +124,9 @@ catalog:
   '@eslint/js': ^9.18.0
   globals: ^16.0.0
   nodemon: ^3.1.9
+
+  '@headlessui/react': ^2.2.9
+  'date-fns': ^4.1.0
+  'tailwindcss-merge': ^1.14.0
+  'tailwind-merge': ^3.4.0
+  'body-parser': ^2.2.2

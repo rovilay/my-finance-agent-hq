@@ -66,35 +66,6 @@ export const financialEntries = pgTable('financial_entries', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const taxDocumentStatusEnum = pgEnum('tax_document_status', [
-  'uploaded', // File received in S3, waiting for AI
-  'processing', // AI (Gemini) is currently parsing the document
-  'extracted', // AI finished; results are in aiExtractedData (needs review)
-  'verified', // User confirmed the numbers; data moved to financialEntries
-  'rejected', // User flagged the extraction as incorrect
-  'failed', // System error (e.g., file unreadable, API down)
-]);
-
-export const taxDocuments = pgTable('tax_documents', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
-    .references(() => users.id)
-    .notNull(),
-  entityId: uuid('entity_id')
-    .references(() => fiscalEntities.id)
-    .notNull(),
-
-  s3Key: text('s3_key').notNull(), // The path to the PDF
-  fileName: text('file_name').notNull(),
-  status: taxDocumentStatusEnum('status').default('uploaded').notNull(), // uploaded, extracted, verified, failed
-
-  // The "Candidate" data from Gemini before the user clicks 'Confirm'
-  encryptedAiExtractedData: text('encrypted_ai_extracted_data'), // The hex ciphertext
-
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
 // 1. Enums for the State Machine & Privacy
 export const documentStatusEnum = pgEnum('document_status', [
   'uploaded', // Initial state

@@ -3,7 +3,7 @@ import { setContext } from '@apollo/client/link/context';
 import { getIdToken } from './firebase';
 
 const httpLink = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333/graphql',
+  uri: `${process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3333'}/graphql`,
   credentials: 'include',
 });
 

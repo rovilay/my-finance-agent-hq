@@ -30,15 +30,6 @@ type Document {
   updatedAt: DateTime!
 }
 
-input DocumentInput {
-  entityId: String!
-  fileBuffer: String!
-  fileMetadata: FileMetadataInput!
-  fileName: String!
-  retentionPolicy: RetentionPolicy!
-  userId: String!
-}
-
 enum DocumentStatus {
   failed
   processed
@@ -47,12 +38,21 @@ enum DocumentStatus {
   verified
 }
 
-type FileMetadata {
-  mimeType: String!
-  sizeInKb: Int!
+input ExtractFinancialEntryInput {
+  documentId: String!
 }
 
-input FileMetadataInput {
+type ExtractedFinancialEntry {
+  amount: Float
+  category: String
+  currency: String
+  date: String
+  description: String
+  taxYear: String
+  type: FinancialType
+}
+
+type FileMetadata {
   mimeType: String!
   sizeInKb: Int!
 }
@@ -103,9 +103,9 @@ type Mutation {
   addFinancialEntry(input: CreateFinancialEntryInput!): FinancialEntry!
   createFiscalEntity(input: FiscalEntityInput!): FiscalEntity!
   deleteFiscalEntity(id: ID!): Boolean!
+  extractFinancialEntry(input: ExtractFinancialEntryInput!): ExtractedFinancialEntry!
   syncUser(input: UserInput!): User!
   updateFiscalEntity(id: ID!, input: UpdateFiscalEntityInput!): FiscalEntity!
-  uploadDocument(input: DocumentInput!): Document!
   verifyAndFinalize(documentId: ID!, shouldKeep: Boolean!): Document!
   verifyDocument(approved: Boolean!, documentId: ID!, shouldKeepFile: Boolean!): Boolean!
 }

@@ -74,5 +74,35 @@ export class CreateFinancialEntryInput {
   taxYear: string;
 }
 
+@InputType()
+export class ExtractFinancialEntryInput {
+  @Field()
+  documentId: string;
+}
+
+@ObjectType()
+export class ExtractedFinancialEntry {
+  @Field({ nullable: true })
+  date?: string;
+
+  @Field(() => Float, { nullable: true })
+  amount?: number;
+
+  @Field({ nullable: true })
+  currency?: string;
+
+  @Field({ nullable: true })
+  category?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field({ nullable: true })
+  taxYear?: string;
+
+  @Field(() => FinancialType, { nullable: true })
+  type?: FinancialType;
+}
+
 @ObjectType()
 export class PaginatedFinancialEntry extends Paginated(FinancialEntry) {}

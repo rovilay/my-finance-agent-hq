@@ -97,8 +97,7 @@ export class DocumentInput {
   @Field()
   entityId: string;
 
-  @Field()
-  fileBuffer: string; // base64 encoded file data
+  fileBuffer: Buffer; // Raw file buffer (not exposed to GraphQL)
 }
 
 @ObjectType()

@@ -1,13 +1,15 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { DocumentResolver } from './document.resolver';
 import { DocumentService } from './document.service';
+import { DocumentController } from './document.controller';
 import { GcsService } from './gcs.service';
 import { AiModule } from '../ai/ai.module';
 import { EncryptionModule } from '../encryption/encryption.module';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [EncryptionModule, AuthModule, AiModule],
+  imports: [EncryptionModule, AuthModule, forwardRef(() => AiModule)],
+  controllers: [DocumentController],
   providers: [GcsService, DocumentResolver, DocumentService],
   exports: [DocumentService, GcsService],
 })

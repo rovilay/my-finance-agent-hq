@@ -58,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Create `.env.local`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3333/graphql
 ```
 
 ## Project Structure

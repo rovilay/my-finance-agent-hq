@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { DocumentService } from './document.service';
-import { Document, DocumentInput, PaginatedDocument } from './models/document.model';
+import { Document, PaginatedDocument } from './models/document.model';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AiOrchestrator } from '../ai/ai.orchestrator';
@@ -23,20 +23,20 @@ export class DocumentResolver {
     private readonly documentService: DocumentService,
     private readonly aiOrchestrator: AiOrchestrator,
   ) {}
-  @Mutation(() => Document)
-  async uploadDocument(
-    @CurrentUser() user: User,
-    @Args('input') input: DocumentInput,
-  ) {
-    // 1. Secure the file in the Vault (GCS + Encrypted DB Record)
-    const doc = await this.documentService.handleUpload(input);
+  // @Mutation(() => Document)
+  // async uploadDocument(
+  //   @CurrentUser() user: User,
+  //   @Args('input') input: DocumentInput,
+  // ) {
+  //   // 1. Secure the file in the Vault (GCS + Encrypted DB Record)
+  //   const doc = await this.documentService.handleUpload(input);
 
-    // 2. Hand off to the Orchestrator to start the "Brain" work
-    // We don't await this because we want the user to get their "Upload Success" UI immediately
-    void this.aiOrchestrator.initiateExtraction(doc.id);
+  //   // 2. Hand off to the Orchestrator to start the "Brain" work
+  //   // We don't await this because we want the user to get their "Upload Success" UI immediately
+  //   void this.aiOrchestrator.initiateExtraction(doc.id);
 
-    return doc;
-  }
+  //   return doc;
+  // }
 
   @Mutation(() => Document)
   async verifyAndFinalize(
@@ -55,7 +55,11 @@ export class DocumentResolver {
     @Args('entityId', { type: () => ID }) entityId: string,
     @Args('pagination', { nullable: true }) pagination?: PaginationInput,
   ): Promise<PaginatedDocument> {
-    const docs = await this.documentService.documentsByEntityId(entityId, user.id, pagination ?? {});
+    const docs = await this.documentService.documentsByEntityId(
+      entityId,
+      user.id,
+      pagination ?? {},
+    );
     return docs;
   }
 

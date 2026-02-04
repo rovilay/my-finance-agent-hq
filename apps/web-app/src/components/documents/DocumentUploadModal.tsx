@@ -4,14 +4,15 @@ import { useState, ChangeEvent, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Button } from '@/components/ui';
 import { Upload, FileText, Shield, CheckCircle, X } from 'lucide-react';
-import { RetentionPolicy, useUploadDocumentMutation } from '@/lib/graphql/generated';
+import { Document, RetentionPolicy } from '@/lib/graphql/generated';
 import { useAuth } from '@/hooks/useAuth';
+import { uploadDocumentToApi } from '@/lib/utils';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   entityId: string;
-  onUploadSuccess?: (data: any) => void;
+  onUploadSuccess?: (data: Document) => void;
 }
 
 export default function DocumentUploadModal({
@@ -22,10 +23,12 @@ export default function DocumentUploadModal({
 }: DocumentUploadModalProps) {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<Document | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [retentionPolicy, setRetentionPolicy] = useState<RetentionPolicy>(
     RetentionPolicy.VerifyAndPurge
   );
-  const [uploadDocument, { loading, data, error }] = useUploadDocumentMutation();
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -46,27 +49,19 @@ export default function DocumentUploadModal({
       }
 
       try {
-        const result = await uploadDocument({
-          variables: {
-            input: {
-              userId: user.id,
-              entityId,
-              fileName: file.name,
-              fileMetadata: {
-                mimeType: file.type,
-                sizeInKb: Math.round(file.size / 1024),
-              },
-              fileBuffer: base64,
-              retentionPolicy,
-            },
-          },
-        });
+        setIsLoading(true);
+        setError(null);
+        const result = await uploadDocumentToApi(file, entityId, retentionPolicy);
+        setData(result);
+        setIsLoading(false);
 
-        if (result.data && onUploadSuccess) {
-          onUploadSuccess(result.data.uploadDocument);
+        if (result && onUploadSuccess) {
+          onUploadSuccess(result);
         }
       } catch (err) {
         console.error('Upload error:', err);
+        setIsLoading(false);
+        setError(err as Error);
       }
     };
     reader.readAsDataURL(file);
@@ -227,12 +222,12 @@ export default function DocumentUploadModal({
                   <div className="flex gap-3 p-6 border-t border-neutral-200">
                     <Button
                       onClick={handleUpload}
-                      disabled={!file || loading || !user}
-                      isLoading={loading}
+                      disabled={!file || isLoading || !user}
+                      isLoading={isLoading}
                       className="flex-1"
                       variant="primary"
                     >
-                      {loading ? 'Uploading...' : 'Upload & Extract Data'}
+                      {isLoading ? 'Uploading...' : 'Upload & Extract Data'}
                     </Button>
                     <Button onClick={handleClose} variant="outline">
                       Cancel

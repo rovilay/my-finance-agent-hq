@@ -25,7 +25,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "strictPropertyInitialization": false,
-    "types": ["node"],
+    "types": ["node", "multer"],
     "composite": true
   },
   "include": ["src/**/*"],

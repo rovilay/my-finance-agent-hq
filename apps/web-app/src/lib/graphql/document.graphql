@@ -1,21 +1,8 @@
-mutation UploadDocument($input: DocumentInput!) {
-  uploadDocument(input: $input) {
-    id
-    fileName
-    status
-    retentionPolicy
-    storagePath
-    purgedAt
-    createdAt
-    updatedAt
-    fileMetadata {
-      mimeType
-      sizeInKb
-    }
-  }
-}
-
-mutation VerifyAndFinalizeDocument($documentId: ID!, $approved: Boolean!, $shouldKeepFile: Boolean!) {
+mutation VerifyAndFinalizeDocument(
+  $documentId: ID!
+  $approved: Boolean!
+  $shouldKeepFile: Boolean!
+) {
   verifyDocument(documentId: $documentId, approved: $approved, shouldKeepFile: $shouldKeepFile)
 }
 
