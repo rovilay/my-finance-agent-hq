@@ -69,7 +69,7 @@ export type ExtractedFinancialEntry = {
 export type FileMetadata = {
   __typename?: 'FileMetadata';
   mimeType: Scalars['String']['output'];
-  sizeInKb: Scalars['Int']['output'];
+  sizeInKb: Scalars['Float']['output'];
 };
 
 export type FinancialEntry = {
@@ -225,6 +225,7 @@ export type QueryDocumentArgs = {
 export type QueryDocumentsByEntityArgs = {
   entityId: Scalars['ID']['input'];
   pagination?: InputMaybe<PaginationInput>;
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -314,6 +315,7 @@ export type VerifyAndFinalizeDocumentMutation = { __typename?: 'Mutation', verif
 export type GetDocumentsByEntityQueryVariables = Exact<{
   entityId: Scalars['ID']['input'];
   pagination?: InputMaybe<PaginationInput>;
+  status?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -452,8 +454,8 @@ export type VerifyAndFinalizeDocumentMutationHookResult = ReturnType<typeof useV
 export type VerifyAndFinalizeDocumentMutationResult = Apollo.MutationResult<VerifyAndFinalizeDocumentMutation>;
 export type VerifyAndFinalizeDocumentMutationOptions = Apollo.BaseMutationOptions<VerifyAndFinalizeDocumentMutation, VerifyAndFinalizeDocumentMutationVariables>;
 export const GetDocumentsByEntityDocument = gql`
-    query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput) {
-  documentsByEntity(entityId: $entityId, pagination: $pagination) {
+    query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput, $status: String) {
+  documentsByEntity(entityId: $entityId, pagination: $pagination, status: $status) {
     items {
       id
       fileName
@@ -490,6 +492,7 @@ export const GetDocumentsByEntityDocument = gql`
  *   variables: {
  *      entityId: // value for 'entityId'
  *      pagination: // value for 'pagination'
+ *      status: // value for 'status'
  *   },
  * });
  */

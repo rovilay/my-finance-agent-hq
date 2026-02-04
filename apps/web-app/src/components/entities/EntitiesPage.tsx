@@ -1,8 +1,6 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGetFiscalEntitiesQuery, FiscalEntityType } from '@/lib/graphql/generated';
-import { Card, CardContent, Button, PageLoader } from '@/components/ui';
+import { Card, CardContent, Button, PageLoader, Tabs, Tab } from '@/components/ui';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,11 +9,11 @@ import { entityTypeColors, entityTypeIcons, entityTypeLabels } from './constants
 
 export default function EntitiesPage() {
   const { user } = useAuth();
-  const [filterType, setFilterType] = useState<FiscalEntityType | 'all'>('all');
+  const [filterType, setFilterType] = useState<FiscalEntityType | 'ALL'>('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data, loading, error } = useGetFiscalEntitiesQuery({
     variables: {
-      type: filterType === 'all' ? undefined : (filterType as FiscalEntityType),
+      type: filterType === 'ALL' ? undefined : (filterType as FiscalEntityType),
       pagination: {
         skip: 0,
         take: 50,
@@ -23,6 +21,24 @@ export default function EntitiesPage() {
     },
     skip: !user,
   });
+
+  const tabs: Tab[] = useMemo(() => {
+    return [
+      { id: 'ALL', label: 'All' },
+      {
+        id: FiscalEntityType.Individual,
+        label: entityTypeLabels[FiscalEntityType.Individual],
+      },
+      {
+        id: FiscalEntityType.Household,
+        label: entityTypeLabels[FiscalEntityType.Household],
+      },
+      {
+        id: FiscalEntityType.Business,
+        label: entityTypeLabels[FiscalEntityType.Business],
+      },
+    ];
+  }, []);
 
   if (loading) return <PageLoader message="Loading entities..." />;
 
@@ -59,40 +75,19 @@ export default function EntitiesPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex gap-3 mb-6">
-            <Button
-              onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filterType === 'all'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white text-neutral-700 hover:bg-neutral-100'
-              }`}
-            >
-              All
-            </Button>
-            {Object.entries(entityTypeLabels).map(([type, label]) => {
-              return (
-                <Button
-                  key={type}
-                  onClick={() => setFilterType(type as FiscalEntityType)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    filterType === type
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                  }`}
-                >
-                  {label}
-                </Button>
-              );
-            })}
-          </div>
+          <Tabs
+            tabs={tabs}
+            activeTab={filterType}
+            onTabChange={tabId => setFilterType(tabId as FiscalEntityType | 'ALL')}
+            className="mb-6"
+          />
 
           {/* Entities Grid */}
           {entities.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <p className="text-neutral-500">
-                  {filterType === 'all'
+                  {filterType === 'ALL'
                     ? 'No entities yet. Create your first entity to get started.'
                     : `No ${entityTypeLabels[filterType as FiscalEntityType].toLowerCase()} entities found.`}
                 </p>

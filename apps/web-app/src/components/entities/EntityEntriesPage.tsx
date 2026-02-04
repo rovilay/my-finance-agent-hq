@@ -1,14 +1,14 @@
-'use client';
-
-import { useState } from 'react';
-import { Card, CardContent, Button } from '@/components/ui';
+import { useState, useMemo } from 'react';
+import { Card, CardContent, Button, Tabs, Tab } from '@/components/ui';
 import { Plus, Package, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '../BackButton';
-import { FinancialEntry, useGetLedgerQuery } from '@/lib/graphql/generated';
+import { FinancialEntry, FinancialType, useGetLedgerQuery } from '@/lib/graphql/generated';
 import { format } from 'date-fns';
 import { TYPE_CONFIG } from './constants';
 import EntryInfoModal from './EntryInfoModal';
+import { Pagination } from '../Pagination';
+import { usePagination } from '@/hooks/usePagination';
 
 interface EntityEntriesPageProps {
   entityId: string;
@@ -16,10 +16,10 @@ interface EntityEntriesPageProps {
 }
 
 export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPageProps) {
-  const [skip, setSkip] = useState(0);
-  const take = 20;
+  const { take, skip, handleLoadMore, handleLoadPrevious } = usePagination({});
   const [selectedEntry, setSelectedEntry] = useState<FinancialEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState<FinancialType | 'ALL'>('ALL');
 
   const { data, loading, error } = useGetLedgerQuery({
     variables: {
@@ -28,17 +28,38 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
     },
   });
 
-  const entries = data?.financialEntries.items || [];
+  const allEntries = data?.financialEntries.items || [];
+  const entries =
+    selectedType === 'ALL' ? allEntries : allEntries.filter(entry => entry.type === selectedType);
   const total = data?.financialEntries.total || 0;
   const hasMore = data?.financialEntries.hasMore || false;
 
-  const handleLoadMore = () => {
-    setSkip(skip + take);
-  };
-
-  const handleLoadPrevious = () => {
-    setSkip(Math.max(0, skip - take));
-  };
+  // Generate tabs with counts
+  const tabs: Tab[] = useMemo(
+    () => [
+      {
+        id: 'ALL',
+        label: 'All',
+      },
+      {
+        id: FinancialType.Income,
+        label: 'Income',
+      },
+      {
+        id: FinancialType.Deduction,
+        label: 'Deductions',
+      },
+      {
+        id: FinancialType.Credit,
+        label: 'Credits',
+      },
+      {
+        id: FinancialType.TaxPaid,
+        label: 'Tax Paid',
+      },
+    ],
+    [allEntries]
+  );
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -51,9 +72,6 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-neutral-900 mb-2">Financial Entries</h1>
-                {/* <p className="text-neutral-600">
-                  {total} {total === 1 ? 'entry' : 'entries'} total
-                </p> */}
               </div>
               <Link href={`/entities/${entityId}/entries/create`}>
                 <Button variant="primary" size="lg">
@@ -63,6 +81,17 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
               </Link>
             </div>
           </div>
+
+          {/* Filter Tabs */}
+          {!loading && !error && allEntries.length > 0 && (
+            <div className="mb-6">
+              <Tabs
+                tabs={tabs}
+                activeTab={selectedType}
+                onTabChange={tabId => setSelectedType(tabId as FinancialType | 'ALL')}
+              />
+            </div>
+          )}
 
           {/* Loading State */}
           {loading && (
@@ -86,7 +115,7 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
           )}
 
           {/* Empty State */}
-          {!loading && !error && entries.length === 0 && (
+          {!loading && !error && allEntries.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center">
                 <Package className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
@@ -97,6 +126,19 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
                     Create Your First Entry
                   </Button>
                 </Link>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Filtered Empty State */}
+          {!loading && !error && allEntries.length > 0 && entries.length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Package className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                <p className="text-neutral-500 mb-2">No entries found for type "{selectedType}"</p>
+                <Button onClick={() => setSelectedType('ALL')} variant="outline">
+                  Show All Entries
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -156,20 +198,14 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
                 );
               })}
 
-              {/* Pagination */}
-              {total > take && (
-                <div className="flex items-center justify-between pt-4">
-                  <Button variant="outline" onClick={handleLoadPrevious} disabled={skip === 0}>
-                    Previous
-                  </Button>
-                  <span className="text-sm text-neutral-500">
-                    Showing {skip + 1}-{Math.min(skip + take, total)} of {total}
-                  </span>
-                  <Button variant="outline" onClick={handleLoadMore} disabled={!hasMore}>
-                    Next
-                  </Button>
-                </div>
-              )}
+              <Pagination
+                take={take}
+                skip={skip}
+                total={total}
+                hasMore={hasMore}
+                handleLoadPrevious={handleLoadPrevious}
+                handleLoadMore={handleLoadMore}
+              />
             </div>
           )}
         </div>

@@ -81,22 +81,6 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
 
               {/* Quick Links */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Link href={`/entities/${entityId}/documents`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardContent className="py-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center">
-                          <FileText className="w-6 h-6 text-primary-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-neutral-900">Documents</h3>
-                          <p className="text-sm text-neutral-600">View all documents</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-
                 <Link href={`/entities/${entityId}/entries`}>
                   <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                     <CardContent className="py-6">
@@ -107,6 +91,22 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
                         <div>
                           <h3 className="font-semibold text-neutral-900">Financial Entries</h3>
                           <p className="text-sm text-neutral-600">Manage entries</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+
+                <Link href={`/entities/${entityId}/documents`}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardContent className="py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-primary-100 flex items-center justify-center">
+                          <FileText className="w-6 h-6 text-primary-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-neutral-900">Documents</h3>
+                          <p className="text-sm text-neutral-600">View all documents</p>
                         </div>
                       </div>
                     </CardContent>

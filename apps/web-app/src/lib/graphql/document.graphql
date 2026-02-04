@@ -6,8 +6,8 @@ mutation VerifyAndFinalizeDocument(
   verifyDocument(documentId: $documentId, approved: $approved, shouldKeepFile: $shouldKeepFile)
 }
 
-query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput) {
-  documentsByEntity(entityId: $entityId, pagination: $pagination) {
+query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput, $status: String) {
+  documentsByEntity(entityId: $entityId, pagination: $pagination, status: $status) {
     items {
       id
       fileName

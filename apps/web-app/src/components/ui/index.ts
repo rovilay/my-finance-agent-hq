@@ -19,3 +19,6 @@ export { PageLoader } from './PageLoader';
 
 export { Modal } from './Modal';
 export type { ModalProps } from './Modal';
+
+export { Tabs } from './Tabs';
+export type { Tab } from './Tabs';

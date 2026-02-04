@@ -1,6 +1,16 @@
-import { FinancialType, FiscalEntityType } from '@/lib/graphql';
+import { DocumentStatus, FinancialType, FiscalEntityType } from '@/lib/graphql';
 import clsx from 'clsx';
-import { Building2, Home, TrendingDown, TrendingUp, User } from 'lucide-react';
+import {
+  Building2,
+  CheckCircle2,
+  Clock,
+  Home,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  User,
+  XCircle,
+} from 'lucide-react';
 
 export const entityTypeIcons = {
   [FiscalEntityType.Individual]: User,
@@ -122,5 +132,38 @@ export const TYPE_CONFIG = {
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
     icon: TrendingDown,
+  },
+};
+
+export const STATUS_CONFIG = {
+  [DocumentStatus.Uploaded]: {
+    label: 'Uploaded',
+    icon: Clock,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+  },
+  [DocumentStatus.Processed]: {
+    label: 'Processed',
+    icon: CheckCircle2,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+  },
+  [DocumentStatus.Verified]: {
+    label: 'Verified',
+    icon: CheckCircle2,
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50',
+  },
+  [DocumentStatus.Purged]: {
+    label: 'Purged',
+    icon: Trash2,
+    color: 'text-neutral-500',
+    bgColor: 'bg-neutral-50',
+  },
+  [DocumentStatus.Failed]: {
+    label: 'Failed',
+    icon: XCircle,
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
   },
 };

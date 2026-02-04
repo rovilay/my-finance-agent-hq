@@ -54,7 +54,7 @@ type ExtractedFinancialEntry {
 
 type FileMetadata {
   mimeType: String!
-  sizeInKb: Int!
+  sizeInKb: Float!
 }
 
 type FinancialEntry {
@@ -141,7 +141,7 @@ input PaginationInput {
 
 type Query {
   document(id: ID!): Document!
-  documentsByEntity(entityId: ID!, pagination: PaginationInput): PaginatedDocument!
+  documentsByEntity(entityId: ID!, pagination: PaginationInput, status: String): PaginatedDocument!
   financialEntries(entityId: ID!, pagination: PaginationInput, taxYear: String): PaginatedFinancialEntry!
   financialEntry(id: ID!): FinancialEntry!
   fiscalEntities(fiscalEntityType: FiscalEntityType, pagination: PaginationInput): PaginatedFiscalEntity!

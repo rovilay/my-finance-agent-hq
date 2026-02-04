@@ -10,7 +10,7 @@ import {
   type DatabaseClient,
 } from '@hq/database';
 import { KmsService, CipherUtil } from '@hq/encryption';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, not } from 'drizzle-orm';
 import {
   Document,
   DocumentInput,
@@ -239,13 +239,19 @@ export class DocumentService {
     entityId: string,
     userId: string,
     { skip = 0, take = 10 }: PaginationInput,
+    status?: DocumentStatus,
   ): Promise<PaginatedDocument> {
+    const whereConditions = [
+      eq(documents.entityId, entityId),
+      eq(documents.userId, userId),
+      status
+        ? eq(documents.status, status)
+        : not(eq(documents.status, DocumentStatus.purged)),
+    ];
+
     // Fetch one extra item to check if there are more pages
     const docs = await this.db.query.documents.findMany({
-      where: and(
-        eq(documents.entityId, entityId),
-        eq(documents.userId, userId),
-      ),
+      where: and(...whereConditions),
       limit: take + 1,
       offset: skip,
     });

@@ -4,7 +4,7 @@ import {
   ID,
   registerEnumType,
   InputType,
-  Int,
+  Float,
 } from '@nestjs/graphql';
 import { Paginated } from '../../common/models';
 
@@ -30,7 +30,7 @@ export class FileMetadata {
   @Field()
   mimeType: string;
 
-  @Field(() => Int)
+  @Field(() => Float)
   sizeInKb: number;
 }
 
@@ -39,7 +39,7 @@ export class FileMetadataInput {
   @Field()
   mimeType: string;
 
-  @Field(() => Int)
+  @Field(() => Float)
   sizeInKb: number;
 }
 
