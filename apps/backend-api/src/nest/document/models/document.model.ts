@@ -48,6 +48,9 @@ export class Document {
   @Field(() => ID)
   id: string;
 
+  @Field(() => ID)
+  entityId: string;
+
   @Field()
   fileName: string;
 

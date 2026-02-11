@@ -3,6 +3,7 @@ import {
   Inject,
   InternalServerErrorException,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import {
   documents,
@@ -10,7 +11,7 @@ import {
   type DatabaseClient,
 } from '@hq/database';
 import { KmsService, CipherUtil } from '@hq/encryption';
-import { eq, and, not } from 'drizzle-orm';
+import { eq, and, not, desc } from 'drizzle-orm';
 import {
   Document,
   DocumentInput,
@@ -21,6 +22,7 @@ import {
 import { GcsService } from './gcs.service';
 import { type EnvConfig, envConfig } from 'src/config/env';
 import { PaginationInput } from '../common/models';
+import { ExtractionWorkflow } from '../ai/workflows/extraction.workflow';
 
 @Injectable()
 export class DocumentService {
@@ -29,6 +31,8 @@ export class DocumentService {
     @Inject(envConfig.KEY) private readonly config: EnvConfig,
     private readonly gcsService: GcsService,
     private readonly kmsService: KmsService,
+    @Inject(forwardRef(() => ExtractionWorkflow))
+    private readonly extractionWorkflow: ExtractionWorkflow,
   ) {}
 
   async handleUpload({
@@ -144,12 +148,70 @@ export class DocumentService {
     }
   }
 
+  async finalizeDocumentExtraction(
+    documentId: string,
+    approved: boolean,
+    userConfirmedKeep?: boolean,
+  ): Promise<Document> {
+    const doc = await this.findDocOrThrow(documentId);
+
+    if (!approved) {
+      // User rejected - mark as failed and optionally purge
+      const [updated] = await this.db
+        .update(documents)
+        .set({
+          status: DocumentStatus.failed,
+          updatedAt: new Date(),
+        })
+        .where(eq(documents.id, documentId))
+        .returning();
+
+      return this.mapDBDocToModel(updated);
+    }
+
+    // Logic: If user specifically says "Keep" OR the policy is "Permanent", we preserve the file.
+    const shouldKeepFile =
+      userConfirmedKeep || doc.retentionPolicy === RetentionPolicy.permanent;
+
+    if (shouldKeepFile) {
+      // Mark as verified and keep file
+      const [updated] = await this.db
+        .update(documents)
+        .set({
+          status: DocumentStatus.verified,
+          updatedAt: new Date(),
+        })
+        .where(eq(documents.id, documentId))
+        .returning();
+
+      return this.mapDBDocToModel(updated);
+    } else {
+      // Mark as verified but purge the file
+      if (doc.storagePath) {
+        await this.gcsService.delete(doc.storagePath);
+      }
+
+      const [updated] = await this.db
+        .update(documents)
+        .set({
+          status: DocumentStatus.purged,
+          storagePath: null,
+          purgedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(documents.id, documentId))
+        .returning();
+
+      return this.mapDBDocToModel(updated);
+    }
+  }
+
   /**
    * Finalizes the document based on user verification and the chosen Retention Policy.
    */
   async finalize(
     documentId: string,
-    userConfirmedKeep: boolean,
+    userConfirmedKeep?: boolean,
   ): Promise<Document> {
     const doc = await this.findDocOrThrow(documentId);
 
@@ -200,6 +262,55 @@ export class DocumentService {
 
       return this.mapDBDocToModel(updated);
     }
+
+    return doc;
+  }
+
+  async purgeDocument(documentId: string): Promise<Document> {
+    const doc = await this.findDocOrThrow(documentId);
+
+    console.log(
+      `[DocumentService] 🗑️ Initiating Purge for Doc: ${documentId} (Retention: ${doc.retentionPolicy})`,
+    );
+
+    // 1. Delete from Cloud Storage
+    if (doc.storagePath) {
+      await this.gcsService.delete(doc.storagePath);
+    }
+
+    // 2. Update DB: Nullify storage path and mark as purged
+    const [updated] = await this.db
+      .update(documents)
+      .set({
+        status: DocumentStatus.purged,
+        storagePath: null,
+        purgedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(documents.id, documentId))
+      .returning();
+
+    console.log(
+      `[DocumentService] ✅ Purge complete. Storage cleared for Doc: ${documentId}`,
+    );
+
+    return this.mapDBDocToModel(updated);
+  }
+
+  async updateDocumentStatus(
+    documentId: string,
+    status: DocumentStatus,
+  ): Promise<Document> {
+    const [updated] = await this.db
+      .update(documents)
+      .set({
+        status,
+        updatedAt: new Date(),
+      })
+      .where(eq(documents.id, documentId))
+      .returning();
+
+    return this.mapDBDocToModel(updated);
   }
 
   async findDocOrThrow(id: string, userId?: string): Promise<Document> {
@@ -213,6 +324,22 @@ export class DocumentService {
 
     if (!doc) throw new NotFoundException(`Document ${id} not found`);
     return this.mapDBDocToModel(doc);
+  }
+
+  async updateDocumentRetentionPolicy(
+    documentId: string,
+    retentionPolicy: RetentionPolicy,
+  ): Promise<Document> {
+    const [updated] = await this.db
+      .update(documents)
+      .set({
+        retentionPolicy,
+        updatedAt: new Date(),
+      })
+      .where(eq(documents.id, documentId))
+      .returning();
+
+    return this.mapDBDocToModel(updated);
   }
 
   async decryptDocumentData(document: Document): Promise<string | null> {
@@ -254,6 +381,7 @@ export class DocumentService {
       where: and(...whereConditions),
       limit: take + 1,
       offset: skip,
+      orderBy: [desc(documents.createdAt)],
     });
 
     const hasMore = docs.length > take;
@@ -288,6 +416,7 @@ export class DocumentService {
   private mapDBDocToModel(doc: typeof documents.$inferSelect): Document {
     return {
       id: doc.id,
+      entityId: doc.entityId,
       fileName: doc.fileName,
       status: doc.status as DocumentStatus,
       retentionPolicy: doc.retentionPolicy as RetentionPolicy,

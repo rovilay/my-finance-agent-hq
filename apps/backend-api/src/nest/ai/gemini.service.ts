@@ -7,6 +7,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { KmsService, CipherUtil } from '@hq/encryption';
 import { GcsService } from '../document/gcs.service';
 import { type EnvConfig, envConfig } from 'src/config/env';
+import { agent_models } from '@hq/tools';
 
 @Injectable()
 export class GeminiService {
@@ -41,7 +42,7 @@ export class GeminiService {
 
       // 2. Initialize the Model with a strict JSON response schema
       const model = this.genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: agent_models.GEMINI_2_MODEL,
         systemInstruction: `You are an expert Canadian tax assistant. 
           Extract fields from the provided tax document (usually a T4). 
           Return ONLY a JSON object. If a field is missing, return null. 

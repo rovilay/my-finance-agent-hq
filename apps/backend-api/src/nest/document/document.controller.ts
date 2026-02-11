@@ -12,10 +12,14 @@ import { DocumentService } from './document.service';
 import { Document, RetentionPolicy } from './models/document.model';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { type Request } from 'express';
+import { ExtractionWorkflow } from '../ai/workflows/extraction.workflow';
 
 @Controller('api/documents')
 export class DocumentController {
-  constructor(private readonly documentService: DocumentService) {}
+  constructor(
+    private readonly documentService: DocumentService,
+    private readonly extractionWorkflow: ExtractionWorkflow,
+  ) {}
 
   @Post('upload')
   @UseGuards(AuthGuard)
@@ -25,7 +29,11 @@ export class DocumentController {
     file: Express.Multer.File,
     @Req()
     req: Request<{
-      body: { entityId: string; retentionPolicy?: RetentionPolicy };
+      body: {
+        entityId: string;
+        retentionPolicy?: RetentionPolicy;
+        extractData?: boolean;
+      };
     }>,
   ): Promise<Document> {
     if (!file) {
@@ -33,7 +41,7 @@ export class DocumentController {
     }
 
     const userId = req.user!.id;
-    const { entityId, retentionPolicy } = req.body;
+    const { entityId, retentionPolicy, extractData } = req.body;
 
     if (!entityId) {
       throw new BadRequestException('entityId is required');
@@ -48,9 +56,13 @@ export class DocumentController {
       fileName: file.originalname,
       fileMetadata: {
         mimeType: file.mimetype,
-        sizeInKb: file.size / 1024,
+        sizeInKb: parseFloat((file.size / 1024).toFixed(2)),
       },
     });
+
+    if (extractData) {
+      await this.extractionWorkflow.initiateExtraction(document.id);
+    }
 
     return {
       ...document,

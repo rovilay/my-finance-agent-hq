@@ -46,6 +46,7 @@
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
     "graphql": "catalog:",
+    "graphql-type-json": "^0.3.2",
     "jose": "catalog:",
     "pdf-parse": "^2.4.5",
     "reflect-metadata": "catalog:",

@@ -2,8 +2,9 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, Button, Tabs, Tab } from '@/components/ui';
 import { FileText, Upload as UploadIcon, Loader2, AlertCircle } from 'lucide-react';
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
+import DocumentReviewModal from '@/components/documents/DocumentReviewModal';
 import { BackButton } from '../BackButton';
-import { useGetDocumentsByEntityQuery, DocumentStatus } from '@/lib/graphql';
+import { useGetDocumentsByEntityQuery, DocumentStatus, type Document } from '@/lib/graphql';
 import { format } from 'date-fns';
 import { Pagination } from '../Pagination';
 import { usePagination } from '@/hooks/usePagination';
@@ -16,6 +17,7 @@ interface EntityDocumentsPageProps {
 
 export default function EntityDocumentsPage({ entityId, onBack }: EntityDocumentsPageProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [reviewDocument, setReviewDocument] = useState<Document | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<DocumentStatus | 'ALL'>('ALL');
   const { take, skip, handleLoadMore, handleLoadPrevious } = usePagination({});
 
@@ -26,6 +28,8 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
       status: selectedStatus === 'ALL' ? undefined : selectedStatus,
     },
   });
+
+  console.log('reviewDocument', reviewDocument?.decryptedData);
 
   const documents = data?.documentsByEntity.items || [];
   const total = data?.documentsByEntity.total || 0;
@@ -196,6 +200,15 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
+                          {doc.status === DocumentStatus.Processed && (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => setReviewDocument(doc)}
+                            >
+                              Review Extraction
+                            </Button>
+                          )}
                           {doc.status === DocumentStatus.Purged && (
                             <span className="text-xs text-neutral-400 italic">
                               File removed for privacy
@@ -229,6 +242,21 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
           refetch();
         }}
       />
+
+      {reviewDocument && (
+        <DocumentReviewModal
+          isOpen={!!reviewDocument}
+          onClose={() => setReviewDocument(null)}
+          documentId={reviewDocument.id}
+          entityId={entityId}
+          fileName={reviewDocument.fileName}
+          extractedData={reviewDocument.decryptedData}
+          retentionPolicy={reviewDocument.retentionPolicy}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+      )}
     </div>
   );
 }

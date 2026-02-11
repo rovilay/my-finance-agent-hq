@@ -1,20 +1,25 @@
 mutation VerifyAndFinalizeDocument(
   $documentId: ID!
   $approved: Boolean!
-  $shouldKeepFile: Boolean!
+  $shouldKeepFile: Boolean
 ) {
-  verifyDocument(documentId: $documentId, approved: $approved, shouldKeepFile: $shouldKeepFile)
+  verifyAndFinalize(documentId: $documentId, approved: $approved, shouldKeep: $shouldKeepFile) {
+    id
+    status
+  }
 }
 
 query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput, $status: String) {
   documentsByEntity(entityId: $entityId, pagination: $pagination, status: $status) {
     items {
       id
+      entityId
       fileName
       status
       retentionPolicy
       storagePath
       purgedAt
+      decryptedData
       createdAt
       updatedAt
       fileMetadata {
@@ -32,6 +37,7 @@ query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput, $status
 query GetDocument($id: ID!) {
   document(id: $id) {
     id
+    entityId
     fileName
     status
     retentionPolicy
@@ -39,6 +45,7 @@ query GetDocument($id: ID!) {
     purgedAt
     createdAt
     updatedAt
+    decryptedData
     fileMetadata {
       mimeType
       sizeInKb

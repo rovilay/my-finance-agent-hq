@@ -23,11 +23,17 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
   }).format(amount);
 }
 
-export async function uploadDocumentToApi(
-  file: File,
-  entityId: string,
-  retentionPolicy?: RetentionPolicy
-): Promise<Document> {
+export async function uploadDocumentToApi({
+  file,
+  entityId,
+  retentionPolicy,
+  extractData = false,
+}: {
+  file: File;
+  entityId: string;
+  retentionPolicy?: RetentionPolicy;
+  extractData?: boolean;
+}): Promise<Document> {
   // Get Firebase auth token
   const token = await getIdToken();
 
@@ -37,6 +43,7 @@ export async function uploadDocumentToApi(
   if (retentionPolicy) {
     formData.append('retentionPolicy', retentionPolicy);
   }
+  formData.append('extractData', extractData.toString());
 
   return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/documents/upload`, {
     method: 'POST',

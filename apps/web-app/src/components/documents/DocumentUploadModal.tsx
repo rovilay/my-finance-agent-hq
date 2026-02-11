@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent, Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { Button } from '@/components/ui';
 import { Upload, FileText, Shield, CheckCircle, X } from 'lucide-react';
 import { Document, RetentionPolicy } from '@/lib/graphql/generated';
@@ -51,7 +51,12 @@ export default function DocumentUploadModal({
       try {
         setIsLoading(true);
         setError(null);
-        const result = await uploadDocumentToApi(file, entityId, retentionPolicy);
+        const result = await uploadDocumentToApi({
+          file,
+          entityId,
+          retentionPolicy,
+          extractData: false,
+        });
         setData(result);
         setIsLoading(false);
 
@@ -69,13 +74,17 @@ export default function DocumentUploadModal({
 
   const handleClose = () => {
     setFile(null);
+    setData(null);
+    setError(null);
+    setIsLoading(false);
+    setRetentionPolicy(RetentionPolicy.VerifyAndPurge);
     onClose();
   };
 
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog onClose={handleClose} className="relative z-50">
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -85,10 +94,10 @@ export default function DocumentUploadModal({
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0 scale-95"
@@ -97,7 +106,7 @@ export default function DocumentUploadModal({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="mx-auto max-w-2xl w-full bg-white rounded-xl shadow-xl">
+            <DialogPanel className="mx-auto max-w-2xl w-full bg-white rounded-xl shadow-xl">
               {!data ? (
                 <>
                   <div className="flex items-center justify-between p-6 border-b border-neutral-200">
@@ -248,8 +257,8 @@ export default function DocumentUploadModal({
                   </Button>
                 </div>
               )}
-            </Dialog.Panel>
-          </Transition.Child>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>

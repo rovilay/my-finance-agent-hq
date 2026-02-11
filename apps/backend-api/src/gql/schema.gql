@@ -20,6 +20,7 @@ scalar DateTime
 type Document {
   createdAt: DateTime!
   decryptedData: String
+  entityId: ID!
   fileMetadata: FileMetadata!
   fileName: String!
   id: ID!
@@ -106,7 +107,7 @@ type Mutation {
   extractFinancialEntry(input: ExtractFinancialEntryInput!): ExtractedFinancialEntry!
   syncUser(input: UserInput!): User!
   updateFiscalEntity(id: ID!, input: UpdateFiscalEntityInput!): FiscalEntity!
-  verifyAndFinalize(documentId: ID!, shouldKeep: Boolean!): Document!
+  verifyAndFinalize(approved: Boolean!, documentId: ID!, shouldKeep: Boolean): Document!
   verifyDocument(approved: Boolean!, documentId: ID!, shouldKeepFile: Boolean!): Boolean!
 }
 

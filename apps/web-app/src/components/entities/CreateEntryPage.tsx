@@ -64,7 +64,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
 
     try {
       // Step 1: Upload document to API
-      const { id } = await uploadDocumentToApi(file, entityId);
+      const { id } = await uploadDocumentToApi({ file, entityId });
       setUploadedFileName(file.name);
 
       // Step 2: Call extraction mutation with documentId

@@ -26,12 +26,18 @@ export class DocumentResolver {
   @Mutation(() => Document)
   async verifyAndFinalize(
     @Args('documentId', { type: () => ID }) documentId: string,
-    @Args('shouldKeep', { type: () => Boolean }) shouldKeep: boolean,
+    @Args('approved', { type: () => Boolean }) approved: boolean,
+    @Args('shouldKeep', { type: () => Boolean, nullable: true })
+    shouldKeep?: boolean,
   ) {
     console.log(
-      `[DocumentResolver] Finalizing doc ${documentId}. Keep: ${shouldKeep}`,
+      `[DocumentResolver] Finalizing doc ${documentId}. Approved: ${approved}, Keep: ${shouldKeep}`,
     );
-    return this.documentService.finalize(documentId, shouldKeep);
+    return this.documentService.finalizeDocumentExtraction(
+      documentId,
+      approved,
+      shouldKeep,
+    );
   }
 
   @Query(() => PaginatedDocument, { name: 'documentsByEntity' })
