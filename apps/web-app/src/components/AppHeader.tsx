@@ -61,7 +61,7 @@ export const AppHeader = () => {
     return (
       <>
         <Link href={ENTITIES_ROUTE}>
-          <Button variant="ghost">Entities</Button>
+          <Button variant="ghost">Tax</Button>
         </Link>
       </>
     );

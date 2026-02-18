@@ -1,11 +1,20 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { FinancialEntryService } from '../financial-entry/financial-entry.service';
 import {
   FinancialEntry,
   FinancialType,
 } from '../financial-entry/models/financial-entry.model';
 import { TaxProjection } from './models/tax.model';
-import { calculateCanadaFederalTax, calculateOntarioTax } from '@hq/tools';
+import {
+  calculateCanadaFederalTax,
+  calculateOntarioTax,
+  calculateBasicPersonalAmountCredit,
+} from '@hq/tools';
+import { SupportedTaxYear, taxYearSchema } from '@hq/validation-schema';
 
 @Injectable()
 export class TaxService {
@@ -20,6 +29,19 @@ export class TaxService {
     );
 
     try {
+      // Validate tax year using Zod schema
+      const validationResult = taxYearSchema.safeParse(taxYear);
+
+      if (!validationResult.success) {
+        throw new BadRequestException(
+          validationResult.error.errors[0]?.message ||
+            'Invalid tax year: enter a supported year (e.g., 2025, 2026)',
+        );
+      }
+
+      // Parse validated tax year as number for calculation
+      const year = parseInt(validationResult.data, 10) as SupportedTaxYear;
+
       const entries = await this.financialService.findByEntity(
         entityId,
         taxYear,
@@ -27,23 +49,22 @@ export class TaxService {
 
       const totalIncome = this.sumByType(entries, FinancialType.income);
       const totalDeductions = this.sumByType(entries, FinancialType.deduction);
+      const userCredits = this.sumByType(entries, FinancialType.credit);
       const taxAlreadyPaid = this.sumByType(entries, FinancialType.taxPaid);
 
       const taxableIncome = Math.max(0, totalIncome - totalDeductions);
 
       // 1. Calculate Federal Tax
-      const federalTax = calculateCanadaFederalTax(taxableIncome, 2026);
+      const federalTax = calculateCanadaFederalTax(taxableIncome, year);
 
       // 2. Calculate Provincial Tax (Ontario)
-      const provincialTax = calculateOntarioTax(taxableIncome, 2026);
+      const provincialTax = calculateOntarioTax(taxableIncome, year);
 
       // 3. Totals
       const totalTax = federalTax + provincialTax;
 
-      // Basic Personal Amount (BPA) Credit - Simplification for Phase 1
-      // 2026 Estimated Federal BPA: ~$16,200. Ontario BPA: ~$12,500.
-      // We apply 15% (Fed) and 5.05% (Prov) to these amounts as non-refundable credits.
-      const totalCredits = 16200 * 0.15 + 12500 * 0.0505;
+      // Basic Personal Amount (BPA) Credits - automatic non-refundable credits
+      const totalCredits = calculateBasicPersonalAmountCredit(year);
 
       const totalTaxLiability = Math.max(
         0,
@@ -58,8 +79,14 @@ export class TaxService {
         federalTax,
         provincialTax,
         totalTax,
+        creditsApplied: totalCredits,
         totalTaxLiability,
         effectiveTaxRate: totalIncome > 0 ? (totalTax / totalIncome) * 100 : 0,
+        // Entry type summaries
+        incomeTotal: totalIncome,
+        deductionsTotal: totalDeductions,
+        creditsTotal: userCredits,
+        taxPaidTotal: taxAlreadyPaid,
       };
 
       console.log(

@@ -113,19 +113,21 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
                   </Card>
                 </Link>
 
-                <Card className="bg-neutral-100">
-                  <CardContent className="py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-accent-100 flex items-center justify-center">
-                        <Calendar className="w-6 h-6 text-accent-600" />
+                <Link href={`/entities/${entityId}/tax`}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardContent className="py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-accent-100 flex items-center justify-center">
+                          <Calendar className="w-6 h-6 text-accent-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-neutral-900">Tax Overview</h3>
+                          <p className="text-sm text-neutral-600">View tax projections</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-neutral-900">Tax Years</h3>
-                        <p className="text-sm text-neutral-600">Coming soon</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               </div>
             </div>
           </div>

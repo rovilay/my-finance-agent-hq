@@ -26,10 +26,37 @@ export class TaxProjection {
   totalTax: number;
 
   @Field(() => Float, {
+    description:
+      'Total credits applied (includes automatic BPA and user-entered credits)',
+  })
+  creditsApplied: number;
+
+  @Field(() => Float, {
     description: 'Final amount owed to CRA after credits and prepayments',
   })
   totalTaxLiability: number;
 
   @Field(() => Float)
   effectiveTaxRate: number;
+
+  // Entry type summaries
+  @Field(() => Float, {
+    description: 'Total income from all income entries',
+  })
+  incomeTotal: number;
+
+  @Field(() => Float, {
+    description: 'Total deductions from all deduction entries',
+  })
+  deductionsTotal: number;
+
+  @Field(() => Float, {
+    description: 'Total user-entered credits (not including automatic BPA)',
+  })
+  creditsTotal: number;
+
+  @Field(() => Float, {
+    description: 'Total tax already paid throughout the year',
+  })
+  taxPaidTotal: number;
 }

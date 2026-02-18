@@ -158,10 +158,26 @@ enum RetentionPolicy {
 }
 
 type TaxProjection {
+  """
+  Total credits applied (includes automatic BPA and user-entered credits)
+  """
+  creditsApplied: Float!
+
+  """Total user-entered credits (not including automatic BPA)"""
+  creditsTotal: Float!
+
+  """Total deductions from all deduction entries"""
+  deductionsTotal: Float!
   effectiveTaxRate: Float!
   entityId: ID!
   federalTax: Float!
+
+  """Total income from all income entries"""
+  incomeTotal: Float!
   provincialTax: Float!
+
+  """Total tax already paid throughout the year"""
+  taxPaidTotal: Float!
   taxYear: String!
   taxableIncome: Float!
   totalIncome: Float!

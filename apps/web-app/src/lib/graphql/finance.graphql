@@ -70,7 +70,12 @@ query GetTaxProjection($entityId: String!, $taxYear: String!) {
     federalTax
     provincialTax
     totalTax
+    creditsApplied
     totalTaxLiability
     effectiveTaxRate
+    incomeTotal
+    deductionsTotal
+    creditsTotal
+    taxPaidTotal
   }
 }

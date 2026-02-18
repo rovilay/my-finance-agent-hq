@@ -128,10 +128,49 @@ const applyBrackets = (income: number, brackets: { threshold: number; rate: numb
   return tax;
 };
 
-export const calculateCanadaFederalTax = (income: number, taxYear: SupportedTaxYear): number => {
+export const calculateCanadaFederalTax = (
+  income: number,
+  taxYear: SupportedTaxYear = 2026
+): number => {
   return applyBrackets(income, CANADA_FEDERAL_INCOME_TAX_BRACKETS[taxYear]);
 };
 
-export const calculateOntarioTax = (income: number, taxYear: SupportedTaxYear): number => {
+export const calculateOntarioTax = (income: number, taxYear: SupportedTaxYear = 2026): number => {
   return applyBrackets(income, ONTARIO_INCOME_TAX_BRACKETS[taxYear]);
+};
+
+/**
+ * Basic Personal Amount (BPA) Credit configuration by year
+ * These are non-refundable tax credits that reduce the amount of tax owed
+ * Federal BPA: The amount you can earn before paying federal tax, with credit at lowest tax rate (15%)
+ * Provincial BPA: The amount you can earn before paying provincial tax, with credit at lowest tax rate (5.05% for Ontario)
+ */
+const BPA_CREDITS: Record<
+  SupportedTaxYear,
+  { federalBPA: number; federalRate: number; ontarioBPA: number; ontarioRate: number }
+> = {
+  2025: {
+    federalBPA: 16200,
+    federalRate: 0.15,
+    ontarioBPA: 12500,
+    ontarioRate: 0.0505,
+  },
+  2026: {
+    federalBPA: 16200,
+    federalRate: 0.15,
+    ontarioBPA: 12500,
+    ontarioRate: 0.0505,
+  },
+};
+
+/**
+ * Calculate the total Basic Personal Amount (BPA) tax credits
+ * This includes both federal and provincial (Ontario) credits
+ *
+ * @param taxYear - The tax year to calculate credits for
+ * @returns The total dollar amount of BPA credits
+ */
+export const calculateBasicPersonalAmountCredit = (taxYear: SupportedTaxYear = 2026): number => {
+  const bpa = BPA_CREDITS[taxYear];
+  return bpa.federalBPA * bpa.federalRate + bpa.ontarioBPA * bpa.ontarioRate;
 };

@@ -22,3 +22,5 @@ export type { ModalProps } from './Modal';
 
 export { Tabs } from './Tabs';
 export type { Tab } from './Tabs';
+
+export { TaxTooltip } from './TaxTooltip';
