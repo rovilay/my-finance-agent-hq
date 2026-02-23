@@ -40,6 +40,7 @@ catalog:
   'drizzle-orm': ^0.45.1
   'drizzle-kit': ^0.31.8
   '@types/pg': ^8.11.10
+  ioredis: ^5.4.2
 
   # Ai
   '@mastra/pg': ^1.0.0

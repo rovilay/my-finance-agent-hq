@@ -29,6 +29,7 @@
     "@as-integrations/express5": "catalog:",
     "@google-cloud/storage": "catalog:",
     "@google/generative-ai": "catalog:",
+    "@hq/cache": "workspace:*",
     "@hq/config": "workspace:*",
     "@hq/database": "workspace:*",
     "@hq/encryption": "workspace:^",

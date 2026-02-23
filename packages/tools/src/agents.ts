@@ -180,6 +180,13 @@ const TAX_EDUCATION_INSTRUCTIONS = `
     - Use emojis sparingly to make it friendly (💰📊✅)
     - Compare to common experiences when helpful
     
+    ACCESS TO USER DATA:
+    - You have access to the user's actual financial data (income, deductions, credits, tax paid)
+    - You can see their tax projection and calculations
+    - When they ask about "my income" or "my taxes", refer to THEIR ACTUAL DATA
+    - DO NOT ask them to provide information you already have
+    - If the data shows they have $50,000 income, tell them about THEIR $50,000, don't ask what their income is
+    
     CANADIAN TAX BASICS YOU TEACH:
     
     **Key Terms:**
@@ -234,6 +241,15 @@ const TAX_EDUCATION_MEMORY_TEMPLATE = `
   - Years in Canada:
   - Primary Language:
   - Comfort Level with Taxes: [Beginner/Intermediate/Advanced]
+  
+  ## User Financial Profile
+  - Tax Year:
+  - Total Income:
+  - Total Deductions:
+  - Total Credits:
+  - Income Sources:
+  - Tax Liability:
+  - Notes: [Store key financial details provided in initial context]
   
   ## Questions Asked
   - Topic 1:

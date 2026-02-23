@@ -26,6 +26,7 @@ import { formatCurrency, formatPercentage } from '@hq/tools/client';
 import { TAX_GLOSSARY } from '@/lib/tax-glossary';
 import TaxFlowVisualization from './TaxFlowVisualization';
 import NewcomerWelcomeBanner from './NewcomerWelcomeBanner';
+import TaxChatWidget from './TaxChatWidget';
 
 interface TaxOverviewPageProps {
   entityId: string;
@@ -35,6 +36,7 @@ const TAX_YEARS: SupportedTaxYear[] = [...supportedTaxYears];
 
 export default function TaxOverviewPage({ entityId }: TaxOverviewPageProps) {
   const [selectedTaxYear, setSelectedTaxYear] = useState<SupportedTaxYear>(2026);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const router = useRouter();
 
   const { data: entityData, loading: entityLoading } = useGetFiscalEntityQuery({
@@ -89,7 +91,7 @@ export default function TaxOverviewPage({ entityId }: TaxOverviewPageProps) {
         <BackButton onClick={onBack} text="Back to Entity" />
 
         {/* Newcomer Welcome Banner */}
-        <NewcomerWelcomeBanner />
+        <NewcomerWelcomeBanner onOpenChat={() => setIsChatOpen(true)} />
 
         {/* Header */}
         <div className="mb-8">
@@ -545,6 +547,15 @@ export default function TaxOverviewPage({ entityId }: TaxOverviewPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Tax Chat Widget */}
+      <TaxChatWidget
+        entityId={entityId}
+        taxYear={String(selectedTaxYear)}
+        isOpen={isChatOpen}
+        onOpen={() => setIsChatOpen(true)}
+        onClose={() => setIsChatOpen(false)}
+      />
     </div>
   );
 }

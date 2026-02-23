@@ -18,6 +18,9 @@ declare const process: {
     GCP_KMS_LOCATION_ID: string;
     GCP_KMS_KEY_RING_ID: string;
     AI_API_KEY: string;
+    REDIS_HOST?: string;
+    REDIS_PORT?: string;
+    REDIS_PASSWORD?: string;
   };
   cwd: () => string;
 };
@@ -59,6 +62,12 @@ const envSchema = z.object({
   GCP_KMS_LOCATION_ID: z.string().min(1, 'GCP_KMS_LOCATION_ID is required'),
   GCP_KMS_KEY_RING_ID: z.string().min(1, 'GCP_KMS_KEY_RING_ID is required'),
   AI_API_KEY: z.string().min(1, 'AI_API_KEY is required'),
+  REDIS_HOST: z.string().default('localhost'),
+  REDIS_PORT: z
+    .string()
+    .optional()
+    .transform((val) => (val ? Number(val) : 6379)),
+  REDIS_PASSWORD: z.string().optional(),
 });
 export type EnvSchema = z.infer<typeof envSchema>;
 
@@ -81,6 +90,9 @@ export const envConfig = registerAs('envConfig', (): EnvSchema => {
       GCP_KMS_LOCATION_ID: process.env.GCP_KMS_LOCATION_ID,
       GCP_KMS_KEY_RING_ID: process.env.GCP_KMS_KEY_RING_ID,
       AI_API_KEY: process.env.AI_API_KEY,
+      REDIS_HOST: parsedEnv.REDIS_HOST,
+      REDIS_PORT: parsedEnv.REDIS_PORT,
+      REDIS_PASSWORD: parsedEnv.REDIS_PASSWORD,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
