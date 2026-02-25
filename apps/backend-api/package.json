@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/main.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node -r tsconfig-paths/register src/main.ts",
@@ -52,6 +52,7 @@
     "pdf-parse": "^2.4.5",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
+    "tsconfig-paths": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -77,7 +78,7 @@
     "supertest": "catalog:",
     "ts-jest": "catalog:",
     "ts-loader": "catalog:",
-    "ts-node": "catalog:",
+    "tsc-alias": "^1.8.16",
     "tsconfig-paths": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "catalog:"

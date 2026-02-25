@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { DEFAULT_PORT, envConfig } from './config/env';
-import { DEV_CORS_ORIGINS } from './nest/constants';
+import { DEV_CORS_ORIGINS, PROD_CORS_ORIGINS } from './nest/constants';
 // import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
@@ -14,14 +14,16 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: envConfig().NODE_ENV === 'development' ? DEV_CORS_ORIGINS : true,
+    origin:
+      envConfig().NODE_ENV === 'development'
+        ? DEV_CORS_ORIGINS
+        : PROD_CORS_ORIGINS,
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? DEFAULT_PORT);
-  console.log(
-    `🚀 Backend API is running on http://localhost:${process.env.PORT ?? DEFAULT_PORT}`,
-  );
+  const port = process.env.PORT ?? DEFAULT_PORT;
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Backend API is running on http://0.0.0.0:${port}`);
 }
 
 bootstrap().catch((error) => {

@@ -20,7 +20,15 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
       host: this.config.host,
       port: this.config.port,
       password: this.config.password,
+      tls: {
+        rejectUnauthorized: false, // Required for Upstash
+      },
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: false,
       retryStrategy: (times: number) => {
+        if (times > 3) {
+          return null; // Stop retrying
+        }
         const delay = Math.min(times * 50, 2000);
         return delay;
       },

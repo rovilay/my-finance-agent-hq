@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { HelpCircle, Info, BookOpen, ExternalLink } from 'lucide-react';

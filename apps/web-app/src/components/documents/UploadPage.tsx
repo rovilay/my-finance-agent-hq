@@ -3,9 +3,10 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent } fro
 import { Upload, FileText, Shield, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { DOCUMENT_ROUTE } from '@/lib/constants';
-import { RetentionPolicy, useUploadDocumentMutation } from '@/lib/graphql/generated';
+import { RetentionPolicy } from '@/lib/graphql/generated';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { uploadDocumentToApi } from '@/lib/utils';
 
 export default function UploadPage() {
   const { user } = useAuth();
@@ -13,7 +14,9 @@ export default function UploadPage() {
   const [retentionPolicy, setRetentionPolicy] = useState<RetentionPolicy>(
     RetentionPolicy.VerifyAndPurge
   );
-  const [uploadDocument, { loading, data, error }] = useUploadDocumentMutation();
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleReload = () => {
@@ -21,7 +24,6 @@ export default function UploadPage() {
     router.push('/documents/upload');
   };
 
-  // eslint-disable-next-line no-undef
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
@@ -31,37 +33,25 @@ export default function UploadPage() {
   const handleUpload = async () => {
     if (!file || !user) return;
 
-    // Read file as base64
-    const reader = new FileReader();
-    reader.onload = async e => {
-      const base64 = e.target?.result?.toString().split(',')[1];
+    setLoading(true);
+    setError(null);
 
-      if (!base64) {
-        console.error('Failed to read file');
-        return;
-      }
+    try {
+      const result = await uploadDocumentToApi({
+        file,
+        entityId: 'default-entity', // TODO: Get from context/selection
+        retentionPolicy,
+        extractData: true,
+      });
 
-      try {
-        await uploadDocument({
-          variables: {
-            input: {
-              userId: user.id,
-              entityId: 'default-entity', // TODO: Get from context/selection
-              fileName: file.name,
-              fileMetadata: {
-                mimeType: file.type,
-                sizeInKb: Math.round(file.size / 1024),
-              },
-              fileBuffer: base64,
-              retentionPolicy,
-            },
-          },
-        });
-      } catch (err) {
-        console.error('Upload error:', err);
-      }
-    };
-    reader.readAsDataURL(file);
+      setData(result);
+      setFile(null); // Clear the file after successful upload
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -179,7 +169,7 @@ export default function UploadPage() {
                 {/* Error Display */}
                 {error && (
                   <div className="bg-error-50 border border-error-200 rounded-lg p-4 text-error-700">
-                    {error.message}
+                    {error}
                   </div>
                 )}
 

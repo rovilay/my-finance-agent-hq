@@ -8,9 +8,23 @@ import { type EnvConfig, envConfig } from 'src/config/env';
 
 @Injectable()
 export class GcsService {
-  private readonly storage = new Storage();
+  private readonly storage: Storage;
 
-  constructor(@Inject(envConfig.KEY) private readonly config: EnvConfig) {}
+  constructor(@Inject(envConfig.KEY) private readonly config: EnvConfig) {
+    // Initialize Storage with credentials from environment if provided
+    if (process.env.GCP_SERVICE_ACCOUNT_JSON) {
+      try {
+        const credentials = JSON.parse(process.env.GCP_SERVICE_ACCOUNT_JSON);
+        this.storage = new Storage({ credentials });
+      } catch (error) {
+        console.error('[GcsService] Failed to parse GCP credentials', error);
+        throw new Error('Invalid GCP service account credentials');
+      }
+    } else {
+      // Fall back to default credentials (for local development with gcloud auth)
+      this.storage = new Storage();
+    }
+  }
 
   async upload(path: string, content: Buffer, mimeType: string): Promise<void> {
     console.log(`[GcsService] ☁️ Uploading encrypted blob to: ${path}`);
