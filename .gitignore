@@ -18,3 +18,4 @@ yarn-error.log*
 backups/
 .last-deployment
 **/docs/
+*.tsbuildinfo
