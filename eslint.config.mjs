@@ -35,6 +35,13 @@ export default [
     },
   },
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/.vscode/**', '**/coverage/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      '**/.vscode/**',
+      '**/coverage/**',
+      '**/drizzle.backup*/**',
+    ],
   },
 ];

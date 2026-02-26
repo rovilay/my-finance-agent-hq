@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@mantine/core/styles.css";
+@import 'tailwindcss';
+@import '@mantine/core/styles.css';
 
 @theme {
   /* Primary Brand Colors - Deep Blue */
@@ -13,7 +13,7 @@
   --color-primary-700: #1d4ed8;
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
-  
+
   /* Secondary - Emerald Green */
   --color-secondary-50: #ecfdf5;
   --color-secondary-100: #d1fae5;
@@ -25,7 +25,7 @@
   --color-secondary-700: #047857;
   --color-secondary-800: #065f46;
   --color-secondary-900: #064e3b;
-  
+
   /* Neutral - Slate */
   --color-neutral-50: #f8fafc;
   --color-neutral-100: #f1f5f9;
@@ -37,20 +37,20 @@
   --color-neutral-700: #334155;
   --color-neutral-800: #1e293b;
   --color-neutral-900: #0f172a;
-  
+
   /* Status Colors */
   --color-success-light: #d1fae5;
   --color-success: #10b981;
   --color-success-dark: #047857;
-  
+
   --color-warning-light: #fef3c7;
   --color-warning: #f59e0b;
   --color-warning-dark: #b45309;
-  
+
   --color-error-light: #fee2e2;
   --color-error: #ef4444;
   --color-error-dark: #b91c1c;
-  
+
   /* Shadows */
   --shadow-soft: 0 2px 8px 0 rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
@@ -74,7 +74,12 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 600;
   }
@@ -90,12 +95,12 @@
     font-weight: 500;
     transition: all 200ms;
   }
-  
+
   .btn:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
   }
-  
+
   .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -106,7 +111,7 @@
     color: white;
     box-shadow: var(--shadow-soft);
   }
-  
+
   .btn-primary:hover:not(:disabled) {
     background-color: var(--color-primary-700);
   }
@@ -116,7 +121,7 @@
     color: white;
     box-shadow: var(--shadow-soft);
   }
-  
+
   .btn-secondary:hover:not(:disabled) {
     background-color: var(--color-secondary-700);
   }
@@ -126,7 +131,7 @@
     background-color: white;
     color: var(--color-neutral-700);
   }
-  
+
   .btn-outline:hover:not(:disabled) {
     background-color: var(--color-neutral-50);
   }
@@ -135,7 +140,7 @@
     background-color: transparent;
     color: var(--color-neutral-700);
   }
-  
+
   .btn-ghost:hover:not(:disabled) {
     background-color: var(--color-neutral-100);
   }
@@ -166,7 +171,7 @@
   .card-hover {
     transition: all 200ms;
   }
-  
+
   .card-hover:hover {
     box-shadow: var(--shadow-medium);
     transform: translateY(-2px);
@@ -180,13 +185,15 @@
     background-color: white;
     padding: 0.5rem 1rem;
     color: var(--color-neutral-900);
-    transition: border-color 200ms, box-shadow 200ms;
+    transition:
+      border-color 200ms,
+      box-shadow 200ms;
   }
-  
+
   .input::placeholder {
     color: var(--color-neutral-400);
   }
-  
+
   .input:focus {
     outline: none;
     border-color: var(--color-primary-500);
@@ -196,7 +203,7 @@
   .input-error {
     border-color: var(--color-error);
   }
-  
+
   .input-error:focus {
     border-color: var(--color-error);
     box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
@@ -245,14 +252,14 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
   @media (min-width: 640px) {
     .container-custom {
       padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
-  
+
   @media (min-width: 1024px) {
     .container-custom {
       padding-left: 2rem;

@@ -33,7 +33,8 @@
     "fly:logs:prod:backend": "flyctl logs -a finance-agent-backend",
     "fly:logs:prod:frontend": "flyctl logs -a finance-agent-frontend",
     "fly:status:staging": "flyctl status -a finance-agent-backend-stg",
-    "fly:status:prod": "flyctl status -a finance-agent-backend"
+    "fly:status:prod": "flyctl status -a finance-agent-backend",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -46,6 +47,8 @@
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-prettier": "catalog:",
     "globals": "^17.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "catalog:",
     "ts-node": "catalog:",
     "typescript": "catalog:"
@@ -60,5 +63,14 @@
     "overrides": {
       "zod": "^3.23.8"
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
