@@ -12,6 +12,7 @@ import { DocumentService } from './document.service';
 import { Document, RetentionPolicy } from './models/document.model';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { type Request } from 'express';
+import type { Express } from 'express';
 import { ExtractionWorkflow } from '../ai/workflows/extraction.workflow';
 
 @Controller('api/documents')

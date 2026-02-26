@@ -1,14 +1,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-// eslint-disable-next-line no-undef
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   helperText?: string;
 }
 
-// eslint-disable-next-line no-undef
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, helperText, type = 'text', ...props }, ref) => {
     return (
@@ -31,14 +29,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
-// eslint-disable-next-line no-undef
 export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
   helperText?: string;
 }
 
-// eslint-disable-next-line no-undef
 export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
   ({ className, label, error, helperText, ...props }, ref) => {
     return (

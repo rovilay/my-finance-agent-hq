@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
 import HomePage from '@/components/Homepage';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';

@@ -1,5 +1,4 @@
 const tsConfigPaths = require('tsconfig-paths');
-const path = require('path');
 
 // Load tsconfig.json from the current directory
 const baseUrl = __dirname;

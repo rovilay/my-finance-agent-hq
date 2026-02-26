@@ -262,8 +262,6 @@ export class DocumentService {
 
       return this.mapDBDocToModel(updated);
     }
-
-    return doc;
   }
 
   async purgeDocument(documentId: string): Promise<Document> {

@@ -1,4 +1,3 @@
-import { LogoWithText } from '@/components/Logo';
 import { Button, Input, PageLoader } from '@/components/ui';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
 import Link from 'next/link';

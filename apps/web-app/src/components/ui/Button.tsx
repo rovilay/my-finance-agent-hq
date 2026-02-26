@@ -1,7 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-// eslint-disable-next-line no-undef
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
@@ -9,7 +8,6 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
 }
 
-// eslint-disable-next-line no-undef
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { className, variant = 'primary', size = 'md', isLoading, children, disabled, ...props },
