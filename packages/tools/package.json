@@ -9,6 +9,7 @@
     "./client": "./dist/client.js"
   },
   "scripts": {
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "build": "tsc --build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
