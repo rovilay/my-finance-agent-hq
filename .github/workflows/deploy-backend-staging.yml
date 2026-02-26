@@ -1,0 +1,28 @@
+name: Deploy Backend to Staging
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/backend-api/**'
+      - 'apps/cli/**'
+      - 'packages/**'
+      - '.github/workflows/deploy-backend-staging.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Backend to Fly.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy Backend to Fly.io
+        run: flyctl deploy -a finance-agent-backend-stg --config apps/backend-api/fly.staging.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
