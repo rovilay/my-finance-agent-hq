@@ -17,17 +17,9 @@ COPY apps/backend-api/ ./apps/backend-api/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build packages first
-RUN pnpm --filter @hq/config build
-RUN pnpm --filter @hq/database build
-RUN pnpm --filter @hq/encryption build
-RUN pnpm --filter @hq/tools build
-RUN pnpm --filter @hq/validation-schema build
-RUN pnpm --filter @hq/cache build
-
-# Build backend-api
+# Build backend-api and all its dependencies in correct order
 WORKDIR /app/apps/backend-api
-RUN pnpm build
+RUN pnpm --filter @hq/backend-api... build
 
 # Production stage
 FROM node:20-alpine AS production
