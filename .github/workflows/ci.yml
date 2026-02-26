@@ -69,17 +69,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
-        run: |
-          pnpm --filter @hq/config build || true
-          pnpm --filter @hq/database build || true
-          pnpm --filter @hq/encryption build || true
-          pnpm --filter @hq/tools build || true
-          pnpm --filter @hq/validation-schema build || true
-          pnpm --filter @hq/cache build || true
-
-      - name: Build backend
-        run: pnpm --filter @hq/backend-api build
+      - name: Build backend and its dependencies
+        run: pnpm --filter @hq/backend-api... build
 
   build-frontend:
     name: Build Web App
