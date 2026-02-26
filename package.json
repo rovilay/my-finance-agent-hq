@@ -34,7 +34,7 @@
     "fly:logs:prod:frontend": "flyctl logs -a finance-agent-frontend",
     "fly:status:staging": "flyctl status -a finance-agent-backend-stg",
     "fly:status:prod": "flyctl status -a finance-agent-backend",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "keywords": [],
   "author": "",
