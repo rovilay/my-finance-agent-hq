@@ -17,6 +17,9 @@ COPY apps/backend-api/ ./apps/backend-api/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Clean all build artifacts to avoid TypeScript incremental build issues
+RUN pnpm -r --filter './packages/**' exec rm -rf dist tsconfig.tsbuildinfo || true
+
 # Build backend-api and all its dependencies in correct order
 WORKDIR /app/apps/backend-api
 RUN pnpm --filter @hq/backend-api... build
@@ -43,10 +46,10 @@ COPY --from=builder /app/packages/database/package.json ./packages/database/
 COPY --from=builder /app/packages/database/dist ./packages/database/dist
 COPY --from=builder /app/packages/encryption/package.json ./packages/encryption/
 COPY --from=builder /app/packages/encryption/dist ./packages/encryption/dist
-COPY --from=builder /app/packages/tools/package.json ./packages/tools/
-COPY --from=builder /app/packages/tools/dist ./packages/tools/dist
 COPY --from=builder /app/packages/validation-schema/package.json ./packages/validation-schema/
 COPY --from=builder /app/packages/validation-schema/dist ./packages/validation-schema/dist
+COPY --from=builder /app/packages/tools/package.json ./packages/tools/
+COPY --from=builder /app/packages/tools/dist ./packages/tools/dist
 
 # Copy backend-api
 COPY --from=builder /app/apps/backend-api/package.json ./apps/backend-api/

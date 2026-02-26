@@ -38,13 +38,12 @@ COPY apps/web-app/ ./apps/web-app/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Build packages first
-RUN pnpm --filter @hq/validation-schema build
-RUN pnpm --filter @hq/tools build
+# Clean all build artifacts to avoid TypeScript incremental build issues
+RUN pnpm -r --filter './packages/**' exec rm -rf dist tsconfig.tsbuildinfo || true
 
-# Build web app
+# Build web app and its dependencies in correct order
 WORKDIR /app/apps/web-app
-RUN pnpm build
+RUN pnpm --filter @hq/web-app... build
 
 # Production stage
 FROM node:20-alpine AS production
