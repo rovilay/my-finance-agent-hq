@@ -27,6 +27,7 @@ export class AiController {
       userId,
       body.entityId,
       body.taxYear,
+      req.user,
     );
 
     return { response };

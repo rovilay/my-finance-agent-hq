@@ -5,6 +5,7 @@ export interface CacheConfig {
   host: string;
   port: number;
   password?: string;
+  tlsEnabled?: boolean;
 }
 
 export const CACHE_CONFIG = 'CACHE_CONFIG';
@@ -16,23 +17,30 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   constructor(@Inject(CACHE_CONFIG) private readonly config: CacheConfig) {}
 
   async onModuleInit() {
-    this.client = new Redis({
+    const redisConfig: any = {
       host: this.config.host,
       port: this.config.port,
       password: this.config.password,
-      tls: {
-        rejectUnauthorized: false, // Required for Upstash
-      },
       maxRetriesPerRequest: 3,
       enableReadyCheck: false,
+      connectTimeout: 10000, // Increase timeout to 10s
       retryStrategy: (times: number) => {
         if (times > 3) {
           return null; // Stop retrying
         }
-        const delay = Math.min(times * 50, 2000);
+        const delay = Math.min(times * 100, 3000);
         return delay;
       },
-    });
+    };
+
+    // Use TLS if explicitly enabled
+    if (this.config.tlsEnabled) {
+      redisConfig.tls = {
+        rejectUnauthorized: false,
+      };
+    }
+
+    this.client = new Redis(redisConfig);
 
     this.client.on('connect', () => {
       console.log('[CacheService] ✅ Connected to Redis');

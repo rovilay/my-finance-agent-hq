@@ -23,6 +23,7 @@ import { envConfig } from 'src/config/env';
       host: envConfig().REDIS_HOST,
       port: envConfig().REDIS_PORT,
       password: envConfig().REDIS_PASSWORD,
+      tlsEnabled: ['staging', 'production'].includes(envConfig().NODE_ENV),
     }),
     forwardRef(() => TaxModule),
     forwardRef(() => FinancialEntryModule),

@@ -15,6 +15,7 @@ import { FinancialEntryService } from '../financial-entry/financial-entry.servic
 import { FinancialType } from '../financial-entry/models/financial-entry.model';
 import { TaxProjection } from '../tax/models/tax.model';
 import { CacheService } from '@hq/cache';
+import { User } from '../auth/models/user.model';
 
 interface ExtractedEntry {
   date?: string;
@@ -342,6 +343,7 @@ IMPORTANT INSTRUCTIONS:
     userId: string,
     entityId: string,
     taxYear?: string,
+    user?: User,
   ): Promise<string> {
     const threadId = `${userId}-tax-education-${entityId}`;
 
@@ -370,12 +372,14 @@ IMPORTANT INSTRUCTIONS:
       await this.setCachedFinancialData(entityId, taxYear, financialContext);
     }
 
+    const userContext = this.buildUserContext(user);
+
     const taxEducationAgent = createTaxEducationAgent({
       mastraStore: this.mastraStore,
       apiKey: this.config.AI_API_KEY,
       id: threadId,
       name: 'Tax Education Assistant',
-      additionalInstructions: `${taxYear ? `The user is currently viewing tax year ${taxYear}.` : ''}${financialContext}`,
+      additionalInstructions: `${userContext}${taxYear ? `The user is currently viewing tax year ${taxYear}.` : ''}${financialContext}`,
     });
 
     const memoryContext = {
@@ -390,5 +394,29 @@ IMPORTANT INSTRUCTIONS:
     console.log('[AiService] Tax education response generated');
 
     return result.text;
+  }
+
+  private buildUserContext(user?: User): string {
+    if (!user) {
+      return '';
+    }
+
+    const fullName = [user.firstName, user.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+
+    return `
+===== USER PROFILE =====
+- User ID: ${user.id}
+- Name: ${fullName || 'Not provided'}
+- Email: ${user.email || 'Not provided'}
+===== END USER PROFILE =====
+
+IMPORTANT INSTRUCTIONS:
+1. Address the user by their first name when appropriate.
+2. Keep identity details private and only use them to personalize responses.
+3. Never invent missing profile details.
+`;
   }
 }
