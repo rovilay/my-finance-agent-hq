@@ -5,7 +5,13 @@ import { Button, Avatar, Dropdown, DropdownItem, DropdownDivider } from './ui';
 import { Menu } from '@mantine/core';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { ENTITIES_ROUTE, HOME_ROUTE, LOGIN_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
+import {
+  ENTITIES_ROUTE,
+  GUIDE_ROUTE,
+  HOME_ROUTE,
+  LOGIN_ROUTE,
+  SIGNUP_ROUTE,
+} from '@/lib/constants';
 
 export const AppHeader = () => {
   const { user, signOut, loading } = useAuth();
@@ -45,6 +51,9 @@ export const AppHeader = () => {
 
     return (
       <>
+        <Link href={GUIDE_ROUTE}>
+          <Button variant="ghost">Guide</Button>
+        </Link>
         <Link href={LOGIN_ROUTE}>
           <Button variant="ghost">Login</Button>
         </Link>
@@ -60,6 +69,9 @@ export const AppHeader = () => {
 
     return (
       <>
+        <Link href={GUIDE_ROUTE}>
+          <Button variant="ghost">Guide</Button>
+        </Link>
         <Link href={ENTITIES_ROUTE}>
           <Button variant="ghost">Tax</Button>
         </Link>

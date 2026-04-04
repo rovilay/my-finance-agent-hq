@@ -1,6 +1,6 @@
 import { LogoWithText } from '@/components/Logo';
 import { Button } from '@/components/ui';
-import { LOGIN_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
+import { GUIDE_ROUTE, LOGIN_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
 import {
   BookOpen,
   FileText,
@@ -145,11 +145,23 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <CapabilityCard
-              icon={<BookOpen className="w-8 h-8 text-primary-600" />}
-              title="Learn the basics"
-              description="Understand how Canadian taxes work, what Ontario residents owe, and key deadlines — explained in plain language."
-            />
+            <Link href={GUIDE_ROUTE} className="group block">
+              <div className="card-hover p-6 rounded-xl border border-neutral-200 bg-white h-full group-hover:border-primary-300 transition-colors">
+                <div className="mb-4">
+                  <BookOpen className="w-8 h-8 text-primary-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-900 mb-2 group-hover:text-primary-700">
+                  Learn the basics
+                </h3>
+                <p className="text-neutral-600 text-sm">
+                  Understand how Canadian taxes work, what Ontario residents owe, and key deadlines
+                  — explained in plain language.
+                </p>
+                <p className="mt-3 text-xs font-medium text-primary-600 flex items-center gap-1">
+                  Read the document guide <ArrowRight className="w-3.5 h-3.5" />
+                </p>
+              </div>
+            </Link>
             <CapabilityCard
               icon={<FileText className="w-8 h-8 text-secondary-600" />}
               title="Upload your slips"
@@ -178,7 +190,10 @@ export default function HomePage() {
             </h2>
             <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
               Not sure which documents you need? Here are the most common ones for new residents and
-              what they mean.
+              what they mean.{' '}
+              <Link href={GUIDE_ROUTE} className="text-primary-600 hover:underline font-medium">
+                Read the full document guide →
+              </Link>
             </p>
           </div>
 
@@ -219,6 +234,10 @@ export default function HomePage() {
             Not sure which slips apply to you?{' '}
             <Link href={SIGNUP_ROUTE} className="text-primary-600 hover:underline font-medium">
               Sign up and ask our Tax Assistant
+            </Link>{' '}
+            or{' '}
+            <Link href={GUIDE_ROUTE} className="text-primary-600 hover:underline font-medium">
+              browse the document guide
             </Link>
             .
           </p>

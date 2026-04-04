@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui';
-import { ENTITIES_ROUTE, UPLOAD_ROUTE } from '@/lib/constants';
+import { ENTITIES_ROUTE, GUIDE_ROUTE, UPLOAD_ROUTE } from '@/lib/constants';
 import {
   ArrowRight,
   ArrowLeft,
@@ -504,6 +504,14 @@ export default function StartHerePage() {
                 </Button>
               </Link>
             </div>
+
+            <Link
+              href={GUIDE_ROUTE}
+              className="flex items-center gap-1 text-sm text-primary-600 hover:underline mt-4"
+            >
+              Not sure what a slip means? Read the document guide
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
 
             <button
               onClick={handleBack}
