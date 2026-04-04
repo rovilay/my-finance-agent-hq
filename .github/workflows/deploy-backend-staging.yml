@@ -14,6 +14,7 @@ jobs:
   deploy:
     name: Deploy Backend to Fly.io
     runs-on: ubuntu-latest
+    concurrency: deploy-backend-staging
 
     steps:
       - name: Checkout code
@@ -22,7 +23,23 @@ jobs:
       - name: Setup Fly.io CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
 
+      - name: Validate Fly.io token configuration
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_BACKEND_STAGING }}
+        run: |
+          if [[ -z "${FLY_API_TOKEN}" ]]; then
+            echo "::error::Missing GitHub Actions secret FLY_API_TOKEN_BACKEND_STAGING."
+            echo "::error::Create an app-scoped deploy token with: fly tokens create deploy -a finance-agent-backend-stg --name 'github-actions backend staging'"
+            exit 1
+          fi
+
+          if [[ "${FLY_API_TOKEN}" != FlyV1* ]]; then
+            echo "::error::Fly token must be the full value returned by Fly, including the 'FlyV1' prefix."
+            echo "::error::Do not use the output of 'flyctl auth token' for GitHub Actions; use 'fly tokens create deploy' instead."
+            exit 1
+          fi
+
       - name: Deploy Backend to Fly.io
         run: flyctl deploy -a finance-agent-backend-stg --config apps/backend-api/fly.staging.toml --remote-only
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_BACKEND_STAGING }}
