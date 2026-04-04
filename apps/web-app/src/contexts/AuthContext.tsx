@@ -99,7 +99,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     const result = await signUpWithEmail(email, password);
     if (result.user) {
-      await syncUser({
+      const idToken = await result.user.getIdToken();
+      const syncResult = await syncUser({
         variables: {
           input: {
             email,
@@ -109,10 +110,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
         context: {
           headers: {
-            authorization: `Bearer ${await result.user.getIdToken()}`,
+            authorization: `Bearer ${idToken}`,
           },
         },
       });
+      setUser(syncResult.data?.syncUser || null);
     }
   };
 

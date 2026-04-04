@@ -1,10 +1,9 @@
 import { Button, Input, PageLoader } from '@/components/ui';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { signUpWithEmail, signInWithGoogle } from '@/lib/firebase/auth';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ENTITIES_ROUTE, LOGIN_ROUTE } from '@/lib/constants';
+import { ENTITIES_ROUTE, LOGIN_ROUTE, START_ROUTE } from '@/lib/constants';
 import { useAuth } from '@/contexts';
 
 export default function SignUpPage() {
@@ -13,7 +12,8 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, signUp, signInWithGoogle } = useAuth();
+  const navigatingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +21,9 @@ export default function SignUpPage() {
     setError('');
 
     try {
-      await signUpWithEmail(email, password);
-      router.push(ENTITIES_ROUTE);
+      await signUp(email, password, '', '');
+      navigatingRef.current = true;
+      router.push(START_ROUTE);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up. Please try again.');
     } finally {
@@ -36,7 +37,8 @@ export default function SignUpPage() {
 
     try {
       await signInWithGoogle();
-      router.push(ENTITIES_ROUTE);
+      navigatingRef.current = true;
+      router.push(START_ROUTE);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up with Google.');
     } finally {
@@ -45,8 +47,7 @@ export default function SignUpPage() {
   };
 
   useEffect(() => {
-    if (loading) return; // Wait until loading finishes
-
+    if (loading || navigatingRef.current) return; // loading or handler already navigating — don't override
     if (isAuthenticated) {
       router.push(ENTITIES_ROUTE);
     }
