@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { KmsService, CipherUtil } from '@hq/encryption';
 import { GcsService } from '../document/gcs.service';
@@ -13,6 +9,52 @@ import {
   getExtractionConfig,
   type SlipType,
 } from './extraction-prompts';
+
+/** Thrown when Gemini extraction fails with a classifiable reason. */
+export class ExtractionError extends Error {
+  constructor(
+    public readonly reason:
+      | 'unsupported_type'
+      | 'quality_too_poor'
+      | 'incomplete_document'
+      | 'values_unreadable'
+      | 'processing_error',
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ExtractionError';
+  }
+}
+
+/** Maps a raw error to a typed ExtractionError reason. */
+function classifyError(error: unknown): ExtractionError {
+  const msg =
+    error instanceof Error
+      ? error.message.toUpperCase()
+      : String(error).toUpperCase();
+
+  if (
+    msg.includes('SAFETY') ||
+    msg.includes('RECITATION') ||
+    msg.includes('PROHIBITED') ||
+    msg.includes('UNSUPPORTED_USER_LOCATION')
+  ) {
+    return new ExtractionError(
+      'unsupported_type',
+      'Document blocked by safety filters.',
+    );
+  }
+  if (msg.includes('SYNTAXERROR') || error instanceof SyntaxError) {
+    return new ExtractionError(
+      'values_unreadable',
+      'Extraction succeeded but the response could not be parsed.',
+    );
+  }
+  return new ExtractionError(
+    'processing_error',
+    'Gemini failed to process the document.',
+  );
+}
 
 @Injectable()
 export class GeminiService {
@@ -91,8 +133,15 @@ export class GeminiService {
         .replace(/```json|```/g, '')
         .trim();
 
-      const extracted = JSON.parse(responseText);
-
+      let extracted: Record<string, unknown>;
+      try {
+        extracted = JSON.parse(responseText);
+      } catch {
+        throw new ExtractionError(
+          'values_unreadable',
+          'Extraction succeeded but the JSON response could not be parsed.',
+        );
+      }
       // Ensure the documentType is always present even if the model omitted it
       if (!extracted.documentType && slipType !== 'UNKNOWN') {
         extracted.documentType = slipType;
@@ -104,7 +153,9 @@ export class GeminiService {
       return extracted;
     } catch (error) {
       console.error(`[GeminiService] ❌ AI Extraction failed`, error);
-      throw new InternalServerErrorException('AI failed to read the document.');
+      // Re-throw already-classified errors from inner try/catch blocks
+      if (error instanceof ExtractionError) throw error;
+      throw classifyError(error);
     }
   }
 }

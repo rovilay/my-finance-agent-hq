@@ -19,6 +19,7 @@ query GetDocumentsByEntity($entityId: ID!, $pagination: PaginationInput, $status
       retentionPolicy
       storagePath
       purgedAt
+      failureReason
       decryptedData
       createdAt
       updatedAt

@@ -311,6 +311,27 @@ export class DocumentService {
     return this.mapDBDocToModel(updated);
   }
 
+  async markAsFailed(
+    documentId: string,
+    failureReason: string,
+  ): Promise<Document> {
+    console.log(
+      `[DocumentService] ❌ Marking Doc: ${documentId} as failed (${failureReason})`,
+    );
+
+    const [updated] = await this.db
+      .update(documents)
+      .set({
+        status: DocumentStatus.failed,
+        failureReason,
+        updatedAt: new Date(),
+      })
+      .where(eq(documents.id, documentId))
+      .returning();
+
+    return this.mapDBDocToModel(updated);
+  }
+
   async findDocOrThrow(id: string, userId?: string): Promise<Document> {
     const conditions = userId
       ? and(eq(documents.id, id), eq(documents.userId, userId))
@@ -425,6 +446,7 @@ export class DocumentService {
       fileMetadata: doc.fileMetadata as any,
       wrappedDek: doc.wrappedDek ?? undefined,
       extractedData: (doc.extractedData as string | null) ?? undefined,
+      failureReason: doc.failureReason ?? undefined,
     };
   }
 

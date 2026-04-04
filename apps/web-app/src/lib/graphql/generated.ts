@@ -38,6 +38,7 @@ export type Document = {
   createdAt: Scalars['DateTime']['output'];
   decryptedData?: Maybe<Scalars['String']['output']>;
   entityId: Scalars['ID']['output'];
+  failureReason?: Maybe<Scalars['String']['output']>;
   fileMetadata: FileMetadata;
   fileName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
@@ -338,6 +339,7 @@ export type GetDocumentsByEntityQuery = {
       retentionPolicy: RetentionPolicy;
       storagePath?: string | null;
       purgedAt?: any | null;
+      failureReason?: string | null;
       decryptedData?: string | null;
       createdAt: any;
       updatedAt: any;

@@ -21,6 +21,7 @@ type Document {
   createdAt: DateTime!
   decryptedData: String
   entityId: ID!
+  failureReason: String
   fileMetadata: FileMetadata!
   fileName: String!
   id: ID!

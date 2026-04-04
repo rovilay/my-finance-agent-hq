@@ -78,6 +78,9 @@ export class Document {
   @Field({ nullable: true })
   decryptedData?: string;
 
+  @Field({ nullable: true })
+  failureReason?: string;
+
   // internal use only
   wrappedDek?: string | null;
   extractedData?: string | null;

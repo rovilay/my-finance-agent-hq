@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, Button, Tabs, Tab } from '@/components/ui';
-import { FileText, Upload as UploadIcon, Loader2, AlertCircle } from 'lucide-react';
+import { FileText, Upload as UploadIcon, Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
 import DocumentReviewModal from '@/components/documents/DocumentReviewModal';
 import { BackButton } from '../BackButton';
@@ -8,7 +8,7 @@ import { useGetDocumentsByEntityQuery, DocumentStatus, type Document } from '@/l
 import { format } from 'date-fns';
 import { Pagination } from '../Pagination';
 import { usePagination } from '@/hooks/usePagination';
-import { STATUS_CONFIG } from './constants';
+import { STATUS_CONFIG, FAILURE_CONFIG, getFailureReason } from './constants';
 
 interface EntityDocumentsPageProps {
   entityId: string;
@@ -123,7 +123,6 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
               <CardContent className="py-12 text-center">
                 <AlertCircle className="w-16 h-16 text-red-300 mx-auto mb-4" />
                 <p className="text-red-600 mb-2">Failed to load documents</p>
-                <p className="text-sm text-neutral-500">{error.message}</p>
               </CardContent>
             </Card>
           )}
@@ -228,6 +227,36 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
                           )}
                         </div>
                       </div>
+
+                      {/* Failure reason panel */}
+                      {doc.status === DocumentStatus.Failed &&
+                        (() => {
+                          const reason = getFailureReason(
+                            doc.failureReason as Parameters<typeof getFailureReason>[0],
+                            doc.fileMetadata.mimeType
+                          );
+                          const failure = FAILURE_CONFIG[reason];
+                          return (
+                            <details className="mt-3 mx-2 mb-2 group">
+                              <summary className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-100 rounded-lg cursor-pointer list-none text-sm font-medium text-red-700 hover:bg-red-100 transition-colors">
+                                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                                {failure.label}
+                                <span className="ml-auto text-xs text-red-400 group-open:hidden">
+                                  Show details
+                                </span>
+                                <span className="ml-auto text-xs text-red-400 hidden group-open:block">
+                                  Hide
+                                </span>
+                              </summary>
+                              <div className="px-4 pb-4 pt-2 bg-red-50 border border-t-0 border-red-100 rounded-b-lg">
+                                <p className="text-sm text-red-600">{failure.explanation}</p>
+                                <p className="text-xs text-red-500 mt-1">
+                                  <span className="font-medium">Next step:</span> {failure.action}
+                                </p>
+                              </div>
+                            </details>
+                          );
+                        })()}
                     </CardContent>
                   </Card>
                 );

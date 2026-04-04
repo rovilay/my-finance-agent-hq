@@ -2,7 +2,7 @@ import { Workflow, createStep } from '@mastra/core/workflows';
 import { Injectable, Logger } from '@nestjs/common';
 import { z } from 'zod';
 import { DocumentService } from '../../document/document.service';
-import { GeminiService } from '../gemini.service';
+import { GeminiService, ExtractionError } from '../gemini.service';
 
 export enum ExtractionWorkflowSteps {
   PREPARE = 'prepare',
@@ -138,6 +138,18 @@ export class ExtractionWorkflow {
         `❌ Failed to execute workflow for ${documentId}`,
         error,
       );
+
+      // Persist the failure reason so the UI can surface it
+      const failureReason =
+        error instanceof ExtractionError ? error.reason : 'processing_error';
+      try {
+        await this.documentService.markAsFailed(documentId, failureReason);
+      } catch (markErr) {
+        this.logger.error(
+          `❌ Could not mark document ${documentId} as failed`,
+          markErr,
+        );
+      }
     }
   }
 

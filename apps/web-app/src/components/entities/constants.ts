@@ -183,3 +183,59 @@ export const STATUS_CONFIG = {
     hint: "We couldn't read this file. Try uploading a clearer copy.",
   },
 };
+
+// ─── Failure Reasons ──────────────────────────────────────────────────────────
+
+export type FailureReason =
+  | 'unsupported_type'
+  | 'quality_too_poor'
+  | 'incomplete_document'
+  | 'values_unreadable'
+  | 'processing_error';
+
+export const FAILURE_CONFIG: Record<
+  FailureReason,
+  { label: string; explanation: string; action: string }
+> = {
+  unsupported_type: {
+    label: 'Unsupported document type',
+    explanation: "This file format isn't supported. We accept PDF, JPG, and PNG files.",
+    action: 'Try converting the document to PDF and uploading again.',
+  },
+  quality_too_poor: {
+    label: 'Image or scan quality too poor',
+    explanation: 'The image was too blurry or low-resolution for us to read.',
+    action: 'Scan the document again at a higher resolution (300 dpi or above).',
+  },
+  incomplete_document: {
+    label: 'Missing page or incomplete document',
+    explanation: 'The document appears to be missing pages or is cut off.',
+    action: 'Make sure all pages are included and try again.',
+  },
+  values_unreadable: {
+    label: 'Values could not be read reliably',
+    explanation:
+      "We could read the document structure but couldn't extract the numbers with confidence.",
+    action: 'Try a clearer copy, or add the values manually from the Financial Entries page.',
+  },
+  processing_error: {
+    label: 'Processing error',
+    explanation: 'Something went wrong while reading this document.',
+    action: 'Please try uploading the document again.',
+  },
+};
+
+/**
+ * Infers a failure reason from available document metadata.
+ * Once the backend exposes a `failureReason` field, pass it as the first argument
+ * and this function will use it directly instead of inferring.
+ */
+export const getFailureReason = (
+  backendReason: FailureReason | null | undefined,
+  mimeType: string
+): FailureReason => {
+  if (backendReason && backendReason in FAILURE_CONFIG) return backendReason;
+  const supported = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+  if (!supported.includes(mimeType)) return 'unsupported_type';
+  return 'processing_error';
+};

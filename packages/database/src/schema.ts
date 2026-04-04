@@ -103,6 +103,7 @@ export const documents = pgTable('documents', {
   // State & Logic
   status: documentStatusEnum('status').default('uploaded').notNull(),
   retentionPolicy: retentionPolicyEnum('retention_policy').default('verify_and_purge').notNull(),
+  failureReason: text('failure_reason'), // Populated when status = 'failed'
 
   // Data Payload
   extractedData: jsonb('extracted_data'), // JSON results from Gemini Flash
