@@ -58,15 +58,15 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
       },
       {
         id: DocumentStatus.Uploaded,
-        label: 'Uploaded',
+        label: 'In Progress',
       },
       {
         id: DocumentStatus.Processed,
-        label: 'Processed',
+        label: 'Needs Review',
       },
       {
         id: DocumentStatus.Verified,
-        label: 'Verified',
+        label: 'Saved',
       },
       {
         id: DocumentStatus.Failed,
@@ -147,9 +147,7 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
             <Card>
               <CardContent className="py-12 text-center">
                 <FileText className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                <p className="text-neutral-500 mb-2">
-                  No documents found with status "{selectedStatus}"
-                </p>
+                <p className="text-neutral-500 mb-2">No documents match this filter.</p>
                 <Button onClick={() => setSelectedStatus('ALL')} variant="outline">
                   Show All Documents
                 </Button>
@@ -178,7 +176,7 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
                               <span
                                 className={`px-2 py-0.5 rounded-full text-xs font-medium ${config.bgColor} ${config.color} flex items-center gap-1`}
                               >
-                                <StatusIcon className="w-3 h-3" />
+                                <StatusIcon className={`w-3 h-3 ${config.iconClassName}`} />
                                 {config.label}
                               </span>
                             </div>
@@ -197,6 +195,7 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
                                 </>
                               )}
                             </div>
+                            <p className="text-xs text-neutral-400 mt-0.5">{config.hint}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -209,10 +208,23 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
                               Review Extraction
                             </Button>
                           )}
-                          {doc.status === DocumentStatus.Purged && (
-                            <span className="text-xs text-neutral-400 italic">
-                              File removed for privacy
-                            </span>
+                          {doc.status === DocumentStatus.Verified && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setReviewDocument(doc)}
+                            >
+                              View Extracted Data
+                            </Button>
+                          )}
+                          {doc.status === DocumentStatus.Failed && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsUploadModalOpen(true)}
+                            >
+                              Try Again
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -252,6 +264,7 @@ export default function EntityDocumentsPage({ entityId, onBack }: EntityDocument
           fileName={reviewDocument.fileName}
           extractedData={reviewDocument.decryptedData}
           retentionPolicy={reviewDocument.retentionPolicy}
+          readOnly={reviewDocument.status === DocumentStatus.Verified}
           onSuccess={() => {
             refetch();
           }}

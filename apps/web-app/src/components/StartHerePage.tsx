@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui';
-import { ENTITIES_ROUTE, GUIDE_ROUTE, UPLOAD_ROUTE } from '@/lib/constants';
+import { ENTITIES_ROUTE, GUIDE_ROUTE } from '@/lib/constants';
 import {
   ArrowRight,
   ArrowLeft,
@@ -493,7 +493,7 @@ export default function StartHerePage() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href={UPLOAD_ROUTE} className="flex-1">
+              <Link href={ENTITIES_ROUTE} className="flex-1">
                 <Button className="w-full gap-2">
                   Upload my documents <ArrowRight className="w-4 h-4" />
                 </Button>

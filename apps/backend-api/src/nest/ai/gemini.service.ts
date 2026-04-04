@@ -8,6 +8,11 @@ import { KmsService, CipherUtil } from '@hq/encryption';
 import { GcsService } from '../document/gcs.service';
 import { type EnvConfig, envConfig } from 'src/config/env';
 import { agent_models } from '@hq/tools';
+import {
+  DOCUMENT_TYPE_DETECTION,
+  getExtractionConfig,
+  type SlipType,
+} from './extraction-prompts';
 
 @Injectable()
 export class GeminiService {
@@ -32,38 +37,71 @@ export class GeminiService {
     );
 
     try {
-      // 1. Get the raw data (Download & Decrypt)
+      // 1. Download & decrypt
       const encryptedFile = await this.gcsService.download(storagePath);
       const dek = await this.kmsService.unwrapKey(wrappedDek);
       const decryptedFileBuffer = CipherUtil.decrypt(
         encryptedFile.toString(CipherUtil.ENCODING),
         dek,
       );
+      const fileBase64 = decryptedFileBuffer.toString('base64');
+      const inlineData = { data: fileBase64, mimeType };
 
-      // 2. Initialize the Model with a strict JSON response schema
-      const model = this.genAI.getGenerativeModel({
+      // 2. Pass 1 — detect document type
+      const detectionModel = this.genAI.getGenerativeModel({
         model: agent_models.GEMINI_2_MODEL,
-        systemInstruction: `You are an expert Canadian tax assistant. 
-          Extract fields from the provided tax document (usually a T4). 
-          Return ONLY a JSON object. If a field is missing, return null. 
-          Focus on: employmentIncome, incomeTaxDeducted, cppContributions, eiPremiums.`,
+        systemInstruction: DOCUMENT_TYPE_DETECTION.systemInstruction,
       });
 
-      // 3. Call Gemini with the file buffer
-      const result = await model.generateContent([
-        {
-          inlineData: {
-            data: decryptedFileBuffer.toString('base64'),
-            mimeType,
-          },
-        },
-        'Extract all tax-relevant fields from this document into JSON format.',
+      const detectionResult = await detectionModel.generateContent([
+        { inlineData },
+        DOCUMENT_TYPE_DETECTION.userPrompt,
       ]);
 
-      const responseText = result.response.text();
+      let slipType: SlipType = 'UNKNOWN';
+      try {
+        const detectionText = detectionResult.response
+          .text()
+          .replace(/```json|```/g, '')
+          .trim();
+        const detected = JSON.parse(detectionText);
+        slipType = (detected?.documentType ?? 'UNKNOWN') as SlipType;
+        console.log(`[GeminiService] Detected slip type: ${slipType}`);
+      } catch {
+        console.warn(
+          '[GeminiService] Could not parse type detection result; falling back to UNKNOWN',
+        );
+      }
 
-      // We parse it here just to validate it's real JSON before passing back to DocumentService
-      return JSON.parse(responseText.replace(/```json|```/g, '').trim());
+      // 3. Pass 2 — full extraction using the slip-specific prompt
+      const config = getExtractionConfig(slipType);
+
+      const extractionModel = this.genAI.getGenerativeModel({
+        model: agent_models.GEMINI_2_MODEL,
+        systemInstruction: config.systemInstruction,
+      });
+
+      const extractionResult = await extractionModel.generateContent([
+        { inlineData },
+        config.userPrompt,
+      ]);
+
+      const responseText = extractionResult.response
+        .text()
+        .replace(/```json|```/g, '')
+        .trim();
+
+      const extracted = JSON.parse(responseText);
+
+      // Ensure the documentType is always present even if the model omitted it
+      if (!extracted.documentType && slipType !== 'UNKNOWN') {
+        extracted.documentType = slipType;
+      }
+
+      console.log(
+        `[GeminiService] ✅ Extraction complete for ${slipType} (Doc: ${documentId})`,
+      );
+      return extracted;
     } catch (error) {
       console.error(`[GeminiService] ❌ AI Extraction failed`, error);
       throw new InternalServerErrorException('AI failed to read the document.');

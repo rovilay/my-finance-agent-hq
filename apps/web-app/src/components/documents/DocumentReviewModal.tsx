@@ -19,6 +19,7 @@ interface DocumentReviewModalProps {
   fileName: string;
   extractedData?: string | null;
   retentionPolicy: RetentionPolicy;
+  readOnly?: boolean;
   onSuccess?: () => void;
 }
 
@@ -29,6 +30,7 @@ export default function DocumentReviewModal({
   fileName,
   extractedData,
   retentionPolicy,
+  readOnly = false,
   onSuccess,
 }: DocumentReviewModalProps) {
   const [shouldKeepFile, setShouldKeepFile] = useState(
@@ -148,14 +150,16 @@ export default function DocumentReviewModal({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <DialogPanel className="mx-auto max-w-2xl w-full bg-white rounded-xl shadow-xl my-8">
+            <DialogPanel className="mx-auto max-w-2xl w-full bg-white rounded-xl shadow-xl my-8 flex flex-col max-h-[90vh]">
               <div className="flex items-center justify-between p-6 border-b border-neutral-200">
                 <div>
                   <DialogTitle className="text-xl font-semibold text-neutral-900">
-                    Review Extracted Data
+                    {readOnly ? 'Extracted Data' : 'Review Extracted Data'}
                   </DialogTitle>
                   <Description className="text-sm text-neutral-600 mt-1">
-                    Verify the accuracy of the extracted information
+                    {readOnly
+                      ? 'Data saved to your tax summary'
+                      : 'Verify the accuracy of the extracted information'}
                   </Description>
                 </div>
                 <button
@@ -166,7 +170,7 @@ export default function DocumentReviewModal({
                 </button>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6 overflow-y-auto flex-1">
                 {/* Document Info Section */}
                 <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                   <div className="flex items-center gap-3">
@@ -214,23 +218,25 @@ export default function DocumentReviewModal({
                   )}
                 </div>
 
-                {/* Retention Policy */}
-                <div className="border-t border-neutral-200 pt-6">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={shouldKeepFile}
-                      onChange={e => setShouldKeepFile(e.target.checked)}
-                      className="mt-1 w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
-                    />
-                    <div>
-                      <p className="font-medium text-neutral-900">Keep document file</p>
-                      <p className="text-sm text-neutral-600">
-                        If unchecked, the file will be securely purged after verification
-                      </p>
-                    </div>
-                  </label>
-                </div>
+                {/* Retention Policy — hidden in read-only mode */}
+                {!readOnly && (
+                  <div className="border-t border-neutral-200 pt-6">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={shouldKeepFile}
+                        onChange={e => setShouldKeepFile(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+                      />
+                      <div>
+                        <p className="font-medium text-neutral-900">Keep document file</p>
+                        <p className="text-sm text-neutral-600">
+                          If unchecked, the file will be securely purged after verification
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                )}
 
                 {/* Error Message */}
                 {errors.form && (
@@ -242,26 +248,34 @@ export default function DocumentReviewModal({
               </div>
 
               <div className="flex gap-3 p-6 border-t border-neutral-200">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleReject}
-                  disabled={submitting}
-                  className="flex-1"
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Reject
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={handleApprove}
-                  disabled={submitting || !parsedData}
-                  className="flex-1"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  {submitting ? 'Approving...' : 'Approve & Save'}
-                </Button>
+                {readOnly ? (
+                  <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
+                    Close
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleReject}
+                      disabled={submitting}
+                      className="flex-1"
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={handleApprove}
+                      disabled={submitting || !parsedData}
+                      className="flex-1"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      {submitting ? 'Approving...' : 'Approve & Save'}
+                    </Button>
+                  </>
+                )}
               </div>
             </DialogPanel>
           </TransitionChild>

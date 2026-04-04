@@ -1,12 +1,6 @@
-'use client';
-
-import UploadPage from '@/components/documents/UploadPage';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { redirect } from 'next/navigation';
+import { ENTITIES_ROUTE } from '@/lib/constants';
 
 export default function Upload() {
-  return (
-    <ProtectedRoute>
-      <UploadPage />
-    </ProtectedRoute>
-  );
+  redirect(ENTITIES_ROUTE);
 }
