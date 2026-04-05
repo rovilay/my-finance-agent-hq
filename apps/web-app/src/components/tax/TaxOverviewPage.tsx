@@ -11,6 +11,9 @@ import {
   FileText,
   ArrowUpRight,
   ArrowDownRight,
+  ArrowRight,
+  Search,
+  ListChecks,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -92,6 +95,62 @@ export default function TaxOverviewPage({ entityId }: TaxOverviewPageProps) {
 
         {/* Newcomer Welcome Banner */}
         <NewcomerWelcomeBanner onOpenChat={() => setIsChatOpen(true)} />
+
+        {/* How it works — document → entries → summary flow */}
+        <div className="mb-8 p-5 bg-white border border-neutral-200 rounded-xl shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400 mb-4">
+            How your tax summary is built
+          </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-neutral-900">1. Upload documents</p>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  T4, T5, receipts — anything related to your income or expenses
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-neutral-300 shrink-0 hidden sm:block" />
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                <Search className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-neutral-900">2. We read the values</p>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  We extract dollar amounts and key details, then you confirm they're correct
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-neutral-300 shrink-0 hidden sm:block" />
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+                <ListChecks className="w-5 h-5 text-violet-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-neutral-900">3. Entries are saved</p>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Confirmed values are recorded as financial entries in your ledger
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-neutral-300 shrink-0 hidden sm:block" />
+            <div className="flex items-start gap-3 flex-1">
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                <PieChart className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-neutral-900">4. Your summary updates</p>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Your tax projection on this page reflects everything automatically
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Header */}
         <div className="mb-8">

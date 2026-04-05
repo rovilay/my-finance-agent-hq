@@ -8,7 +8,7 @@ import {
   TransitionChild,
 } from '@headlessui/react';
 import { Button } from '@/components/ui';
-import { FileText, AlertCircle, CheckCircle, XCircle, X } from 'lucide-react';
+import { FileText, AlertCircle, CheckCircle, XCircle, X, Info, ArrowRight } from 'lucide-react';
 import { RetentionPolicy, useVerifyAndFinalizeDocumentMutation } from '@/lib/graphql';
 
 interface DocumentReviewModalProps {
@@ -171,6 +171,36 @@ export default function DocumentReviewModal({
               </div>
 
               <div className="p-6 space-y-6 overflow-y-auto flex-1">
+                {/* How-it-works flow explainer */}
+                <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Info className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+                  <div>
+                    {readOnly ? (
+                      <p className="text-sm text-blue-800">
+                        These values were extracted from your document and saved as financial
+                        entries that feed your tax summary.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          How does this work?
+                        </p>
+                        <p className="text-sm text-blue-800">
+                          Check the values below, then tap <strong>Approve &amp; Save</strong>. Your
+                          tax summary will update automatically.
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-2 text-xs text-blue-700 font-medium">
+                          <span>This document</span>
+                          <ArrowRight className="w-3 h-3" />
+                          <span>Extracted values</span>
+                          <ArrowRight className="w-3 h-3" />
+                          <span>Tax summary</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
                 {/* Document Info Section */}
                 <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                   <div className="flex items-center gap-3">
