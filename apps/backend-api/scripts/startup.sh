@@ -9,14 +9,12 @@ if command -v psql >/dev/null 2>&1; then
   cd /app/apps/backend-api
   
   # Check if migration files exist
-  if [ -d "drizzle" ] && [ -f "drizzle/0000_fresh_start.sql" ]; then
+  if [ -d "drizzle" ]; then
     echo "Applying migrations..."
-    psql $DATABASE_URL -f drizzle/0000_fresh_start.sql 2>&1 | grep -v "already exists" || true
-    
-    if [ -f "drizzle/0002_create_document_enums.sql" ]; then
-      psql $DATABASE_URL -f drizzle/0002_create_document_enums.sql 2>&1 | grep -v "already exists" || true
-    fi
-    
+    for migration in $(ls drizzle/*.sql 2>/dev/null | sort); do
+      echo "  Running $migration..."
+      psql $DATABASE_URL -f "$migration" 2>&1 | grep -v "already exists" || true
+    done
     echo "Migrations completed successfully"
   else
     echo "No migration files found, skipping..."
