@@ -9,6 +9,7 @@ import {
   ENTITIES_ROUTE,
   GUIDE_ROUTE,
   HOME_ROUTE,
+  LEARN_ROUTE,
   LOGIN_ROUTE,
   SIGNUP_ROUTE,
 } from '@/lib/constants';
@@ -51,6 +52,9 @@ export const AppHeader = () => {
 
     return (
       <>
+        <Link href={LEARN_ROUTE}>
+          <Button variant="ghost">Learn</Button>
+        </Link>
         <Link href={GUIDE_ROUTE}>
           <Button variant="ghost">Guide</Button>
         </Link>
@@ -69,6 +73,9 @@ export const AppHeader = () => {
 
     return (
       <>
+        <Link href={LEARN_ROUTE}>
+          <Button variant="ghost">Learn</Button>
+        </Link>
         <Link href={GUIDE_ROUTE}>
           <Button variant="ghost">Guide</Button>
         </Link>

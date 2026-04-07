@@ -5,3 +5,4 @@ export const SIGNUP_ROUTE = '/signup';
 export const HOME_ROUTE = '/';
 export const START_ROUTE = '/start';
 export const GUIDE_ROUTE = '/guide';
+export const LEARN_ROUTE = '/learn';
