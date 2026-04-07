@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button, Card, CardContent, Input } from '@/components/ui';
-import { getIdToken } from '@/lib/firebase/auth';
+import { sendTaxChatMessage, fetchConversationHistory } from '@/lib/ai-api';
 
 interface Message {
   id: string;
@@ -69,6 +70,50 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
     }
   }, [isOpen]);
 
+  const SUGGESTED_QUESTIONS = [
+    'What is a T4 slip and where do I get it?',
+    'Do I need to file taxes if I arrived mid-year?',
+    'What credits can newcomers claim?',
+    'How do tax brackets work in Canada?',
+  ];
+
+  const sendSuggestion = (question: string) => {
+    setInput(question);
+    // Use a ref-based approach: set input then trigger send on next tick
+    setTimeout(() => {
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now().toString(), content: question, role: 'user', timestamp: new Date() },
+      ]);
+      setInput('');
+      setIsLoading(true);
+      sendTaxChatMessage({ message: question, entityId, taxYear })
+        .then(data =>
+          setMessages(prev => [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              content: data.response,
+              role: 'assistant',
+              timestamp: new Date(),
+            },
+          ])
+        )
+        .catch(() =>
+          setMessages(prev => [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              content: "I'm having trouble responding right now. Please try again.",
+              role: 'assistant',
+              timestamp: new Date(),
+            },
+          ])
+        )
+        .finally(() => setIsLoading(false));
+    }, 0);
+  };
+
   const WELCOME_MESSAGE: Message = {
     id: 'welcome',
     content:
@@ -79,20 +124,7 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
 
   const loadHistory = async () => {
     try {
-      const token = await getIdToken();
-      const params = new URLSearchParams({ entityId });
-      if (taxYear) params.set('taxYear', taxYear);
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/conversation-history?${params.toString()}`,
-        {
-          headers: {
-            ...(token ? { authorization: `Bearer ${token}` } : {}),
-          },
-          credentials: 'include',
-        }
-      );
-      if (!res.ok) throw new Error('Failed to load history');
-      const data = await res.json();
+      const data = await fetchConversationHistory(entityId, taxYear);
       if (data.messages?.length > 0) {
         const loaded: Message[] = data.messages.map(
           (m: { id: string; role: string; content: string; createdAt: string }) => ({
@@ -126,34 +158,15 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
     setIsLoading(true);
 
     try {
-      const token = await getIdToken();
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/tax-education-chat`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { authorization: `Bearer ${token}` } : {}),
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            message: input.trim(),
-            entityId,
-            taxYear,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
-      const data = await response.json();
+      const response = await sendTaxChatMessage({
+        message: input.trim(),
+        entityId,
+        taxYear,
+      });
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: response.response,
         role: 'assistant',
         timestamp: new Date(),
       };
@@ -172,6 +185,22 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const markdownComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
+    p: ({ children }) => <p className="text-sm my-1">{children}</p>,
+    ul: ({ children }) => <ul className="text-sm list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
+    ol: ({ children }) => (
+      <ol className="text-sm list-decimal pl-4 my-1 space-y-0.5">{children}</ol>
+    ),
+    li: ({ children }) => <li className="text-sm">{children}</li>,
+    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+    h1: ({ children }) => <h1 className="text-sm font-semibold mt-2 mb-1">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-sm font-semibold mt-2 mb-1">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-sm font-semibold mt-1 mb-0.5">{children}</h3>,
+    code: ({ children }) => (
+      <code className="text-xs bg-neutral-100 rounded px-1 py-0.5 font-mono">{children}</code>
+    ),
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -234,7 +263,11 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
                       : 'bg-white border border-neutral-200 text-neutral-900'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'assistant' ? (
+                    <ReactMarkdown components={markdownComponents}>{message.content}</ReactMarkdown>
+                  ) : (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  )}
                   <p
                     className={`text-xs mt-1 ${message.role === 'user' ? 'text-white/70' : 'text-neutral-500'}`}
                   >
@@ -246,6 +279,21 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
                 </div>
               </div>
             ))}
+
+            {/* Suggested questions — only show when conversation is fresh */}
+            {messages.length === 1 && messages[0].id === 'welcome' && !isLoading && (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {SUGGESTED_QUESTIONS.map(q => (
+                  <button
+                    key={q}
+                    onClick={() => sendSuggestion(q)}
+                    className="text-xs px-3 py-1.5 rounded-full border border-primary-200 bg-white text-primary-700 hover:bg-primary-50 hover:border-primary-400 transition-colors text-left leading-snug cursor-pointer"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {isLoading && (
               <div className="flex justify-start">

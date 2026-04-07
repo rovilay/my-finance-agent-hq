@@ -26,6 +26,7 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-markdown": "catalog:",
     "tailwind-merge": "catalog:",
     "zod": "catalog:"
   },
@@ -36,6 +37,7 @@
     "@graphql-codegen/typescript-operations": "catalog:",
     "@graphql-codegen/typescript-react-apollo": "catalog:",
     "@tailwindcss/postcss": "catalog:",
+    "@tailwindcss/typography": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
