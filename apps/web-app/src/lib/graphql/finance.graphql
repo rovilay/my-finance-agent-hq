@@ -9,6 +9,7 @@ query GetLedger($entityId: ID!, $pagination: PaginationInput, $taxYear: String) 
       entityId
       taxYear
       type
+      sourceDocumentId
       createdAt
       updatedAt
     }
@@ -29,6 +30,7 @@ query GetFinancialEntry($id: ID!) {
     entityId
     taxYear
     type
+    sourceDocumentId
     createdAt
     updatedAt
   }
@@ -44,6 +46,7 @@ mutation AddFinancialEntry($input: CreateFinancialEntryInput!) {
     entityId
     taxYear
     type
+    sourceDocumentId
     createdAt
     updatedAt
   }

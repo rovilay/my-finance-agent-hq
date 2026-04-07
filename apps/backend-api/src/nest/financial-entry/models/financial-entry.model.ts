@@ -43,6 +43,9 @@ export class FinancialEntry {
   @Field()
   taxYear: string;
 
+  @Field({ nullable: true })
+  sourceDocumentId?: string;
+
   @Field()
   createdAt: Date;
 
@@ -72,6 +75,9 @@ export class CreateFinancialEntryInput {
 
   @Field()
   taxYear: string;
+
+  @Field({ nullable: true })
+  sourceDocumentId?: string;
 }
 
 @InputType()

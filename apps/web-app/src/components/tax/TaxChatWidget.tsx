@@ -29,6 +29,7 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
 }) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const historyLoadedRef = useRef(false);
 
   // Use external control if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
@@ -62,19 +63,53 @@ export const TaxChatWidget: React.FC<TaxChatWidgetProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      // Add welcome message when first opened
-      setMessages([
-        {
-          id: '1',
-          content:
-            "Hello! 👋 I'm your Canadian Tax Assistant for newcomers. I'm here to help you understand your taxes in simple terms. Feel free to ask me anything about Canadian taxes, deductions, credits, or your tax situation!",
-          role: 'assistant',
-          timestamp: new Date(),
-        },
-      ]);
+    if (isOpen && !historyLoadedRef.current) {
+      historyLoadedRef.current = true;
+      loadHistory();
     }
   }, [isOpen]);
+
+  const WELCOME_MESSAGE: Message = {
+    id: 'welcome',
+    content:
+      "Hello! 👋 I'm your Canadian Tax Assistant for newcomers. I'm here to help you understand your taxes in simple terms. Feel free to ask me anything about Canadian taxes, deductions, credits, or your tax situation!",
+    role: 'assistant',
+    timestamp: new Date(),
+  };
+
+  const loadHistory = async () => {
+    try {
+      const token = await getIdToken();
+      const params = new URLSearchParams({ entityId });
+      if (taxYear) params.set('taxYear', taxYear);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai/conversation-history?${params.toString()}`,
+        {
+          headers: {
+            ...(token ? { authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: 'include',
+        }
+      );
+      if (!res.ok) throw new Error('Failed to load history');
+      const data = await res.json();
+      if (data.messages?.length > 0) {
+        const loaded: Message[] = data.messages.map(
+          (m: { id: string; role: string; content: string; createdAt: string }) => ({
+            id: m.id,
+            content: m.content,
+            role: m.role as 'user' | 'assistant',
+            timestamp: new Date(m.createdAt),
+          })
+        );
+        setMessages(loaded);
+      } else {
+        setMessages([WELCOME_MESSAGE]);
+      }
+    } catch {
+      setMessages([WELCOME_MESSAGE]);
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;

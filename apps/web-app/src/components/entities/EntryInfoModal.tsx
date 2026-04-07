@@ -2,7 +2,7 @@
 
 import { Modal } from '@/components/ui';
 import { format } from 'date-fns';
-import { Calendar, DollarSign, Tag, FileText, Clock } from 'lucide-react';
+import { Calendar, DollarSign, Tag, FileText, Clock, PenLine } from 'lucide-react';
 import { TYPE_CONFIG } from './constants';
 import { FinancialEntry } from '@/lib/graphql';
 
@@ -90,6 +90,33 @@ export default function EntryInfoModal({ isOpen, onClose, entry }: EntryInfoModa
             </div>
             <p className="text-sm font-mono text-neutral-600 break-all">{entry.id}</p>
           </div>
+        </div>
+
+        {/* Source */}
+        <div className="pt-6 border-t border-neutral-200">
+          <div className="flex items-center gap-2 text-sm text-neutral-500 mb-3">
+            {entry.sourceDocumentId ? (
+              <FileText className="w-4 h-4" />
+            ) : (
+              <PenLine className="w-4 h-4" />
+            )}
+            <span className="font-medium">Source</span>
+          </div>
+          {entry.sourceDocumentId ? (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-800 border border-blue-100">
+                <FileText className="w-4 h-4" />
+                Extracted from a document
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-neutral-50 text-neutral-700 border border-neutral-200">
+                <PenLine className="w-4 h-4" />
+                Added manually
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Timestamps */}

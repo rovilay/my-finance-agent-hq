@@ -61,6 +61,9 @@ export const financialEntries = pgTable('financial_entries', {
   // Localized data: e.g., { "t4_box14": 85000, "source": "Shopify Inc" }
   metadata: jsonb('metadata').notNull().default({}),
 
+  // Provenance: populated when the entry was created from a document
+  sourceDocumentId: uuid('source_document_id').references(() => documents.id),
+
   taxYear: text('tax_year').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

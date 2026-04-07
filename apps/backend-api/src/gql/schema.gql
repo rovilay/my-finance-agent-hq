@@ -8,6 +8,7 @@ input CreateFinancialEntryInput {
   currency: String! = "CAD"
   date: DateTime!
   entityId: String!
+  sourceDocumentId: String
   taxYear: String!
   type: FinancialType!
 }
@@ -67,6 +68,7 @@ type FinancialEntry {
   date: DateTime!
   entityId: ID!
   id: ID!
+  sourceDocumentId: String
   taxYear: String!
   type: FinancialType!
   updatedAt: DateTime!
@@ -105,21 +107,11 @@ type Mutation {
   addFinancialEntry(input: CreateFinancialEntryInput!): FinancialEntry!
   createFiscalEntity(input: FiscalEntityInput!): FiscalEntity!
   deleteFiscalEntity(id: ID!): Boolean!
-  extractFinancialEntry(
-    input: ExtractFinancialEntryInput!
-  ): ExtractedFinancialEntry!
+  extractFinancialEntry(input: ExtractFinancialEntryInput!): ExtractedFinancialEntry!
   syncUser(input: UserInput!): User!
   updateFiscalEntity(id: ID!, input: UpdateFiscalEntityInput!): FiscalEntity!
-  verifyAndFinalize(
-    approved: Boolean!
-    documentId: ID!
-    shouldKeep: Boolean
-  ): Document!
-  verifyDocument(
-    approved: Boolean!
-    documentId: ID!
-    shouldKeepFile: Boolean!
-  ): Boolean!
+  verifyAndFinalize(approved: Boolean!, documentId: ID!, shouldKeep: Boolean): Document!
+  verifyDocument(approved: Boolean!, documentId: ID!, shouldKeepFile: Boolean!): Boolean!
 }
 
 type PaginatedDocument {
@@ -153,21 +145,10 @@ input PaginationInput {
 
 type Query {
   document(id: ID!): Document!
-  documentsByEntity(
-    entityId: ID!
-    pagination: PaginationInput
-    status: String
-  ): PaginatedDocument!
-  financialEntries(
-    entityId: ID!
-    pagination: PaginationInput
-    taxYear: String
-  ): PaginatedFinancialEntry!
+  documentsByEntity(entityId: ID!, pagination: PaginationInput, status: String): PaginatedDocument!
+  financialEntries(entityId: ID!, pagination: PaginationInput, taxYear: String): PaginatedFinancialEntry!
   financialEntry(id: ID!): FinancialEntry!
-  fiscalEntities(
-    fiscalEntityType: FiscalEntityType
-    pagination: PaginationInput
-  ): PaginatedFiscalEntity!
+  fiscalEntities(fiscalEntityType: FiscalEntityType, pagination: PaginationInput): PaginatedFiscalEntity!
   fiscalEntity(id: ID!): FiscalEntity!
   getTaxProjection(entityId: String!, taxYear: String!): TaxProjection!
   me: User!
@@ -185,41 +166,29 @@ type TaxProjection {
   """
   creditsApplied: Float!
 
-  """
-  Total user-entered credits (not including automatic BPA)
-  """
+  """Total user-entered credits (not including automatic BPA)"""
   creditsTotal: Float!
 
-  """
-  Total deductions from all deduction entries
-  """
+  """Total deductions from all deduction entries"""
   deductionsTotal: Float!
   effectiveTaxRate: Float!
   entityId: ID!
   federalTax: Float!
 
-  """
-  Total income from all income entries
-  """
+  """Total income from all income entries"""
   incomeTotal: Float!
   provincialTax: Float!
 
-  """
-  Total tax already paid throughout the year
-  """
+  """Total tax already paid throughout the year"""
   taxPaidTotal: Float!
   taxYear: String!
   taxableIncome: Float!
   totalIncome: Float!
 
-  """
-  Federal + Provincial tax before credits
-  """
+  """Federal + Provincial tax before credits"""
   totalTax: Float!
 
-  """
-  Final amount owed to CRA after credits and prepayments
-  """
+  """Final amount owed to CRA after credits and prepayments"""
   totalTaxLiability: Float!
 }
 

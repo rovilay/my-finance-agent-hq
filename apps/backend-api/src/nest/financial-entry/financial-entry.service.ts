@@ -73,6 +73,7 @@ export class FinancialEntryService {
         .values({
           ...input,
           amount: input.amount.toString(),
+          sourceDocumentId: input.sourceDocumentId ?? null,
         })
         .returning();
 
@@ -370,6 +371,7 @@ export class FinancialEntryService {
       ...entry,
       type: entry.type as FinancialEntry['type'],
       amount: parseFloat(entry.amount),
+      sourceDocumentId: entry.sourceDocumentId ?? undefined,
     };
   }
 }

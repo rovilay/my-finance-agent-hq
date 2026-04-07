@@ -29,6 +29,7 @@ export type CreateFinancialEntryInput = {
   currency?: Scalars['String']['input'];
   date: Scalars['DateTime']['input'];
   entityId: Scalars['String']['input'];
+  sourceDocumentId?: InputMaybe<Scalars['String']['input']>;
   taxYear: Scalars['String']['input'];
   type: FinancialType;
 };
@@ -87,6 +88,7 @@ export type FinancialEntry = {
   date: Scalars['DateTime']['output'];
   entityId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
+  sourceDocumentId?: Maybe<Scalars['String']['output']>;
   taxYear: Scalars['String']['output'];
   type: FinancialType;
   updatedAt: Scalars['DateTime']['output'];
@@ -485,6 +487,7 @@ export type GetLedgerQuery = {
       entityId: string;
       taxYear: string;
       type: FinancialType;
+      sourceDocumentId?: string | null;
       createdAt: any;
       updatedAt: any;
     }>;
@@ -507,6 +510,7 @@ export type GetFinancialEntryQuery = {
     entityId: string;
     taxYear: string;
     type: FinancialType;
+    sourceDocumentId?: string | null;
     createdAt: any;
     updatedAt: any;
   };
@@ -528,6 +532,7 @@ export type AddFinancialEntryMutation = {
     entityId: string;
     taxYear: string;
     type: FinancialType;
+    sourceDocumentId?: string | null;
     createdAt: any;
     updatedAt: any;
   };
@@ -1197,6 +1202,7 @@ export const GetLedgerDocument = gql`
         entityId
         taxYear
         type
+        sourceDocumentId
         createdAt
         updatedAt
       }
@@ -1363,6 +1369,7 @@ export const AddFinancialEntryDocument = gql`
       entityId
       taxYear
       type
+      sourceDocumentId
       createdAt
       updatedAt
     }

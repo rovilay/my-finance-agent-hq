@@ -396,6 +396,37 @@ IMPORTANT INSTRUCTIONS:
     return result.text;
   }
 
+  async getConversationHistory(
+    userId: string,
+    entityId: string,
+  ): Promise<
+    Array<{ id: string; role: string; content: string; createdAt: Date }>
+  > {
+    const threadId = `${userId}-tax-education-${entityId}`;
+    const memoryStore = await this.mastraStore.getStore('memory');
+    if (!memoryStore) return [];
+    const result = await memoryStore.listMessages({ threadId, perPage: 50 });
+    return result.messages
+      .filter((m) => m.role === 'user' || m.role === 'assistant')
+      .map((m) => {
+        const parts = m.content?.parts ?? [];
+        const text =
+          parts
+            .filter((p) => p.type === 'text')
+            .map((p) => p.text ?? '')
+            .join('') ||
+          m.content?.content ||
+          '';
+        return {
+          id: m.id,
+          role: m.role as string,
+          content: text,
+          createdAt:
+            m.createdAt instanceof Date ? m.createdAt : new Date(m.createdAt),
+        };
+      });
+  }
+
   private buildUserContext(user?: User): string {
     if (!user) {
       return '';

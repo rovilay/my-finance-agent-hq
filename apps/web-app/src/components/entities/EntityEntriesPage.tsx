@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, Button, Tabs, Tab } from '@/components/ui';
-import { Plus, Package, Loader2 } from 'lucide-react';
+import { Plus, Package, Loader2, FileText, PenLine } from 'lucide-react';
 import Link from 'next/link';
 import { BackButton } from '../BackButton';
 import { FinancialEntry, FinancialType, useGetLedgerQuery } from '@/lib/graphql/generated';
@@ -173,6 +173,17 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
                               >
                                 {config.label}
                               </span>
+                              {entry.sourceDocumentId ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                  <FileText className="w-3 h-3" />
+                                  From document
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-500">
+                                  <PenLine className="w-3 h-3" />
+                                  Manual entry
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center gap-4 text-sm text-neutral-500">
                               <span>{format(new Date(entry.date), 'MMM dd, yyyy')}</span>

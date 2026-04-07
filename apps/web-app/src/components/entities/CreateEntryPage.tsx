@@ -38,6 +38,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isExtracting, setIsExtracting] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [sourceDocumentId, setSourceDocumentId] = useState<string | null>(null);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -66,6 +67,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
       // Step 1: Upload document to API
       const { id } = await uploadDocumentToApi({ file, entityId });
       setUploadedFileName(file.name);
+      setSourceDocumentId(id);
 
       // Step 2: Call extraction mutation with documentId
       const { data } = await extractFinancialEntry({
@@ -156,6 +158,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
             type: formData.type as FinancialType,
             date: formData.date,
             taxYear: formData.taxYear,
+            ...(sourceDocumentId ? { sourceDocumentId } : {}),
           },
         },
       });
