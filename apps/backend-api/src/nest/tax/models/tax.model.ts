@@ -8,6 +8,9 @@ export class TaxProjection {
   @Field()
   taxYear: string; // The "Time" context
 
+  @Field()
+  province: string; // The province used for the calculation
+
   @Field(() => Float)
   totalIncome: number;
 

@@ -155,6 +155,17 @@ export class FiscalEntityService {
     }
   }
 
+  /** Internal service-to-service lookup — returns the stored province for an entity without a user auth check. */
+  async findProvinceByEntityId(entityId: string): Promise<string> {
+    const [entity] = await this.db
+      .select({ province: fiscalEntities.province })
+      .from(fiscalEntities)
+      .where(eq(fiscalEntities.id, entityId))
+      .limit(1);
+
+    return entity?.province ?? 'Ontario';
+  }
+
   async update(
     entityId: string,
     userId: string,

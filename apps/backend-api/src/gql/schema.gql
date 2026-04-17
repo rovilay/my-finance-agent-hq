@@ -185,6 +185,7 @@ type TaxProjection {
 
   """Total income from all income entries"""
   incomeTotal: Float!
+  province: String!
   provincialTax: Float!
 
   """Total tax already paid throughout the year"""

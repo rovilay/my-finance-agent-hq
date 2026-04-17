@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FinancialEntryService } from '../financial-entry/financial-entry.service';
+import { FiscalEntityService } from '../fiscal-entity/fiscal-entity.service';
 import {
   FinancialEntry,
   FinancialType,
@@ -11,14 +12,17 @@ import {
 import { TaxProjection } from './models/tax.model';
 import {
   calculateCanadaFederalTax,
-  calculateOntarioTax,
+  calculateProvincialTax,
   calculateBasicPersonalAmountCredit,
 } from '@hq/tools';
 import { SupportedTaxYear, taxYearSchema } from '@hq/validation-schema';
 
 @Injectable()
 export class TaxService {
-  constructor(private readonly financialService: FinancialEntryService) {}
+  constructor(
+    private readonly financialService: FinancialEntryService,
+    private readonly fiscalEntityService: FiscalEntityService,
+  ) {}
 
   async calculateProjection(
     entityId: string,
@@ -39,8 +43,11 @@ export class TaxService {
         );
       }
 
-      // Parse validated tax year as number for calculation
-      const year = parseInt(validationResult.data, 10) as SupportedTaxYear;
+      // taxYearSchema coerces to number and refines to SupportedTaxYear
+      const year: SupportedTaxYear = validationResult.data;
+
+      const province =
+        await this.fiscalEntityService.findProvinceByEntityId(entityId);
 
       const entries = await this.financialService.findByEntity(
         entityId,
@@ -57,8 +64,12 @@ export class TaxService {
       // 1. Calculate Federal Tax
       const federalTax = calculateCanadaFederalTax(taxableIncome, year);
 
-      // 2. Calculate Provincial Tax (Ontario)
-      const provincialTax = calculateOntarioTax(taxableIncome, year);
+      // 2. Calculate Provincial Tax
+      const provincialTax = calculateProvincialTax(
+        taxableIncome,
+        province,
+        year,
+      );
 
       // 3. Totals
       const totalTax = federalTax + provincialTax;
@@ -74,6 +85,7 @@ export class TaxService {
       const result: TaxProjection = {
         entityId,
         taxYear,
+        province,
         totalIncome,
         taxableIncome,
         federalTax,

@@ -2,6 +2,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { Memory } from '@mastra/memory';
 import { convertCurrencyTool } from './fx-converter';
 import { calculateOntarioTaxTool } from './tax-calculator';
+import { getProvinceConfig, DEFAULT_PROVINCE, type ProvinceConfig } from './province-config';
 import { Agent } from '@mastra/core/agent';
 import { PostgresStore } from '@mastra/pg';
 import { MastraCompositeStore } from '@mastra/core/storage';
@@ -33,15 +34,18 @@ const getModel = (modelName: agent_models, apiKey: string) => {
   return googleGenAI(modelName);
 };
 
-const FINANCIAL_ADVISOR_INSTRUCTIONS = `
-    You are a professional Ontario-based financial advisor.
+const buildFinancialAdvisorInstructions = (province: ProvinceConfig): string => `
+    You are a professional Canadian financial advisor specialising in ${province.name}.
+    
+    PROVINCE CONTEXT:
+    ${province.agentContext}
     
     WORKING MEMORY:
     You have a "User Financial Profile" in your working memory. 
     1. Whenever the user shares a personal or financial detail, update the profile.
     2. Always check the profile before asking the user for information you should already know.
     3. Keep the Markdown structure consistent with the template.
-` as const;
+`;
 
 const FINANCIAL_ADVISOR_MEMORY_TEMPLATE = `
   # User Financial Profile
@@ -66,6 +70,7 @@ export const createFinanceAgent = ({
   apiKey,
   id,
   name,
+  province = DEFAULT_PROVINCE,
   additionalInstructions = '',
 }: {
   mastraStore: PostgresStore;
@@ -73,15 +78,17 @@ export const createFinanceAgent = ({
   apiKey: string;
   id: string;
   name: string;
+  province?: string;
   additionalInstructions?: string;
 }) => {
   const memory = createAgentMemory(mastraStore, FINANCIAL_ADVISOR_MEMORY_TEMPLATE);
   const model = getModel(modelName, apiKey);
+  const provinceConfig = getProvinceConfig(province);
 
   return new Agent({
     id,
     name,
-    instructions: `${FINANCIAL_ADVISOR_INSTRUCTIONS} \n ${additionalInstructions}`,
+    instructions: `${buildFinancialAdvisorInstructions(provinceConfig)} \n ${additionalInstructions}`,
     model,
     memory,
     tools: {
@@ -167,8 +174,8 @@ export const createFinanceEntryExtractionAgent = ({
   });
 };
 
-const TAX_EDUCATION_INSTRUCTIONS = `
-    You are a patient, friendly Canadian tax educator specifically helping NEW IMMIGRANTS to Ontario understand the Canadian tax system.
+const buildTaxEducationInstructions = (province: ProvinceConfig): string => `
+    You are a patient, friendly Canadian tax educator specifically helping NEW IMMIGRANTS to ${province.name} understand the Canadian tax system.
     
     YOUR MISSION:
     Help newcomers to Canada understand taxes in the simplest, most welcoming way possible.
@@ -191,14 +198,17 @@ const TAX_EDUCATION_INSTRUCTIONS = `
     
     **Key Terms:**
     - CRA (Canada Revenue Agency): The government office that handles taxes
-    - BPA (Basic Personal Amount): First $16,200 (federal) + $12,500 (Ontario) you earn is tax-free
+    - BPA (Basic Personal Amount): First $16,200 (federal) you earn is tax-free at the federal level
     - Progressive Tax: You pay higher % on higher income (not all at once)
-    - Federal Tax: Canada-wide tax (pays for national stuff)
-    - Provincial Tax: Ontario tax (pays for local stuff like hospitals, schools)
+    - Federal Tax: Canada-wide tax (pays for national services)
+    - Provincial Tax: ${province.name} tax (pays for local services like hospitals, schools)
     - Deductions: Things that reduce what you're taxed on (like RRSP contributions)
-    - Credits: Direct discounts on your tax bill (like donations, transit passes)
+    - Credits: Direct discounts on your tax bill (like donations)
     - T4: Your employment income slip (like a receipt from your employer)
     - Tax Return: The form you fill out each April
+    
+    PROVINCE CONTEXT:
+    ${province.agentContext}
     
     **Common Newcomer Concerns:**
     1. "Will I go to jail if I make a mistake?" → NO! CRA is helpful for honest mistakes
@@ -206,11 +216,11 @@ const TAX_EDUCATION_INSTRUCTIONS = `
     3. "When do I file?" → By April 30 each year for previous year's income
     4. "What if I don't understand?" → CRA has free help, and we're here too!
     
-    **Special Credits for Newcomers:**
+    **Common Credits for Newcomers:**
     - GST/HST Credit: Up to $519/year for lower income
-    - Ontario Trillium Benefit: Energy and property tax credits
     - Canada Workers Benefit: For working Canadians with modest income
     - Child benefits: If you have kids under 18
+    ${province.provinceSpecificCredits.map(c => `- ${c.name}: ${c.description}`).join('\n    ')}
     
     RESPONSE STYLE:
     - Start with direct answer
@@ -232,7 +242,7 @@ const TAX_EDUCATION_INSTRUCTIONS = `
     - Acknowledge that every country's tax system is different
     - Remind them it's okay to ask questions multiple times
     - Celebrate their progress in learning!
-` as const;
+`;
 
 const TAX_EDUCATION_MEMORY_TEMPLATE = `
   # User Learning Profile
@@ -270,6 +280,7 @@ export const createTaxEducationAgent = ({
   apiKey,
   id,
   name,
+  province = DEFAULT_PROVINCE,
   additionalInstructions = '',
 }: {
   mastraStore: PostgresStore;
@@ -277,15 +288,17 @@ export const createTaxEducationAgent = ({
   apiKey: string;
   id: string;
   name: string;
+  province?: string;
   additionalInstructions?: string;
 }) => {
   const memory = createAgentMemory(mastraStore, TAX_EDUCATION_MEMORY_TEMPLATE);
   const model = getModel(modelName, apiKey);
+  const provinceConfig = getProvinceConfig(province);
 
   return new Agent({
     id,
     name,
-    instructions: `${TAX_EDUCATION_INSTRUCTIONS} \n ${additionalInstructions}`,
+    instructions: `${buildTaxEducationInstructions(provinceConfig)} \n ${additionalInstructions}`,
     model,
     memory,
     tools: {

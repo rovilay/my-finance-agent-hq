@@ -302,7 +302,7 @@ TAX PROJECTION:
 - Total Deductions: $${taxProjection.deductionsTotal.toFixed(2)}
 - Taxable Income: $${taxProjection.taxableIncome.toFixed(2)}
 - Federal Tax: $${taxProjection.federalTax.toFixed(2)}
-- Provincial Tax (Ontario): $${taxProjection.provincialTax.toFixed(2)}
+- Provincial Tax (${taxProjection.province}): $${taxProjection.provincialTax.toFixed(2)}
 - Total Tax Owed: $${taxProjection.totalTax.toFixed(2)}
 - Credits Applied: $${taxProjection.creditsApplied.toFixed(2)}
 - Tax Liability (Final Amount): $${taxProjection.totalTaxLiability.toFixed(2)}

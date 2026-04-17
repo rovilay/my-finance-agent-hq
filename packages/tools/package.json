@@ -6,7 +6,11 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./client": "./dist/client.js"
+    "./client": "./dist/client.js",
+    "./province-config": {
+      "types": "./dist/province-config.d.ts",
+      "default": "./dist/province-config.js"
+    }
   },
   "scripts": {
     "clean": "rm -rf dist tsconfig.tsbuildinfo",

@@ -1,5 +1,11 @@
 import { BadgeDollarSign, CheckCircle2, FileText, Landmark } from 'lucide-react';
 import React from 'react';
+import {
+  FEDERAL_TAX_BRACKETS,
+  getProvinceConfig,
+  type TaxBracket,
+  type SupportedProvince,
+} from '@hq/tools/province-config';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,21 +39,72 @@ export interface Credit {
 
 // ─── Tax brackets ─────────────────────────────────────────────────────────────
 
-export const FEDERAL_BRACKETS_2024: Bracket[] = [
-  { range: 'Up to $57,375', rate: '15%', color: 'bg-blue-100 text-blue-800' },
-  { range: '$57,375 – $114,750', rate: '20.5%', color: 'bg-blue-200 text-blue-900' },
-  { range: '$114,750 – $158,519', rate: '26%', color: 'bg-blue-300 text-blue-900' },
-  { range: '$158,519 – $220,000', rate: '29%', color: 'bg-blue-400 text-white' },
-  { range: 'Over $220,000', rate: '33%', color: 'bg-blue-600 text-white' },
+// Color palettes — ordered lightest → darkest to match ascending bracket order.
+const FEDERAL_BRACKET_COLORS = [
+  'bg-blue-100 text-blue-800',
+  'bg-blue-200 text-blue-900',
+  'bg-blue-300 text-blue-900',
+  'bg-blue-400 text-white',
+  'bg-blue-600 text-white',
 ];
 
-export const ONTARIO_BRACKETS_2024: Bracket[] = [
-  { range: 'Up to $51,446', rate: '5.05%', color: 'bg-violet-100 text-violet-800' },
-  { range: '$51,446 – $102,894', rate: '9.15%', color: 'bg-violet-200 text-violet-900' },
-  { range: '$102,894 – $150,000', rate: '11.16%', color: 'bg-violet-300 text-violet-900' },
-  { range: '$150,000 – $220,000', rate: '12.16%', color: 'bg-violet-400 text-white' },
-  { range: 'Over $220,000', rate: '13.16%', color: 'bg-violet-600 text-white' },
-];
+const PROVINCE_BRACKET_COLORS: Record<SupportedProvince, string[]> = {
+  Ontario: [
+    'bg-violet-100 text-violet-800',
+    'bg-violet-200 text-violet-900',
+    'bg-violet-300 text-violet-900',
+    'bg-violet-400 text-white',
+    'bg-violet-600 text-white',
+  ],
+};
+
+const CAD = new Intl.NumberFormat('en-CA', {
+  style: 'currency',
+  currency: 'CAD',
+  maximumFractionDigits: 0,
+});
+
+/**
+ * Converts TaxBracket[] (descending threshold format used for computation)
+ * into Bracket[] (ascending range format used for display).
+ */
+function bracketsToDisplay(brackets: TaxBracket[], colors: string[]): Bracket[] {
+  const ascending = [...brackets].reverse();
+  return ascending.map((bracket, i) => {
+    const next = ascending[i + 1];
+    const range =
+      bracket.threshold === 0
+        ? `Up to ${CAD.format(next!.threshold)}`
+        : next === undefined
+          ? `Over ${CAD.format(bracket.threshold)}`
+          : `${CAD.format(bracket.threshold)} – ${CAD.format(next.threshold)}`;
+    const rate = `${parseFloat((bracket.rate * 100).toFixed(4))}%`;
+    return { range, rate, color: colors[i] ?? colors[colors.length - 1] };
+  });
+}
+
+export const FEDERAL_BRACKETS_2024: Bracket[] = bracketsToDisplay(
+  FEDERAL_TAX_BRACKETS[2026],
+  FEDERAL_BRACKET_COLORS
+);
+
+/** Province-specific brackets keyed by full province name, derived from province-config. */
+export const PROVINCIAL_BRACKETS_2024: Record<SupportedProvince, Bracket[]> = {
+  Ontario: bracketsToDisplay(
+    getProvinceConfig('Ontario').provincialBrackets[2026],
+    PROVINCE_BRACKET_COLORS['Ontario']
+  ),
+};
+
+/**
+ * Returns provincial brackets for the given province.
+ * Falls back to Ontario when the province is not yet in the map.
+ */
+export const getProvincialBrackets = (province: string): Bracket[] =>
+  PROVINCIAL_BRACKETS_2024[province as SupportedProvince] ?? PROVINCIAL_BRACKETS_2024['Ontario'];
+
+/** @deprecated Use getProvincialBrackets('Ontario') */
+export const ONTARIO_BRACKETS_2024: Bracket[] = PROVINCIAL_BRACKETS_2024['Ontario'];
 
 // ─── Filing journey ───────────────────────────────────────────────────────────
 
@@ -124,7 +181,8 @@ export const KEY_DATES: KeyDate[] = [
 
 // ─── Credits & deductions ─────────────────────────────────────────────────────
 
-export const COMMON_CREDITS: Credit[] = [
+/** Federal credits available to all Canadians regardless of province. */
+export const FEDERAL_CREDITS: Credit[] = [
   {
     name: 'Basic Personal Amount (BPA)',
     amount: '~$15,705 federal',
@@ -144,12 +202,6 @@ export const COMMON_CREDITS: Credit[] = [
     description: 'A refundable tax credit for employed or self-employed people with modest income.',
   },
   {
-    name: 'Ontario Trillium Benefit',
-    amount: 'Varies',
-    who: 'Ontario residents',
-    description: 'Combines energy, sales, and property tax credits into monthly payments.',
-  },
-  {
     name: 'Tuition & Education Credits',
     amount: 'Varies',
     who: 'Students',
@@ -157,3 +209,27 @@ export const COMMON_CREDITS: Credit[] = [
       'Federal and provincial credits on eligible tuition fees. Unused amounts can be carried forward.',
   },
 ];
+
+/** Province-specific credits keyed by full province name. */
+export const PROVINCIAL_CREDITS: Record<SupportedProvince, Credit[]> = {
+  Ontario: [
+    {
+      name: 'Ontario Trillium Benefit',
+      amount: 'Varies',
+      who: 'Ontario residents',
+      description: 'Combines energy, sales, and property tax credits into monthly payments.',
+    },
+  ],
+};
+
+/**
+ * Returns the combined federal + provincial credits for the given province.
+ * Falls back to Ontario provincial credits when the province is not yet in the map.
+ */
+export const getCreditsForProvince = (province: string): Credit[] => [
+  ...FEDERAL_CREDITS,
+  ...(PROVINCIAL_CREDITS[province as SupportedProvince] ?? PROVINCIAL_CREDITS['Ontario']),
+];
+
+/** @deprecated Use getCreditsForProvince('Ontario') */
+export const COMMON_CREDITS: Credit[] = getCreditsForProvince('Ontario');

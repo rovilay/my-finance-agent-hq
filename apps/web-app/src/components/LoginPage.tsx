@@ -64,7 +64,7 @@ export default function LoginPage() {
               <h1 className="text-2xl font-display font-bold text-neutral-900 mb-2">
                 Welcome Back
               </h1>
-              <p className="text-neutral-600">Sign in to access your secure tax documents</p>
+              <p className="text-neutral-600">Sign in to access your finances</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

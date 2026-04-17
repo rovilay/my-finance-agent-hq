@@ -2,11 +2,11 @@
 
 import { GUIDE_ROUTE } from '@/lib/constants';
 import {
-  COMMON_CREDITS,
   FEDERAL_BRACKETS_2024,
   FILING_STEPS,
   KEY_DATES,
-  ONTARIO_BRACKETS_2024,
+  getCreditsForProvince,
+  getProvincialBrackets,
   type Bracket,
 } from '@/lib/learn-data';
 import {
@@ -137,8 +137,7 @@ export default function LearnPage() {
               ))}
             </div>
             <p className="text-xs text-neutral-500">
-              You also pay Ontario provincial tax on top of the federal rate — see the brackets
-              below.
+              You also pay provincial tax on top of the federal rate — see the brackets below.
             </p>
           </div>
 
@@ -153,7 +152,7 @@ export default function LearnPage() {
               />
               <div className="hidden sm:block w-px bg-neutral-100" />
               <BracketTable
-                brackets={ONTARIO_BRACKETS_2024}
+                brackets={getProvincialBrackets('Ontario')}
                 jurisdiction="Ontario (Provincial)"
                 accentClass="text-violet-700"
               />
@@ -235,7 +234,7 @@ export default function LearnPage() {
             subtitle="Credits reduce the tax you owe — some even result in a refund. These are the ones most relevant for newcomers."
           />
           <div className="space-y-3">
-            {COMMON_CREDITS.map(c => (
+            {getCreditsForProvince('Ontario').map(c => (
               <div
                 key={c.name}
                 className="bg-white border border-neutral-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-start gap-3"

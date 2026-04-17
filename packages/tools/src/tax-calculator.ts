@@ -1,68 +1,25 @@
-import { SupportedTaxYear } from '@hq/validation-schema';
+import { SupportedTaxYear, taxYearSchema } from '@hq/validation-schema';
 import { tool } from 'ai';
 import z from 'zod';
-
-/**
- * Simplified 2026 Combined Tax Brackets (Federal + Ontario)
- * Note: These are representative of the progressive brackets for 2026.
- */
-const INCOME_TAX_BRACKETS: Record<SupportedTaxYear, { threshold: number; rate: number }[]> = {
-  2025: [
-    { threshold: 53891, rate: 0.1905 }, // Combined rate for first bracket
-    { threshold: 58523, rate: 0.2315 },
-    { threshold: 107785, rate: 0.2965 },
-    { threshold: 117045, rate: 0.3148 },
-    { threshold: Infinity, rate: 0.3389 },
-  ],
-  2026: [
-    { threshold: 53891, rate: 0.1905 }, // Combined rate for first bracket
-    { threshold: 58523, rate: 0.2315 },
-    { threshold: 107785, rate: 0.2965 },
-    { threshold: 117045, rate: 0.3148 },
-    { threshold: Infinity, rate: 0.3389 },
-  ],
-};
-
-const CANADA_FEDERAL_INCOME_TAX_BRACKETS: Record<
-  SupportedTaxYear,
-  { threshold: number; rate: number }[]
-> = {
-  2025: [
-    { threshold: 173205, rate: 0.29 },
-    { threshold: 111733, rate: 0.26 },
-    { threshold: 55867, rate: 0.205 },
-    { threshold: 0, rate: 0.15 },
-  ],
-  2026: [
-    { threshold: 173205, rate: 0.29 },
-    { threshold: 111733, rate: 0.26 },
-    { threshold: 55867, rate: 0.205 },
-    { threshold: 0, rate: 0.15 },
-  ],
-};
-
-const ONTARIO_INCOME_TAX_BRACKETS: Record<SupportedTaxYear, { threshold: number; rate: number }[]> =
-  {
-    2025: [
-      { threshold: 173205, rate: 0.29 },
-      { threshold: 111733, rate: 0.26 },
-      { threshold: 55867, rate: 0.205 },
-      { threshold: 0, rate: 0.15 },
-    ],
-    2026: [
-      { threshold: 173205, rate: 0.29 },
-      { threshold: 111733, rate: 0.26 },
-      { threshold: 55867, rate: 0.205 },
-      { threshold: 0, rate: 0.15 },
-    ],
-  };
+import {
+  getProvinceConfig,
+  DEFAULT_PROVINCE,
+  FEDERAL_TAX_BRACKETS,
+  FEDERAL_BPA,
+} from './province-config';
+// All bracket data lives in province-config.ts — see FEDERAL_TAX_BRACKETS and each ProvinceConfig.
 
 const OntarioTaxSchema = z.object({
   income: z.number().min(0).describe('Total annual gross income in CAD.'),
   invoiceAmount: z
     .number()
     .optional()
-    .describe('An optional business invoice amount to calculate HST for in CAD.'),
+    .describe('An optional business invoice amount to calculate sales tax for in CAD.'),
+  province: z
+    .string()
+    .optional()
+    .describe('Canadian province for which to calculate tax. Defaults to Ontario.'),
+  taxYear: taxYearSchema.optional().describe('Tax year for which to calculate. Defaults to 2026.'),
 });
 
 export type OntarioTaxSchemaType = z.infer<typeof OntarioTaxSchema>;
@@ -78,38 +35,33 @@ export type OntarioTaxResult = {
 export const calculateOntarioIncomeTax = async ({
   income,
   invoiceAmount,
+  province = DEFAULT_PROVINCE,
+  taxYear = 2026,
 }: OntarioTaxSchemaType): Promise<OntarioTaxResult> => {
-  // 1. Calculate Progressive Income Tax
-  let remainingIncome = income;
-  let totalIncomeTax = 0;
-  let previousThreshold = 0;
+  const provinceConfig = getProvinceConfig(province);
 
-  for (const { threshold, rate } of INCOME_TAX_BRACKETS[2026]) {
-    const taxableInThisBracket = Math.min(
-      Math.max(remainingIncome, 0),
-      threshold - previousThreshold
-    );
-    totalIncomeTax += taxableInThisBracket * rate;
-    remainingIncome -= taxableInThisBracket;
-    previousThreshold = threshold;
-    if (remainingIncome <= 0) break;
-  }
+  // Combine federal + provincial taxes from their separate sources of truth
+  const federalTax = calculateCanadaFederalTax(income, taxYear);
+  const provincialTax = calculateProvincialTax(income, province, taxYear);
+  const totalIncomeTax = federalTax + provincialTax;
 
-  // 2. Calculate HST if invoiceAmount is provided
-  const hst = invoiceAmount ? invoiceAmount * 0.13 : 0;
+  // Sales tax on invoice amount if provided
+  const salesTax = invoiceAmount ? invoiceAmount * provinceConfig.salesTaxRate : 0;
 
   return {
     currency: 'CAD',
     incomeTax: Number(totalIncomeTax.toFixed(2)),
     netIncome: Number((income - totalIncomeTax).toFixed(2)),
-    hst: Number(hst.toFixed(2)),
+    hst: Number(salesTax.toFixed(2)),
     effectiveRate: `${((totalIncomeTax / income) * 100).toFixed(2)}%`,
-    disclaimer: 'Based on simplified 2026 Ontario/Federal combined estimates.',
+    disclaimer: `Based on simplified ${taxYear} ${provinceConfig.name}/Federal combined estimates.`,
   };
 };
 
 export const calculateOntarioTaxTool = tool({
-  description: 'Calculates Ontario HST (13%) and progressive personal income tax for 2026.',
+  description:
+    'Calculates provincial sales tax and progressive personal income tax for a given year. ' +
+    'Supports any Canadian province — defaults to Ontario when province is not specified.',
   inputSchema: OntarioTaxSchema,
   execute: calculateOntarioIncomeTax,
 });
@@ -132,45 +84,30 @@ export const calculateCanadaFederalTax = (
   income: number,
   taxYear: SupportedTaxYear = 2026
 ): number => {
-  return applyBrackets(income, CANADA_FEDERAL_INCOME_TAX_BRACKETS[taxYear]);
+  return applyBrackets(income, FEDERAL_TAX_BRACKETS[taxYear]);
 };
 
-export const calculateOntarioTax = (income: number, taxYear: SupportedTaxYear = 2026): number => {
-  return applyBrackets(income, ONTARIO_INCOME_TAX_BRACKETS[taxYear]);
+/** Calculate provincial income tax. Defaults to Ontario when no province is supplied. */
+export const calculateProvincialTax = (
+  income: number,
+  province: string = DEFAULT_PROVINCE,
+  taxYear: SupportedTaxYear = 2026
+): number => {
+  return applyBrackets(income, getProvinceConfig(province).provincialBrackets[taxYear]);
 };
 
-/**
- * Basic Personal Amount (BPA) Credit configuration by year
- * These are non-refundable tax credits that reduce the amount of tax owed
- * Federal BPA: The amount you can earn before paying federal tax, with credit at lowest tax rate (15%)
- * Provincial BPA: The amount you can earn before paying provincial tax, with credit at lowest tax rate (5.05% for Ontario)
+/** @deprecated Use calculateProvincialTax instead */
+export const calculateOntarioTax = (income: number, taxYear: SupportedTaxYear = 2026): number =>
+  calculateProvincialTax(income, 'Ontario', taxYear);
+
+/** Calculate the combined federal + provincial Basic Personal Amount (BPA) tax credit.
+ * Federal BPA data is sourced from FEDERAL_BPA in province-config.ts.
  */
-const BPA_CREDITS: Record<
-  SupportedTaxYear,
-  { federalBPA: number; federalRate: number; ontarioBPA: number; ontarioRate: number }
-> = {
-  2025: {
-    federalBPA: 16200,
-    federalRate: 0.15,
-    ontarioBPA: 12500,
-    ontarioRate: 0.0505,
-  },
-  2026: {
-    federalBPA: 16200,
-    federalRate: 0.15,
-    ontarioBPA: 12500,
-    ontarioRate: 0.0505,
-  },
-};
-
-/**
- * Calculate the total Basic Personal Amount (BPA) tax credits
- * This includes both federal and provincial (Ontario) credits
- *
- * @param taxYear - The tax year to calculate credits for
- * @returns The total dollar amount of BPA credits
- */
-export const calculateBasicPersonalAmountCredit = (taxYear: SupportedTaxYear = 2026): number => {
-  const bpa = BPA_CREDITS[taxYear];
-  return bpa.federalBPA * bpa.federalRate + bpa.ontarioBPA * bpa.ontarioRate;
+export const calculateBasicPersonalAmountCredit = (
+  taxYear: SupportedTaxYear = 2026,
+  province: string = DEFAULT_PROVINCE
+): number => {
+  const federal = FEDERAL_BPA[taxYear];
+  const provincial = getProvinceConfig(province).basicPersonalAmount[taxYear];
+  return federal.amount * federal.rate + provincial.amount * provincial.lowestRate;
 };

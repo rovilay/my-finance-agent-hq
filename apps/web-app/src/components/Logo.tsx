@@ -58,7 +58,7 @@ export function LogoWithText({ className = '' }: { className?: string }) {
       <div className="flex flex-col">
         <span className="text-xl font-display font-bold text-neutral-900">Finance Agent</span>
         <span className="text-xs text-neutral-500 font-medium tracking-wide">
-          SECURE TAX DOCUMENTS
+          YOUR FINANCES, SIMPLIFIED
         </span>
       </div>
     </div>

@@ -79,7 +79,7 @@ export default function OnboardingChecklist({ entityId }: OnboardingChecklistPro
       : [
           {
             id: 'start-here',
-            label: 'Complete Start Here',
+            label: 'Complete "Start Here"',
             description: 'Answer a few questions for a personalized checklist',
             href: '/start',
             done: false,
