@@ -4,4 +4,5 @@ export {
   fiscalEntities,
   financialEntries,
   documents,
+  userOnboarding,
 } from '@hq/database';

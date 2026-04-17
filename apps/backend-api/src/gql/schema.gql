@@ -108,6 +108,7 @@ type Mutation {
   createFiscalEntity(input: FiscalEntityInput!): FiscalEntity!
   deleteFiscalEntity(id: ID!): Boolean!
   extractFinancialEntry(input: ExtractFinancialEntryInput!): ExtractedFinancialEntry!
+  saveOnboarding(input: SaveOnboardingInput!): UserOnboarding!
   syncUser(input: UserInput!): User!
   updateFiscalEntity(id: ID!, input: UpdateFiscalEntityInput!): FiscalEntity!
   verifyAndFinalize(approved: Boolean!, documentId: ID!, shouldKeep: Boolean): Document!
@@ -152,12 +153,19 @@ type Query {
   fiscalEntity(id: ID!): FiscalEntity!
   getTaxProjection(entityId: String!, taxYear: String!): TaxProjection!
   me: User!
+  myOnboarding: UserOnboarding
 }
 
 enum RetentionPolicy {
   ephemeral
   permanent
   verify_and_purge
+}
+
+input SaveOnboardingInput {
+  arrivedThisYear: Boolean!
+  filingPath: String!
+  incomeSources: [String!]!
 }
 
 type TaxProjection {
@@ -214,4 +222,14 @@ input UserInput {
   email: String!
   firstName: String!
   lastName: String!
+}
+
+type UserOnboarding {
+  arrivedThisYear: Boolean!
+  createdAt: DateTime!
+  filingPath: String!
+  id: ID!
+  incomeSources: [String!]!
+  updatedAt: DateTime!
+  userId: String!
 }

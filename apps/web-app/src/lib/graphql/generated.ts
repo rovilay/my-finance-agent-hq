@@ -130,6 +130,7 @@ export type Mutation = {
   createFiscalEntity: FiscalEntity;
   deleteFiscalEntity: Scalars['Boolean']['output'];
   extractFinancialEntry: ExtractedFinancialEntry;
+  saveOnboarding: UserOnboarding;
   syncUser: User;
   updateFiscalEntity: FiscalEntity;
   verifyAndFinalize: Document;
@@ -150,6 +151,10 @@ export type MutationDeleteFiscalEntityArgs = {
 
 export type MutationExtractFinancialEntryArgs = {
   input: ExtractFinancialEntryInput;
+};
+
+export type MutationSaveOnboardingArgs = {
+  input: SaveOnboardingInput;
 };
 
 export type MutationSyncUserArgs = {
@@ -215,6 +220,7 @@ export type Query = {
   fiscalEntity: FiscalEntity;
   getTaxProjection: TaxProjection;
   me: User;
+  myOnboarding?: Maybe<UserOnboarding>;
 };
 
 export type QueryDocumentArgs = {
@@ -249,6 +255,12 @@ export type QueryFiscalEntityArgs = {
 export type QueryGetTaxProjectionArgs = {
   entityId: Scalars['String']['input'];
   taxYear: Scalars['String']['input'];
+};
+
+export type SaveOnboardingInput = {
+  arrivedThisYear: Scalars['Boolean']['input'];
+  filingPath: Scalars['String']['input'];
+  incomeSources: Array<Scalars['String']['input']>;
 };
 
 export enum RetentionPolicy {
@@ -297,6 +309,17 @@ export type User = {
   id: Scalars['ID']['output'];
   lastName: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+};
+
+export type UserOnboarding = {
+  __typename?: 'UserOnboarding';
+  arrivedThisYear: Scalars['Boolean']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  filingPath: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  incomeSources: Array<Scalars['String']['output']>;
+  updatedAt: Scalars['DateTime']['output'];
+  userId: Scalars['String']['output'];
 };
 
 export type UserInput = {
@@ -1666,4 +1689,93 @@ export type SyncUserMutationResult = Apollo.MutationResult<SyncUserMutation>;
 export type SyncUserMutationOptions = Apollo.BaseMutationOptions<
   SyncUserMutation,
   SyncUserMutationVariables
+>;
+export const GetMyOnboardingDocument = gql`
+  query GetMyOnboarding {
+    myOnboarding {
+      id
+      userId
+      filingPath
+      arrivedThisYear
+      incomeSources
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export type GetMyOnboardingQueryVariables = Exact<{ [key: string]: never }>;
+export type GetMyOnboardingQuery = {
+  __typename?: 'Query';
+  myOnboarding?: {
+    __typename?: 'UserOnboarding';
+    id: string;
+    userId: string;
+    filingPath: string;
+    arrivedThisYear: boolean;
+    incomeSources: Array<string>;
+    createdAt: any;
+    updatedAt: any;
+  } | null;
+};
+export function useGetMyOnboardingQuery(
+  baseOptions?: Apollo.QueryHookOptions<GetMyOnboardingQuery, GetMyOnboardingQueryVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GetMyOnboardingQuery, GetMyOnboardingQueryVariables>(
+    GetMyOnboardingDocument,
+    options
+  );
+}
+export type GetMyOnboardingQueryHookResult = ReturnType<typeof useGetMyOnboardingQuery>;
+export type GetMyOnboardingQueryResult = Apollo.QueryResult<
+  GetMyOnboardingQuery,
+  GetMyOnboardingQueryVariables
+>;
+export const SaveOnboardingDocument = gql`
+  mutation SaveOnboarding($input: SaveOnboardingInput!) {
+    saveOnboarding(input: $input) {
+      id
+      userId
+      filingPath
+      arrivedThisYear
+      incomeSources
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export type SaveOnboardingMutationVariables = Exact<{
+  input: SaveOnboardingInput;
+}>;
+export type SaveOnboardingMutation = {
+  __typename?: 'Mutation';
+  saveOnboarding: {
+    __typename?: 'UserOnboarding';
+    id: string;
+    userId: string;
+    filingPath: string;
+    arrivedThisYear: boolean;
+    incomeSources: Array<string>;
+    createdAt: any;
+    updatedAt: any;
+  };
+};
+export type SaveOnboardingMutationFn = Apollo.MutationFunction<
+  SaveOnboardingMutation,
+  SaveOnboardingMutationVariables
+>;
+export function useSaveOnboardingMutation(
+  baseOptions?: Apollo.MutationHookOptions<SaveOnboardingMutation, SaveOnboardingMutationVariables>
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SaveOnboardingMutation, SaveOnboardingMutationVariables>(
+    SaveOnboardingDocument,
+    options
+  );
+}
+export type SaveOnboardingMutationHookResult = ReturnType<typeof useSaveOnboardingMutation>;
+export type SaveOnboardingMutationResult = Apollo.MutationResult<SaveOnboardingMutation>;
+export type SaveOnboardingMutationOptions = Apollo.BaseMutationOptions<
+  SaveOnboardingMutation,
+  SaveOnboardingMutationVariables
 >;

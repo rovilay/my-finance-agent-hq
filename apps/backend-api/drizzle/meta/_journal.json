@@ -5,8 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1770177721626,
-      "tag": "0000_equal_hawkeye",
+      "when": 1776393033369,
+      "tag": "0000_huge_magik",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776393100000,
+      "tag": "0001_add_user_onboarding",
       "breakpoints": true
     }
   ]

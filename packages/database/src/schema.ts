@@ -1,4 +1,13 @@
-import { pgTable, uuid, text, numeric, timestamp, pgEnum, jsonb } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  text,
+  numeric,
+  timestamp,
+  pgEnum,
+  jsonb,
+  boolean,
+} from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -115,4 +124,17 @@ export const documents = pgTable('documents', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   purgedAt: timestamp('purged_at'), // Tracking when the storage was cleared
+});
+
+export const userOnboarding = pgTable('user_onboarding', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull()
+    .unique(), // one record per user
+  filingPath: text('filing_path').notNull(), // 'newcomer' | 'resident'
+  arrivedThisYear: boolean('arrived_this_year').notNull().default(false),
+  incomeSources: jsonb('income_sources').$type<string[]>().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

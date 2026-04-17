@@ -9,6 +9,7 @@ CREATE TABLE "documents" (
 	"wrapped_dek" text,
 	"status" "document_status" DEFAULT 'uploaded' NOT NULL,
 	"retention_policy" "retention_policy" DEFAULT 'verify_and_purge' NOT NULL,
+	"failure_reason" text,
 	"extracted_data" jsonb,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE "financial_entries" (
 	"currency" text DEFAULT 'CAD' NOT NULL,
 	"date" timestamp NOT NULL,
 	"metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,
+	"source_document_id" uuid,
 	"tax_year" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -36,18 +38,6 @@ CREATE TABLE "fiscal_entities" (
 	"type" "fiscal_entity_type" DEFAULT 'individual' NOT NULL,
 	"country" text DEFAULT 'Canada' NOT NULL,
 	"province" text DEFAULT 'Ontario' NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "tax_documents" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"entity_id" uuid NOT NULL,
-	"s3_key" text NOT NULL,
-	"file_name" text NOT NULL,
-	"status" "tax_document_status" DEFAULT 'uploaded' NOT NULL,
-	"encrypted_ai_extracted_data" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -67,6 +57,5 @@ CREATE TABLE "users" (
 ALTER TABLE "documents" ADD CONSTRAINT "documents_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "documents" ADD CONSTRAINT "documents_entity_id_fiscal_entities_id_fk" FOREIGN KEY ("entity_id") REFERENCES "public"."fiscal_entities"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "financial_entries" ADD CONSTRAINT "financial_entries_entity_id_fiscal_entities_id_fk" FOREIGN KEY ("entity_id") REFERENCES "public"."fiscal_entities"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "fiscal_entities" ADD CONSTRAINT "fiscal_entities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "tax_documents" ADD CONSTRAINT "tax_documents_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "tax_documents" ADD CONSTRAINT "tax_documents_entity_id_fiscal_entities_id_fk" FOREIGN KEY ("entity_id") REFERENCES "public"."fiscal_entities"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "financial_entries" ADD CONSTRAINT "financial_entries_source_document_id_documents_id_fk" FOREIGN KEY ("source_document_id") REFERENCES "public"."documents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "fiscal_entities" ADD CONSTRAINT "fiscal_entities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;

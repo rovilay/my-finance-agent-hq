@@ -13,6 +13,7 @@ import { envConfig } from './config/env';
 import { FiscalEntityModule } from './nest/fiscal-entity/fiscal-entity.module';
 import { DocumentModule } from './nest/document/document.module';
 import { AiModule } from './nest/ai/ai.module';
+import { OnboardingModule } from './nest/onboarding/onboarding.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AiModule } from './nest/ai/ai.module';
     AiModule,
     DocumentModule,
     TaxModule,
+    OnboardingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

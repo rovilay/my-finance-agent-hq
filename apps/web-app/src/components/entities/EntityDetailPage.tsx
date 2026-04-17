@@ -10,6 +10,7 @@ import { DeleteEntityModal } from './DeleteEntityModal';
 import { useRouter } from 'next/navigation';
 import { ENTITIES_ROUTE } from '@/lib/constants';
 import { BackButton } from '../BackButton';
+import OnboardingChecklist from './OnboardingChecklist';
 
 interface EntityDetailPageProps {
   entityId: string;
@@ -78,6 +79,9 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
                   </Button>
                 </div>
               </div>
+
+              {/* Filing checklist */}
+              <OnboardingChecklist entityId={entityId} />
 
               {/* Quick Links */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

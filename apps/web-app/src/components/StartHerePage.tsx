@@ -2,6 +2,8 @@
 
 import { Button } from '@/components/ui';
 import { ENTITIES_ROUTE, GUIDE_ROUTE } from '@/lib/constants';
+import { useAuth } from '@/hooks/useAuth';
+import { useSaveOnboardingMutation } from '@/lib/graphql';
 import {
   ArrowRight,
   ArrowLeft,
@@ -15,7 +17,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -193,10 +195,29 @@ function PriorityBadge({ priority }: { priority: RecommendedDoc['priority'] }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function StartHerePage() {
+  const { user } = useAuth();
+  const [saveOnboarding] = useSaveOnboardingMutation();
   const [step, setStep] = useState<Step>('path-select');
   const [path, setPath] = useState<FilingPath | null>(null);
   const [arrivedThisYear, setArrivedThisYear] = useState<boolean | null>(null);
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());
+
+  // Persist onboarding answers as soon as user reaches the results step
+  useEffect(() => {
+    if (step === 'results' && path && user) {
+      saveOnboarding({
+        variables: {
+          input: {
+            filingPath: path,
+            arrivedThisYear: arrivedThisYear ?? false,
+            incomeSources: Array.from(selectedSources),
+          },
+        },
+      }).catch(() => {
+        // Non-blocking — checklist will fall back to default if save fails
+      });
+    }
+  }, [step]);
 
   const toggleSource = (id: string) => {
     setSelectedSources(prev => {
