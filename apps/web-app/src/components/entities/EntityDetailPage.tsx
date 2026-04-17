@@ -25,14 +25,14 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
     variables: { id: entityId },
   });
 
-  if (loading) return <PageLoader message="Loading entity..." />;
+  if (loading) return <PageLoader message="Loading..." />;
 
   if (error || !data?.fiscalEntity) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="py-12 text-center">
-            <p className="text-error-600">{error?.message || 'Entity not found'}</p>
+            <p className="text-error-600">Tax profile not found</p>
           </CardContent>
         </Card>
       </div>
@@ -52,7 +52,7 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
           <div className="max-w-6xl mx-auto">
             {/* Entity Header */}
             <div className="mb-8">
-              <BackButton onClick={onBack} text="Back to Entities" />
+              <BackButton onClick={onBack} text="Back to My Tax Profiles" />
 
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -90,7 +90,7 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
                         </div>
                         <div>
                           <h3 className="font-semibold text-neutral-900">Documents</h3>
-                          <p className="text-sm text-neutral-600">View all documents</p>
+                          <p className="text-sm text-neutral-600">Upload tax slips and forms</p>
                         </div>
                       </div>
                     </CardContent>
@@ -106,7 +106,9 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
                         </div>
                         <div>
                           <h3 className="font-semibold text-neutral-900">Financial Entries</h3>
-                          <p className="text-sm text-neutral-600">Manage entries</p>
+                          <p className="text-sm text-neutral-600">
+                            Income, deductions, credits & more
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -121,8 +123,8 @@ export default function EntityDetailPage({ entityId }: EntityDetailPageProps) {
                           <Calendar className="w-6 h-6 text-accent-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-neutral-900">Tax Overview</h3>
-                          <p className="text-sm text-neutral-600">View tax projections</p>
+                          <h3 className="font-semibold text-neutral-900">Tax Summary</h3>
+                          <p className="text-sm text-neutral-600">See your tax estimate</p>
                         </div>
                       </div>
                     </CardContent>

@@ -67,7 +67,7 @@ export default function EntityEntriesPage({ entityId, onBack }: EntityEntriesPag
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <BackButton onClick={onBack} text="Back to Entity" />
+            <BackButton onClick={onBack} text="Back to Tax Profile" />
 
             <div className="flex items-center justify-between">
               <div>

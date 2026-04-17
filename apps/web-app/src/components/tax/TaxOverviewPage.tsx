@@ -91,7 +91,7 @@ export default function TaxOverviewPage({ entityId }: TaxOverviewPageProps) {
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="max-w-7xl mx-auto py-8 px-4">
-        <BackButton onClick={onBack} text="Back to Entity" />
+        <BackButton onClick={onBack} text="Back to Tax Profile" />
 
         {/* Newcomer Welcome Banner */}
         <NewcomerWelcomeBanner onOpenChat={() => setIsChatOpen(true)} />

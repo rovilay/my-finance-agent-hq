@@ -40,7 +40,7 @@ export default function EntitiesPage() {
     ];
   }, []);
 
-  if (loading) return <PageLoader message="Loading entities..." />;
+  if (loading) return <PageLoader message="Loading your tax profiles..." />;
 
   if (error) {
     return (
@@ -63,14 +63,15 @@ export default function EntitiesPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-neutral-900 mb-2">Your Entities</h1>
+              <h1 className="text-3xl font-bold text-neutral-900 mb-2">My Tax Profiles</h1>
               <p className="text-neutral-600">
-                Manage your tax entities and view their financial data
+                Select a tax profile to upload documents, review entries, and track your tax
+                estimate.
               </p>
             </div>
             <Button variant="primary" size="lg" onClick={() => setIsModalOpen(true)}>
               <Plus className="w-5 h-5 mr-2" />
-              New Entity
+              Add Profile
             </Button>
           </div>
 
@@ -88,8 +89,8 @@ export default function EntitiesPage() {
               <CardContent className="py-12 text-center">
                 <p className="text-neutral-500">
                   {filterType === 'ALL'
-                    ? 'No entities yet. Create your first entity to get started.'
-                    : `No ${entityTypeLabels[filterType as FiscalEntityType].toLowerCase()} entities found.`}
+                    ? 'No tax profiles yet. Add your first profile to get started.'
+                    : `No ${entityTypeLabels[filterType as FiscalEntityType].toLowerCase()} profiles found.`}
                 </p>
               </CardContent>
             </Card>
