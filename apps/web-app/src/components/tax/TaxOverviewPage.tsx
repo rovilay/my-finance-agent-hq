@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Button, PageLoader, Badge, TaxTooltip } from '@/components/ui';
 import {
   TrendingUp,
@@ -23,7 +23,7 @@ import {
   FinancialType,
 } from '@/lib/graphql';
 import { BackButton } from '../BackButton';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { SupportedTaxYear, supportedTaxYears } from '@hq/validation-schema';
 import { formatCurrency, formatPercentage } from '@hq/tools/client';
 import { TAX_GLOSSARY } from '@/lib/tax-glossary';
@@ -41,6 +41,14 @@ export default function TaxOverviewPage({ entityId }: TaxOverviewPageProps) {
   const [selectedTaxYear, setSelectedTaxYear] = useState<SupportedTaxYear>(2026);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Auto-open the chat when navigated to with ?chat=open (e.g. from TaxAssistantCTA)
+  useEffect(() => {
+    if (searchParams.get('chat') === 'open') {
+      setIsChatOpen(true);
+    }
+  }, [searchParams]);
 
   const { data: entityData, loading: entityLoading } = useGetFiscalEntityQuery({
     variables: { id: entityId },

@@ -1,6 +1,7 @@
 'use client';
 
 import { ENTITIES_ROUTE, SIGNUP_ROUTE } from '@/lib/constants';
+import { TaxAssistantCTA } from './TaxAssistantCTA';
 import {
   Briefcase,
   Building2,
@@ -312,71 +313,74 @@ function GroupCard({ group }: { group: IncomeGroup }) {
 
 export default function DocumentGuidePage() {
   return (
-    <div className="min-h-screen bg-neutral-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-10">
-          <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full mb-3">
-            Document Guide
-          </span>
-          <h1 className="text-3xl font-display font-bold text-neutral-900 mb-3">
-            Tax slips explained
-          </h1>
-          <p className="text-lg text-neutral-600">
-            Find the income type that applies to you and see exactly which slip you need, who sends
-            it, and what to look for when you upload it.
-          </p>
-        </div>
-
-        {/* Deadline callout */}
-        <div className="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3">
-          <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-900">
-            <strong>Filing deadline:</strong> April 30 for most individuals. Self-employed
-            individuals have until June 15 to file, but any tax owing is still due April 30. T3
-            slips from mutual funds can arrive as late as March 31 — wait for all your slips before
-            filing.{' '}
-            <a
-              href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/important-dates-individuals.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-0.5 text-amber-700 underline hover:text-amber-900"
-            >
-              <ExternalLink className="w-3 h-3" /> Source: CRA
-            </a>
+    <>
+      <div className="min-h-screen bg-neutral-50 py-12 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Header */}
+          <div className="mb-10">
+            <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full mb-3">
+              Document Guide
+            </span>
+            <h1 className="text-3xl font-display font-bold text-neutral-900 mb-3">
+              Tax slips explained
+            </h1>
+            <p className="text-lg text-neutral-600">
+              Find the income type that applies to you and see exactly which slip you need, who
+              sends it, and what to look for when you upload it.
+            </p>
           </div>
-        </div>
 
-        {/* Income groups */}
-        <div className="space-y-4 mb-10">
-          {INCOME_GROUPS.map(group => (
-            <GroupCard key={group.id} group={group} />
-          ))}
-        </div>
+          {/* Deadline callout */}
+          <div className="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3">
+            <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-900">
+              <strong>Filing deadline:</strong> April 30 for most individuals. Self-employed
+              individuals have until June 15 to file, but any tax owing is still due April 30. T3
+              slips from mutual funds can arrive as late as March 31 — wait for all your slips
+              before filing.{' '}
+              <a
+                href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/important-dates-individuals.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 text-amber-700 underline hover:text-amber-900"
+              >
+                <ExternalLink className="w-3 h-3" /> Source: CRA
+              </a>
+            </div>
+          </div>
 
-        {/* CTA */}
-        <div className="rounded-xl bg-primary-600 p-8 text-white text-center">
-          <h2 className="text-xl font-display font-bold mb-2">Ready to upload your slips?</h2>
-          <p className="text-primary-100 text-sm mb-5">
-            Once you have your documents, upload them and our AI will read the key numbers for you
-            to review.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3">
-            <Link
-              href={ENTITIES_ROUTE}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-primary-700 font-semibold rounded-lg hover:bg-primary-50 transition-colors text-sm"
-            >
-              Upload documents <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href={SIGNUP_ROUTE}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-400 transition-colors text-sm border border-primary-400"
-            >
-              Create a free account
-            </Link>
+          {/* Income groups */}
+          <div className="space-y-4 mb-10">
+            {INCOME_GROUPS.map(group => (
+              <GroupCard key={group.id} group={group} />
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="rounded-xl bg-primary-600 p-8 text-white text-center">
+            <h2 className="text-xl font-display font-bold mb-2">Ready to upload your slips?</h2>
+            <p className="text-primary-100 text-sm mb-5">
+              Once you have your documents, upload them and our AI will read the key numbers for you
+              to review.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              <Link
+                href={ENTITIES_ROUTE}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-primary-700 font-semibold rounded-lg hover:bg-primary-50 transition-colors text-sm"
+              >
+                Upload documents <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href={SIGNUP_ROUTE}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-400 transition-colors text-sm border border-primary-400"
+              >
+                Create a free account
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <TaxAssistantCTA />
+    </>
   );
 }
