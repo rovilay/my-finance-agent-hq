@@ -5,4 +5,6 @@ export {
   financialEntries,
   documents,
   userOnboarding,
+  feedback,
+  feedbackCategoryEnum,
 } from '@hq/database';

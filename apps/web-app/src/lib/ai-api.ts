@@ -47,3 +47,20 @@ export async function fetchConversationHistory(
   if (!response.ok) throw new Error('Failed to load history');
   return response.json();
 }
+
+export interface FeedbackPayload {
+  rating: number;
+  category: 'bug' | 'feature_request' | 'general';
+  comment: string;
+}
+
+export async function submitFeedback(payload: FeedbackPayload): Promise<{ id: string }> {
+  const response = await fetch(`${API_BASE}/api/feedback`, {
+    method: 'POST',
+    headers: await authHeaders(),
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error('Failed to submit feedback');
+  return response.json();
+}

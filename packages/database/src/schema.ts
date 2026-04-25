@@ -138,3 +138,20 @@ export const userOnboarding = pgTable('user_onboarding', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
+
+export const feedbackCategoryEnum = pgEnum('feedback_category', [
+  'bug',
+  'feature_request',
+  'general',
+]);
+
+export const feedback = pgTable('feedback', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  rating: numeric('rating', { precision: 2, scale: 0 }).notNull(), // 1–5
+  category: feedbackCategoryEnum('category').notNull(),
+  comment: text('comment').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});

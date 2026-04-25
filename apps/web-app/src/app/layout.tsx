@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import { Providers } from '@/components/Providers';
 import type { ReactNode } from 'react';
 import { AppHeader } from '@/components/AppHeader';
+import { FeedbackWidget } from '@/components/FeedbackWidget';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,6 +31,7 @@ export default function RootLayout({
           <main>
             <AppHeader />
             {children}
+            <FeedbackWidget />
           </main>
         </Providers>
       </body>

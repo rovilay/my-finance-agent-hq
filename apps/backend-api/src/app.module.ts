@@ -14,6 +14,7 @@ import { FiscalEntityModule } from './nest/fiscal-entity/fiscal-entity.module';
 import { DocumentModule } from './nest/document/document.module';
 import { AiModule } from './nest/ai/ai.module';
 import { OnboardingModule } from './nest/onboarding/onboarding.module';
+import { FeedbackModule } from './nest/feedback/feedback.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { OnboardingModule } from './nest/onboarding/onboarding.module';
     DocumentModule,
     TaxModule,
     OnboardingModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService],
