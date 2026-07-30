@@ -6,7 +6,7 @@ primary_region = "yyz" # Toronto (closest to Ontario)
 
 # Build configuration
 [build]
-  dockerfile = "apps/web-app/Dockerfile"
+  dockerfile = "Dockerfile"
   build_context = "../.."  # Build from monorepo root
 
 # Environment variables
