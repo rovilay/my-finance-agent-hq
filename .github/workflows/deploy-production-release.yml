@@ -1,0 +1,88 @@
+name: Promote Release to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Version tag to deploy (e.g. v1.0.0)'
+        required: false
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend to Production
+    runs-on: ubuntu-latest
+    concurrency: deploy-backend-production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Validate Fly.io token configuration
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_BACKEND_PROD }}
+        run: |
+          if [[ -z "${FLY_API_TOKEN}" ]]; then
+            echo "::error::Missing GitHub Actions secret FLY_API_TOKEN_BACKEND_PROD."
+            echo "::error::Create an app-scoped deploy token with: fly tokens create deploy -a finance-agent-backend-prod --name 'github-actions backend production'"
+            exit 1
+          fi
+
+          if [[ "${FLY_API_TOKEN}" != FlyV1* ]]; then
+            echo "::error::Fly token must be the full value returned by Fly, including the 'FlyV1' prefix."
+            echo "::error::Do not use the output of 'flyctl auth token' for GitHub Actions; use 'fly tokens create deploy' instead."
+            exit 1
+          fi
+
+      - name: Deploy Backend to Fly.io Production
+        run: flyctl deploy -a finance-agent-backend-prod --config apps/backend-api/fly.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_BACKEND_PROD }}
+
+  deploy-frontend:
+    name: Deploy Frontend to Production
+    runs-on: ubuntu-latest
+    concurrency: deploy-frontend-production
+    needs: [deploy-backend] # Ensures backend deploys successfully before frontend promotes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Validate Fly.io token configuration
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_FRONTEND_PROD }}
+        run: |
+          if [[ -z "${FLY_API_TOKEN}" ]]; then
+            echo "::error::Missing GitHub Actions secret FLY_API_TOKEN_FRONTEND_PROD."
+            echo "::error::Create an app-scoped deploy token with: fly tokens create deploy -a finance-agent-frontend-prod --name 'github-actions frontend production'"
+            exit 1
+          fi
+
+          if [[ "${FLY_API_TOKEN}" != FlyV1* ]]; then
+            echo "::error::Fly token must be the full value returned by Fly, including the 'FlyV1' prefix."
+            echo "::error::Do not use the output of 'flyctl auth token' for GitHub Actions; use 'fly tokens create deploy' instead."
+            exit 1
+          fi
+
+      - name: Deploy Frontend to Fly.io Production
+        run: |
+          flyctl deploy -a finance-agent-frontend-prod \
+            --config apps/web-app/fly.toml \
+            --remote-only \
+            --build-arg NEXT_PUBLIC_API_BASE_URL="${{ secrets.NEXT_PUBLIC_API_BASE_URL }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY="${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID="${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}" \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID="${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_FRONTEND_PROD }}

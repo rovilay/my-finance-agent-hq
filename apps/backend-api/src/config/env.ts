@@ -21,6 +21,7 @@ declare const process: {
     REDIS_HOST?: string;
     REDIS_PORT?: string;
     REDIS_PASSWORD?: string;
+    CORS_ORIGIN?: string;
   };
   cwd: () => string;
 };
@@ -68,6 +69,7 @@ const envSchema = z.object({
     .optional()
     .transform((val) => (val ? Number(val) : 6379)),
   REDIS_PASSWORD: z.string().optional(),
+  CORS_ORIGIN: z.string().optional(),
 });
 export type EnvSchema = z.infer<typeof envSchema>;
 
@@ -93,6 +95,7 @@ export const envConfig = registerAs('envConfig', (): EnvSchema => {
       REDIS_HOST: parsedEnv.REDIS_HOST,
       REDIS_PORT: parsedEnv.REDIS_PORT,
       REDIS_PASSWORD: parsedEnv.REDIS_PASSWORD,
+      CORS_ORIGIN: parsedEnv.CORS_ORIGIN,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

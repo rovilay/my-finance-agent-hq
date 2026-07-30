@@ -13,11 +13,12 @@ async function bootstrap() {
   // app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
   // Enable CORS
+  const corsOrigins = envConfig().CORS_ORIGIN?.split(',') ?? [];
   app.enableCors({
     origin:
       envConfig().NODE_ENV === 'development'
-        ? DEV_CORS_ORIGINS
-        : PROD_CORS_ORIGINS,
+        ? [...DEV_CORS_ORIGINS, ...corsOrigins]
+        : [...PROD_CORS_ORIGINS, ...corsOrigins],
     credentials: true,
   });
 

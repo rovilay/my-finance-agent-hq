@@ -19,3 +19,4 @@ backups/
 .last-deployment
 **/docs/
 *.tsbuildinfo
+gcp-prod-key*
