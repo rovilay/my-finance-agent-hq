@@ -17,6 +17,7 @@ declare const process: {
     GCP_KMS_PROJECT_ID: string;
     GCP_KMS_LOCATION_ID: string;
     GCP_KMS_KEY_RING_ID: string;
+    GCP_SERVICE_ACCOUNT_KEY_BASE64?: string;
     AI_API_KEY: string;
     REDIS_HOST?: string;
     REDIS_PORT?: string;
@@ -62,6 +63,7 @@ const envSchema = z.object({
   GCP_KMS_PROJECT_ID: z.string().min(1, 'GCP_KMS_PROJECT_ID is required'),
   GCP_KMS_LOCATION_ID: z.string().min(1, 'GCP_KMS_LOCATION_ID is required'),
   GCP_KMS_KEY_RING_ID: z.string().min(1, 'GCP_KMS_KEY_RING_ID is required'),
+  GCP_SERVICE_ACCOUNT_KEY_BASE64: z.string().optional(),
   AI_API_KEY: z.string().min(1, 'AI_API_KEY is required'),
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z
@@ -91,6 +93,8 @@ export const envConfig = registerAs('envConfig', (): EnvSchema => {
       GCP_KMS_PROJECT_ID: process.env.GCP_KMS_PROJECT_ID,
       GCP_KMS_LOCATION_ID: process.env.GCP_KMS_LOCATION_ID,
       GCP_KMS_KEY_RING_ID: process.env.GCP_KMS_KEY_RING_ID,
+      GCP_SERVICE_ACCOUNT_KEY_BASE64:
+        process.env.GCP_SERVICE_ACCOUNT_KEY_BASE64,
       AI_API_KEY: process.env.AI_API_KEY,
       REDIS_HOST: parsedEnv.REDIS_HOST,
       REDIS_PORT: parsedEnv.REDIS_PORT,

@@ -12,9 +12,13 @@ export class GcsService {
 
   constructor(@Inject(envConfig.KEY) private readonly config: EnvConfig) {
     // Initialize Storage with credentials from environment if provided
-    if (process.env.GCP_SERVICE_ACCOUNT_JSON) {
+    const base64Key = this.config.GCP_SERVICE_ACCOUNT_KEY_BASE64;
+    if (base64Key) {
       try {
-        const credentials = JSON.parse(process.env.GCP_SERVICE_ACCOUNT_JSON);
+        const credentialsJson = Buffer.from(base64Key, 'base64').toString(
+          'utf-8',
+        );
+        const credentials = JSON.parse(credentialsJson);
         this.storage = new Storage({ credentials });
       } catch (error) {
         console.error('[GcsService] Failed to parse GCP credentials', error);

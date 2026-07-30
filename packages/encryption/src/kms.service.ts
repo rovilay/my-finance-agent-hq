@@ -10,9 +10,11 @@ export class KmsService {
     private readonly keyId: string
   ) {
     // Initialize KMS client with credentials from environment if provided
-    if (process.env.GCP_SERVICE_ACCOUNT_JSON) {
+    const base64Key = process.env.GCP_SERVICE_ACCOUNT_KEY_BASE64;
+    if (base64Key) {
       try {
-        const credentials = JSON.parse(process.env.GCP_SERVICE_ACCOUNT_JSON);
+        const credentialsJson = Buffer.from(base64Key, 'base64').toString('utf-8');
+        const credentials = JSON.parse(credentialsJson);
         this.client = new KeyManagementServiceClient({ credentials });
       } catch (error) {
         console.error('[KmsService] Failed to parse GCP credentials', error);
