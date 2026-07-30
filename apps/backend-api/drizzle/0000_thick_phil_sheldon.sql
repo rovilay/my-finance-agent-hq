@@ -1,3 +1,8 @@
+CREATE TYPE "public"."document_status" AS ENUM('uploaded', 'processed', 'verified', 'purged', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."feedback_category" AS ENUM('bug', 'feature_request', 'general');--> statement-breakpoint
+CREATE TYPE "public"."financial_type" AS ENUM('income', 'deduction', 'credit', 'tax_paid');--> statement-breakpoint
+CREATE TYPE "public"."fiscal_entity_type" AS ENUM('individual', 'business', 'household');--> statement-breakpoint
+CREATE TYPE "public"."retention_policy" AS ENUM('permanent', 'verify_and_purge', 'ephemeral');--> statement-breakpoint
 CREATE TABLE "documents" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -14,6 +19,15 @@ CREATE TABLE "documents" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"purged_at" timestamp
+);
+--> statement-breakpoint
+CREATE TABLE "feedback" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"rating" numeric(2, 0) NOT NULL,
+	"category" "feedback_category" NOT NULL,
+	"comment" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "financial_entries" (
@@ -42,6 +56,17 @@ CREATE TABLE "fiscal_entities" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "user_onboarding" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"filing_path" text NOT NULL,
+	"arrived_this_year" boolean DEFAULT false NOT NULL,
+	"income_sources" jsonb NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "user_onboarding_user_id_unique" UNIQUE("user_id")
+);
+--> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"first_name" text NOT NULL,
@@ -56,6 +81,8 @@ CREATE TABLE "users" (
 --> statement-breakpoint
 ALTER TABLE "documents" ADD CONSTRAINT "documents_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "documents" ADD CONSTRAINT "documents_entity_id_fiscal_entities_id_fk" FOREIGN KEY ("entity_id") REFERENCES "public"."fiscal_entities"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "feedback" ADD CONSTRAINT "feedback_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "financial_entries" ADD CONSTRAINT "financial_entries_entity_id_fiscal_entities_id_fk" FOREIGN KEY ("entity_id") REFERENCES "public"."fiscal_entities"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "financial_entries" ADD CONSTRAINT "financial_entries_source_document_id_documents_id_fk" FOREIGN KEY ("source_document_id") REFERENCES "public"."documents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "fiscal_entities" ADD CONSTRAINT "fiscal_entities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "fiscal_entities" ADD CONSTRAINT "fiscal_entities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_onboarding" ADD CONSTRAINT "user_onboarding_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;

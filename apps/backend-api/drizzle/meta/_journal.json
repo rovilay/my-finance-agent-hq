@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1776393033369,
-      "tag": "0000_huge_magik",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1776393100000,
-      "tag": "0001_add_user_onboarding",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1777096236366,
-      "tag": "0002_bizarre_cannonball",
+      "when": 1785424406928,
+      "tag": "0000_thick_phil_sheldon",
       "breakpoints": true
     }
   ]

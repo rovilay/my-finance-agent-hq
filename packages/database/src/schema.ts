@@ -9,6 +9,40 @@ import {
   boolean,
 } from 'drizzle-orm/pg-core';
 
+export const fiscalEntityTypeEnum = pgEnum('fiscal_entity_type', [
+  'individual',
+  'business',
+  'household',
+]);
+
+export const financialTypeEnum = pgEnum('financial_type', [
+  'income', // Money earned
+  'deduction', // Reduces taxable income
+  'credit', // Reduces tax owed directly
+  'tax_paid', // Withholdings (already paid to govt)
+]);
+
+// 1. Enums for the State Machine & Privacy
+export const documentStatusEnum = pgEnum('document_status', [
+  'uploaded', // Initial state
+  'processed', // AI has extracted data
+  'verified', // User confirmed extraction
+  'purged', // File deleted from storage, data kept
+  'failed', // Error in processing
+]);
+
+export const retentionPolicyEnum = pgEnum('retention_policy', [
+  'permanent', // Standard vaulting
+  'verify_and_purge', // The "Privacy-First" default
+  'ephemeral', // Purge immediately after extraction
+]);
+
+export const feedbackCategoryEnum = pgEnum('feedback_category', [
+  'bug',
+  'feature_request',
+  'general',
+]);
+
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   firstName: text('first_name').notNull(),
@@ -22,12 +56,6 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-export const fiscalEntityTypeEnum = pgEnum('fiscal_entity_type', [
-  'individual',
-  'business',
-  'household',
-]);
 
 export const fiscalEntities = pgTable('fiscal_entities', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -44,13 +72,6 @@ export const fiscalEntities = pgTable('fiscal_entities', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-export const financialTypeEnum = pgEnum('financial_type', [
-  'income', // Money earned
-  'deduction', // Reduces taxable income
-  'credit', // Reduces tax owed directly
-  'tax_paid', // Withholdings (already paid to govt)
-]);
 
 export const financialEntries = pgTable('financial_entries', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -77,21 +98,6 @@ export const financialEntries = pgTable('financial_entries', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-// 1. Enums for the State Machine & Privacy
-export const documentStatusEnum = pgEnum('document_status', [
-  'uploaded', // Initial state
-  'processed', // AI has extracted data
-  'verified', // User confirmed extraction
-  'purged', // File deleted from storage, data kept
-  'failed', // Error in processing
-]);
-
-export const retentionPolicyEnum = pgEnum('retention_policy', [
-  'permanent', // Standard vaulting
-  'verify_and_purge', // The "Privacy-First" default
-  'ephemeral', // Purge immediately after extraction
-]);
 
 // 2. The Table
 export const documents = pgTable('documents', {
@@ -138,12 +144,6 @@ export const userOnboarding = pgTable('user_onboarding', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
-export const feedbackCategoryEnum = pgEnum('feedback_category', [
-  'bug',
-  'feature_request',
-  'general',
-]);
 
 export const feedback = pgTable('feedback', {
   id: uuid('id').primaryKey().defaultRandom(),
