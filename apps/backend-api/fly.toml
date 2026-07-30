@@ -1,7 +1,7 @@
 # Fly.io configuration for Finance Agent HQ Backend - PRODUCTION
 # https://fly.io/docs/reference/configuration/
 
-app = "finance-agent-backend"
+app = "finance-agent-backend-prod"
 primary_region = "yyz" # Toronto (closest to Ontario)
 
 # Build configuration
@@ -12,11 +12,11 @@ primary_region = "yyz" # Toronto (closest to Ontario)
 # Environment variables (non-sensitive)
 [env]
   NODE_ENV = "production"
-  PORT = "3000"
+  PORT = "3333"
 
 # HTTP service
 [[services]]
-  internal_port = 3000
+  internal_port = 3333
   protocol = "tcp"
 
   # Keep at least 1 instance running in production
