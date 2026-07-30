@@ -13,7 +13,9 @@ primary_region = "yyz" # Toronto (closest to Ontario)
 # Note: Add NEXT_PUBLIC_API_URL via `fly secrets set`
 [env]
   NODE_ENV = "production"
-  PORT = "8080"
+  PORT = '3000'
+  HOSTNAME = '0.0.0.0'
+  NEXT_PUBLIC_API_BASE_URL = 'https://finance-agent-backend-prod.fly.dev'
 
 # HTTP service
 [[services]]
