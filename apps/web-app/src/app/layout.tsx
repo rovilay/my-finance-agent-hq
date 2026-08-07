@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     default: 'Finance Agent HQ - Secure Tax Document Management',
   },
   description: 'AI-powered secure tax document processing with envelope encryption',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
