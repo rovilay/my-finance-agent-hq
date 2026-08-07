@@ -311,7 +311,7 @@ function GroupCard({ group }: { group: IncomeGroup }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DocumentGuidePage() {
+export default function DocumentGuidePage({ isAuthenticated }: { isAuthenticated?: boolean }) {
   return (
     <>
       <div className="min-h-screen bg-neutral-50 py-12 px-4">
@@ -370,12 +370,14 @@ export default function DocumentGuidePage() {
               >
                 Upload documents <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href={SIGNUP_ROUTE}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-400 transition-colors text-sm border border-primary-400"
-              >
-                Create a free account
-              </Link>
+              {!isAuthenticated && (
+                <Link
+                  href={SIGNUP_ROUTE}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-400 transition-colors text-sm border border-primary-400"
+                >
+                  Create a free account
+                </Link>
+              )}
             </div>
           </div>
         </div>

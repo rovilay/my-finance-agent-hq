@@ -91,7 +91,7 @@ export const NewcomerWelcomeBanner: React.FC<NewcomerWelcomeBannerProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                className="border-blue-300 text-blue-700 hover:bg-blue-100 hidden"
                 onClick={() => {
                   // Could open a modal or navigate to tutorial
                   alert('Video tutorials coming soon!');
