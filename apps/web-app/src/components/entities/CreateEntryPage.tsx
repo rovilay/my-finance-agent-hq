@@ -9,6 +9,7 @@ import {
   CardContent,
   Button,
   Input,
+  Container,
 } from '@/components/ui';
 import { Upload, FileText, Plus, AlertCircle, Loader } from 'lucide-react';
 import { BackButton } from '../BackButton';
@@ -169,7 +170,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="max-w-6xl mx-auto py-12">
+      <Container className="py-12">
         <div className="max-w-3xl mx-auto">
           <BackButton onClick={onBack} text="Back to Entries" />
 
@@ -445,7 +446,7 @@ export default function CreateEntryPage({ entityId, onBack }: CreateEntryPagePro
             </CardContent>
           </Card>
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

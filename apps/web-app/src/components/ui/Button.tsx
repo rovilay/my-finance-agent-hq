@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cnsMerge } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -29,7 +29,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(baseClasses, variantClasses[variant], sizeClasses[size], className)}
+        className={cnsMerge(baseClasses, variantClasses[variant], sizeClasses[size], className)}
         disabled={disabled || isLoading}
         {...props}
       >

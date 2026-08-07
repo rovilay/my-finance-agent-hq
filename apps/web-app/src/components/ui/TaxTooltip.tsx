@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { cnsMerge } from '@/lib/utils';
 import { HelpCircle, Info, BookOpen, ExternalLink } from 'lucide-react';
 
 interface TooltipProps {
@@ -66,7 +66,7 @@ export const TaxTooltip: React.FC<TooltipProps> = ({
           {/* Tooltip */}
           <div
             ref={tooltipRef}
-            className={cn(
+            className={cnsMerge(
               'absolute z-50 w-80 max-w-[90vw] bg-white rounded-lg shadow-xl border border-neutral-200 p-4',
               'animate-in fade-in-0 zoom-in-95 duration-200',
               position === 'bottom'
@@ -76,7 +76,7 @@ export const TaxTooltip: React.FC<TooltipProps> = ({
           >
             {/* Arrow */}
             <div
-              className={cn(
+              className={cnsMerge(
                 'absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-neutral-200 rotate-45',
                 position === 'bottom'
                   ? 'top-0 -translate-y-1/2 border-t border-l'

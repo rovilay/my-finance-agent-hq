@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cnsMerge } from '@/lib/utils';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -16,7 +16,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           type={type}
-          className={cn('input', error && 'input-error', className)}
+          className={cnsMerge('input', error && 'input-error', className)}
           ref={ref}
           {...props}
         />
@@ -43,7 +43,7 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
           <label className="block text-sm font-medium text-neutral-700 mb-1.5">{label}</label>
         )}
         <textarea
-          className={cn('input min-h-[100px] resize-y', error && 'input-error', className)}
+          className={cnsMerge('input min-h-[100px] resize-y', error && 'input-error', className)}
           ref={ref}
           {...props}
         />

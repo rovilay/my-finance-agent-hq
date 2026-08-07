@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { getIdToken } from '@/lib/firebase';
 import { Document, RetentionPolicy } from './graphql';
 
-export function cn(...inputs: ClassValue[]) {
+export function cnsMerge(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 

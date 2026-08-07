@@ -53,10 +53,12 @@ export function Logo({ className = 'h-8 w-8' }: { className?: string }) {
 
 export function LogoWithText({ className = '' }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <Logo className="h-10 w-10" />
+    <div className={`flex items-center gap-2 md:gap-3 ${className}`}>
+      <Logo className="h-8 w-8 md:h-10 md:w-10" />
       <div className="flex flex-col">
-        <span className="text-xl font-display font-bold text-neutral-900">Finance Agent</span>
+        <span className="text-base md:text-xl font-display font-bold text-neutral-900">
+          Finance Agent
+        </span>
         <span className="text-xs text-neutral-500 font-medium tracking-wide">
           YOUR FINANCES, SIMPLIFIED
         </span>

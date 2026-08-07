@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cnsMerge } from '@/lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
@@ -17,7 +17,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     };
 
     return (
-      <span ref={ref} className={cn(variantClasses[variant], className)} {...props}>
+      <span ref={ref} className={cnsMerge(variantClasses[variant], className)} {...props}>
         {children}
       </span>
     );

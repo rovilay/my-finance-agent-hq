@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { Container } from '@/components/ui';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,8 +39,6 @@ interface IncomeGroup {
   description: string;
   slips: SlipEntry[];
 }
-
-// ─── Content ──────────────────────────────────────────────────────────────────
 
 const INCOME_GROUPS: IncomeGroup[] = [
   {
@@ -195,8 +194,6 @@ const INCOME_GROUPS: IncomeGroup[] = [
   },
 ];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function SlipDetail({ slip }: { slip: SlipEntry }) {
   return (
     <div className="mt-4 space-y-5">
@@ -309,15 +306,13 @@ function GroupCard({ group }: { group: IncomeGroup }) {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function DocumentGuidePage({ isAuthenticated }: { isAuthenticated?: boolean }) {
   return (
     <>
-      <div className="min-h-screen bg-neutral-50 py-12 px-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="min-h-screen bg-neutral-50">
+        <Container className="flex flex-col gap-8">
           {/* Header */}
-          <div className="mb-10">
+          <div>
             <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full mb-3">
               Document Guide
             </span>
@@ -331,7 +326,7 @@ export default function DocumentGuidePage({ isAuthenticated }: { isAuthenticated
           </div>
 
           {/* Deadline callout */}
-          <div className="mb-8 p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3">
+          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex gap-3">
             <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="text-sm text-amber-900">
               <strong>Filing deadline:</strong> April 30 for most individuals. Self-employed
@@ -350,7 +345,7 @@ export default function DocumentGuidePage({ isAuthenticated }: { isAuthenticated
           </div>
 
           {/* Income groups */}
-          <div className="space-y-4 mb-10">
+          <div className="space-y-4">
             {INCOME_GROUPS.map(group => (
               <GroupCard key={group.id} group={group} />
             ))}
@@ -380,7 +375,7 @@ export default function DocumentGuidePage({ isAuthenticated }: { isAuthenticated
               )}
             </div>
           </div>
-        </div>
+        </Container>
       </div>
       <TaxAssistantCTA />
     </>

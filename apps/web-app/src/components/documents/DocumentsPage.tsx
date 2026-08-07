@@ -1,4 +1,12 @@
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Badge,
+  Container,
+} from '@/components/ui';
 import { FileText, Clock, CheckCircle, Trash2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import React from 'react';
@@ -37,7 +45,7 @@ export default function DocumentsPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-neutral-50">
         {/* Main Content */}
-        <div className="max-w-6xl mx-auto py-12">
+        <Container className="py-12">
           <div className="mb-8">
             <h1 className="text-3xl font-display font-bold text-neutral-900 mb-2">
               Document Dashboard
@@ -80,7 +88,7 @@ export default function DocumentsPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </Container>
       </div>
     </ProtectedRoute>
   );

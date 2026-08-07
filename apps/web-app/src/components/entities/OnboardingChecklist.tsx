@@ -114,7 +114,7 @@ export default function OnboardingChecklist({ entityId }: OnboardingChecklistPro
   const totalCount = steps.length;
 
   return (
-    <div className="mb-8 bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between">
         <div>

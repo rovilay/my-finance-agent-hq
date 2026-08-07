@@ -17,6 +17,8 @@ export { Dropdown, DropdownItem, DropdownDivider, DropdownLabel } from './Dropdo
 export { Loader } from './Loader';
 export { PageLoader } from './PageLoader';
 
+export { Container } from './Container';
+
 export { Modal } from './Modal';
 export type { ModalProps } from './Modal';
 

@@ -20,6 +20,8 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Container } from '@/components/ui';
+import { cnsMerge } from '@/lib/utils';
 
 function SectionHeader({
   badge,
@@ -31,12 +33,12 @@ function SectionHeader({
   subtitle: string;
 }) {
   return (
-    <div className="mb-8">
-      <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-semibold rounded-full mb-3 uppercase tracking-wide">
+    <div className="space-y-2">
+      <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-xs font-semibold rounded-full uppercase tracking-wide">
         {badge}
       </span>
       <h2 className="text-2xl font-display font-bold text-neutral-900">{title}</h2>
-      <p className="text-neutral-600 mt-2">{subtitle}</p>
+      <p className="text-neutral-600">{subtitle}</p>
     </div>
   );
 }
@@ -51,8 +53,8 @@ function BracketTable({
   accentClass: string;
 }) {
   return (
-    <div className="flex-1 min-w-0">
-      <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${accentClass}`}>
+    <div className="flex-1 min-w-0 space-y-2">
+      <p className={cnsMerge(`text-xs font-semibold uppercase tracking-wide`, accentClass)}>
         {jurisdiction}
       </p>
       <div className="space-y-2">
@@ -74,17 +76,17 @@ function BracketTable({
 export default function LearnPage() {
   return (
     <>
-      <div className="min-h-screen bg-neutral-50 py-12 px-4">
-        <div className="max-w-3xl mx-auto space-y-16">
+      <div className="min-h-screen bg-neutral-50">
+        <Container className="space-y-8">
           {/* Hero */}
-          <div>
-            <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full mb-3">
+          <section className="space-y-4">
+            <span className="inline-block px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
               Tax Education
             </span>
-            <h1 className="text-3xl font-display font-bold text-neutral-900 mb-3">
+            <h1 className="text-3xl font-display font-bold text-neutral-900">
               Canadian taxes, explained simply
             </h1>
-            <p className="text-lg text-neutral-600 mb-6">
+            <p className="text-lg text-neutral-600">
               A visual guide for newcomers to Canada — how the tax system works, what the deadlines
               are, and what credits you might be missing.
             </p>
@@ -107,10 +109,10 @@ export default function LearnPage() {
                 <ExternalLink className="w-3 h-3" />
               </a>
             </div>
-          </div>
+          </section>
 
           {/* Section 1: How tax brackets work */}
-          <section>
+          <section className="space-y-4">
             <SectionHeader
               badge="How it works"
               title="Canada uses progressive tax brackets"
@@ -118,13 +120,13 @@ export default function LearnPage() {
             />
 
             {/* Progressive tax explainer */}
-            <div className="bg-white border border-neutral-200 rounded-xl p-6 mb-6">
-              <p className="text-sm text-neutral-600 mb-4">
+            <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4">
+              <p className="text-sm text-neutral-600">
                 <strong className="text-neutral-900">Example:</strong> If you earn $70,000, you
                 don't pay 20.5% on the whole amount. You pay 15% on the first $57,375 and 20.5% only
                 on the remaining $12,625.
               </p>
-              <div className="flex flex-col sm:flex-row gap-1 items-stretch mb-4">
+              <div className="flex flex-col sm:flex-row gap-1 items-stretch">
                 {[
                   { label: '$57,375', sublabel: '@ 15%', width: 'flex-[57]', bg: 'bg-blue-200' },
                   { label: '$12,625', sublabel: '@ 20.5%', width: 'flex-[13]', bg: 'bg-blue-400' },
@@ -144,8 +146,8 @@ export default function LearnPage() {
             </div>
 
             {/* Bracket tables side by side */}
-            <div className="bg-white border border-neutral-200 rounded-xl p-6">
-              <p className="text-sm font-semibold text-neutral-700 mb-5">2024 Tax Brackets</p>
+            <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4">
+              <p className="text-sm font-semibold text-neutral-700">2024 Tax Brackets</p>
               <div className="flex flex-col sm:flex-row gap-8">
                 <BracketTable
                   brackets={FEDERAL_BRACKETS_2024}
@@ -159,14 +161,14 @@ export default function LearnPage() {
                   accentClass="text-violet-700"
                 />
               </div>
-              <p className="text-xs text-neutral-400 mt-5 pt-4 border-t border-neutral-100">
+              <p className="text-xs text-neutral-400 pt-4 border-t border-neutral-100">
                 Brackets adjust annually. Ontario brackets shown; other provinces differ.
               </p>
             </div>
           </section>
 
           {/* Section 2: Filing journey */}
-          <section>
+          <section className="space-y-4">
             <SectionHeader
               badge="Filing journey"
               title="How to file your tax return"
@@ -183,11 +185,11 @@ export default function LearnPage() {
                   >
                     {s.icon}
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide mb-0.5">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">
                       Step {s.step}
                     </p>
-                    <p className="text-sm font-semibold text-neutral-900 mb-1">{s.title}</p>
+                    <p className="text-sm font-semibold text-neutral-900">{s.title}</p>
                     <p className="text-xs text-neutral-600 leading-relaxed">{s.description}</p>
                   </div>
                 </div>
@@ -196,7 +198,7 @@ export default function LearnPage() {
           </section>
 
           {/* Section 3: Key dates */}
-          <section>
+          <section className="space-y-4">
             <SectionHeader
               badge="Deadlines"
               title="Key dates for the 2024 tax year"
@@ -215,9 +217,9 @@ export default function LearnPage() {
                       {d.date}
                     </span>
                   </div>
-                  <div>
+                  <div className="space-y-1">
                     <p
-                      className={`text-sm font-semibold mb-0.5 ${d.highlight ? 'text-neutral-900' : 'text-neutral-700'}`}
+                      className={`text-sm font-semibold ${d.highlight ? 'text-neutral-900' : 'text-neutral-700'}`}
                     >
                       {d.label}
                     </p>
@@ -229,7 +231,7 @@ export default function LearnPage() {
           </section>
 
           {/* Section 4: Credits & deductions */}
-          <section>
+          <section className="space-y-4">
             <SectionHeader
               badge="Credits & deductions"
               title="Common credits newcomers miss"
@@ -241,14 +243,14 @@ export default function LearnPage() {
                   key={c.name}
                   className="bg-white border border-neutral-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-start gap-3"
                 >
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <div className="flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-semibold text-neutral-900">{c.name}</p>
                       <span className="text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-medium">
                         {c.amount}
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-500 mb-1">{c.description}</p>
+                    <p className="text-xs text-neutral-500">{c.description}</p>
                     <p className="text-xs text-neutral-400">
                       <Users className="w-3 h-3 inline mr-1" />
                       {c.who}
@@ -260,10 +262,10 @@ export default function LearnPage() {
           </section>
 
           {/* CTA footer */}
-          <section className="bg-primary-600 rounded-2xl p-8 text-center text-white">
-            <TrendingUp className="w-8 h-8 mx-auto mb-4 opacity-80" />
-            <h2 className="text-xl font-display font-bold mb-2">Ready to see your tax picture?</h2>
-            <p className="text-primary-100 text-sm mb-6 max-w-md mx-auto">
+          <section className="bg-primary-600 rounded-2xl p-8 text-center text-white space-y-4">
+            <TrendingUp className="w-8 h-8 mx-auto opacity-80" />
+            <h2 className="text-xl font-display font-bold">Ready to see your tax picture?</h2>
+            <p className="text-primary-100 text-sm max-w-md mx-auto">
               Upload your slips and we'll extract the values, calculate your estimated liability,
               and flag credits you might be eligible for.
             </p>
@@ -284,7 +286,7 @@ export default function LearnPage() {
               </Link>
             </div>
           </section>
-        </div>
+        </Container>
       </div>
       <TaxAssistantCTA />
     </>
