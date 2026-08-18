@@ -204,16 +204,6 @@ export default function LoginPage() {
               Sign up for free
             </Link>
           </p>
-
-          {/* Footer */}
-          <div className="text-center mt-8 text-sm text-neutral-500">
-            <p>
-              Protected by bank-grade encryption •{' '}
-              <Link href="/privacy" className="hover:text-neutral-700">
-                Privacy Policy
-              </Link>
-            </p>
-          </div>
         </div>
       )}
     </div>

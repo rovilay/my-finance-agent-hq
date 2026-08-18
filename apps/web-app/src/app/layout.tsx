@@ -4,6 +4,7 @@ import '@/styles/globals.css';
 import { Providers } from '@/components/Providers';
 import type { ReactNode } from 'react';
 import { AppHeader } from '@/components/AppHeader';
+import { AppFooter } from '@/components/AppFooter';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
 
 const inter = Inter({
@@ -29,13 +30,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans`}>
+      <body className={`${inter.variable} font-sans min-h-screen flex flex-col`}>
         <Providers>
-          <main>
-            <AppHeader />
+          <AppHeader />
+          <main className="flex-1">
             {children}
             <FeedbackWidget />
           </main>
+          <AppFooter />
         </Providers>
       </body>
     </html>

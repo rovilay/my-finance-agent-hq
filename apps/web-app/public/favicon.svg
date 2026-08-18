@@ -1,5 +1,5 @@
 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  {/* Shield Background - Represents Security */}
+  <!-- Shield Background - Represents Security -->
   <path
     d="M50 5 L85 20 L85 45 Q85 70 50 95 Q15 70 15 45 L15 20 Z"
     fill="#3b82f6"
@@ -7,9 +7,9 @@
     strokeWidth="2"
   />
 
-  {/* Dollar Sign - Finance Symbol */}
+  <!-- Dollar Sign - Finance Symbol -->
   <g transform="translate(50, 50)">
-    {/* Top curve */}
+    <!-- Top curve -->
     <path
       d="M-8 -15 Q-8 -25 0 -25 Q8 -25 8 -15"
       stroke="#ffffff"
@@ -17,7 +17,7 @@
       fill="none"
       strokeLinecap="round"
     />
-    {/* Bottom curve */}
+    <!-- Bottom curve -->
     <path
       d="M8 15 Q8 25 0 25 Q-8 25 -8 15"
       stroke="#ffffff"
@@ -25,7 +25,7 @@
       fill="none"
       strokeLinecap="round"
     />
-    {/* Vertical line */}
+    <!-- Vertical line -->
     <line
       x1="0"
       y1="-30"
