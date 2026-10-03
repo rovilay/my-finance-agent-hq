@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9.15.4
 
 WORKDIR /app
 
@@ -28,7 +28,7 @@ RUN pnpm --filter @hq/backend-api... build
 FROM node:20-alpine AS production
 
 # Install pnpm and postgresql-client for migrations
-RUN npm install -g pnpm && \
+RUN npm install -g pnpm@9.15.4 && \
     apk add --no-cache postgresql-client
 
 WORKDIR /app

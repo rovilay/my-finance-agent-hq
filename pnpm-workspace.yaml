@@ -2,6 +2,9 @@ packages:
   - 'packages/*'
   - 'apps/*'
 
+overrides:
+  zod: ^3.23.8
+
 catalog:
   # AI/ML Dependencies
   '@ai-sdk/google': ^3.0.10

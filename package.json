@@ -59,11 +59,6 @@
     "ai": "catalog:",
     "dotenv": "catalog:"
   },
-  "pnpm": {
-    "overrides": {
-      "zod": "^3.23.8"
-    }
-  },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs}": [
       "eslint --fix",

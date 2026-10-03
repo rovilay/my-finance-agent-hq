@@ -7,6 +7,10 @@ on:
       - 'apps/backend-api/**'
       - 'apps/cli/**'
       - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
       - '.github/workflows/deploy-backend-staging.yml'
   workflow_dispatch:
 
