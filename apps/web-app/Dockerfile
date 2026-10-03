@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9.15.4
 
 WORKDIR /app
 
@@ -49,7 +49,7 @@ RUN pnpm --filter @hq/web-app... build
 FROM node:20-alpine AS production
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9.15.4
 
 WORKDIR /app
 

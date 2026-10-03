@@ -6,6 +6,10 @@ on:
     paths:
       - 'apps/web-app/**'
       - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
       - '.github/workflows/deploy-frontend-staging.yml'
   workflow_dispatch:
 
