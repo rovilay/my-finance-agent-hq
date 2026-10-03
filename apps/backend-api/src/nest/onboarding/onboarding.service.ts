@@ -64,7 +64,7 @@ export class OnboardingService {
       userId: record.userId,
       filingPath: record.filingPath,
       arrivedThisYear: record.arrivedThisYear,
-      incomeSources: record.incomeSources as string[],
+      incomeSources: record.incomeSources,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     };
