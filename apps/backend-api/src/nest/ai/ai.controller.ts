@@ -45,6 +45,7 @@ export class AiController {
   @UseGuards(AuthGuard)
   async conversationHistory(
     @Query('entityId') entityId: string,
+    @Query('taxYear') taxYear: string | undefined,
     @Req() req: Request,
   ): Promise<{
     messages: Array<{
@@ -58,6 +59,7 @@ export class AiController {
     const messages = await this.aiService.getConversationHistory(
       userId,
       entityId,
+      taxYear,
     );
     return { messages };
   }

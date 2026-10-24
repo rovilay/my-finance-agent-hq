@@ -82,6 +82,18 @@ export class FinancialEntryService {
         `[FinancialEntryService] Successfully persisted entry ID: ${entry.id} for Entity: ${entityId}`,
       );
 
+      try {
+        await this.aiService.invalidateFinancialCache(entityId, taxYear);
+        if (taxYear) {
+          await this.aiService.invalidateFinancialCache(entityId);
+        }
+      } catch (cacheError) {
+        console.error(
+          `[FinancialEntryService] Failed to invalidate AI financial cache for entity: ${entityId}`,
+          cacheError,
+        );
+      }
+
       return this.mapToModel(entry);
     } catch (error) {
       // ERROR LOG: Capture the full context for debugging

@@ -306,7 +306,7 @@ IMPORTANT INSTRUCTIONS:
     taxYear?: string,
     user?: User,
   ): Promise<string> {
-    const threadId = `${userId}-tax-education-${entityId}`;
+    const threadId = this.getTaxEducationThreadId(userId, entityId, taxYear);
 
     console.log(
       `[AiService] Starting tax education chat for user: ${userId}, entity: ${entityId}`,
@@ -360,10 +360,11 @@ IMPORTANT INSTRUCTIONS:
   async getConversationHistory(
     userId: string,
     entityId: string,
+    taxYear?: string,
   ): Promise<
     Array<{ id: string; role: string; content: string; createdAt: Date }>
   > {
-    const threadId = `${userId}-tax-education-${entityId}`;
+    const threadId = this.getTaxEducationThreadId(userId, entityId, taxYear);
     const memoryStore = await this.mastraStore.getStore('memory');
     if (!memoryStore) return [];
     const result = await memoryStore.listMessages({ threadId, perPage: 50 });
@@ -386,6 +387,15 @@ IMPORTANT INSTRUCTIONS:
             m.createdAt instanceof Date ? m.createdAt : new Date(m.createdAt),
         };
       });
+  }
+
+  private getTaxEducationThreadId(
+    userId: string,
+    entityId: string,
+    taxYear?: string,
+  ): string {
+    const scope = taxYear?.trim() ? taxYear.trim() : 'all-years';
+    return `${userId}-tax-education-${entityId}-${scope}`;
   }
 
   private buildUserContext(user?: User): string {
