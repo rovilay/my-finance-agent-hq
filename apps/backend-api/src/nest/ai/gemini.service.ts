@@ -5,8 +5,13 @@ import { GcsService } from '../document/gcs.service';
 import { type EnvConfig, envConfig } from 'src/config/env';
 import { agent_models } from '@hq/tools';
 import {
+  taxSlipExtractionSchemas,
+  type SupportedSlipSchemaType,
+} from '@hq/validation-schema';
+import {
   DOCUMENT_TYPE_DETECTION,
   getExtractionConfig,
+  getRepairPrompt,
   type SlipType,
 } from './extraction-prompts';
 
@@ -123,32 +128,16 @@ export class GeminiService {
         systemInstruction: config.systemInstruction,
       });
 
-      const extractionResult = await extractionModel.generateContent([
-        { inlineData },
-        config.userPrompt,
-      ]);
-
-      const responseText = extractionResult.response
-        .text()
-        .replace(/```json|```/g, '')
-        .trim();
-
-      let extracted: Record<string, unknown>;
-      try {
-        extracted = JSON.parse(responseText);
-      } catch {
-        throw new ExtractionError(
-          'values_unreadable',
-          'Extraction succeeded but the JSON response could not be parsed.',
-        );
-      }
-      // Ensure the documentType is always present even if the model omitted it
-      if (!extracted.documentType && slipType !== 'UNKNOWN') {
-        extracted.documentType = slipType;
-      }
+      const extracted = await this.runExtractionWithValidation({
+        extractionModel,
+        inlineData,
+        slipType,
+        expectedSchemaType: config.schemaType,
+        userPrompt: config.userPrompt,
+      });
 
       console.log(
-        `[GeminiService] ✅ Extraction complete for ${slipType} (Doc: ${documentId})`,
+        `[GeminiService] ✅ Extraction complete for ${slipType} (Doc: ${documentId}, promptVersion: ${config.promptVersion}, schemaVersion: ${config.schemaVersion})`,
       );
       return extracted;
     } catch (error) {
@@ -157,5 +146,133 @@ export class GeminiService {
       if (error instanceof ExtractionError) throw error;
       throw classifyError(error);
     }
+  }
+
+  private async runExtractionWithValidation({
+    extractionModel,
+    inlineData,
+    slipType,
+    expectedSchemaType,
+    userPrompt,
+  }: {
+    extractionModel: ReturnType<GoogleGenerativeAI['getGenerativeModel']>;
+    inlineData: { data: string; mimeType: string };
+    slipType: SlipType;
+    expectedSchemaType: SupportedSlipSchemaType;
+    userPrompt: string;
+  }): Promise<Record<string, unknown>> {
+    const initialResponse = await extractionModel.generateContent([
+      { inlineData },
+      userPrompt,
+    ]);
+
+    const initialResponseText = this.normalizeModelResponse(
+      initialResponse.response.text(),
+    );
+
+    try {
+      return this.parseAndValidateExtraction(
+        initialResponseText,
+        slipType,
+        expectedSchemaType,
+      );
+    } catch (error) {
+      if (!(error instanceof ExtractionError)) throw error;
+      if (error.reason !== 'values_unreadable') throw error;
+
+      const repairPrompt = getRepairPrompt({
+        userPrompt,
+        validationError: error.message,
+        previousInvalidResponse: initialResponseText,
+      });
+
+      const retryResponse = await extractionModel.generateContent([
+        { inlineData },
+        repairPrompt,
+      ]);
+
+      const retryResponseText = this.normalizeModelResponse(
+        retryResponse.response.text(),
+      );
+
+      return this.parseAndValidateExtraction(
+        retryResponseText,
+        slipType,
+        expectedSchemaType,
+      );
+    }
+  }
+
+  private normalizeModelResponse(responseText: string): string {
+    return responseText.replace(/```json|```/g, '').trim();
+  }
+
+  private parseAndValidateExtraction(
+    responseText: string,
+    slipType: SlipType,
+    expectedSchemaType: SupportedSlipSchemaType,
+  ): Record<string, unknown> {
+    let extracted: Record<string, unknown>;
+    try {
+      extracted = JSON.parse(responseText) as Record<string, unknown>;
+    } catch {
+      throw new ExtractionError(
+        'values_unreadable',
+        'Extraction succeeded but the JSON response could not be parsed.',
+      );
+    }
+
+    if (!extracted.documentType && slipType !== 'UNKNOWN') {
+      extracted.documentType = slipType;
+    }
+
+    const schemaSlipType = this.resolveSchemaSlipType(
+      slipType,
+      extracted.documentType,
+      expectedSchemaType,
+    );
+    const schema = taxSlipExtractionSchemas[schemaSlipType];
+    const validationResult = schema.safeParse(extracted);
+
+    if (!validationResult.success) {
+      const issues = validationResult.error.issues
+        .map((issue) => `${issue.path.join('.') || 'root'}: ${issue.message}`)
+        .join('; ');
+      throw new ExtractionError(
+        'values_unreadable',
+        `Extraction JSON failed schema validation for ${schemaSlipType}. ${issues}`,
+      );
+    }
+
+    return validationResult.data as Record<string, unknown>;
+  }
+
+  private resolveSchemaSlipType(
+    detectedSlipType: SlipType,
+    extractedDocumentType: unknown,
+    expectedSchemaType: SupportedSlipSchemaType,
+  ): SupportedSlipSchemaType {
+    if (expectedSchemaType !== 'UNKNOWN') {
+      return expectedSchemaType;
+    }
+
+    if (
+      typeof extractedDocumentType === 'string' &&
+      this.isSupportedSchemaSlipType(extractedDocumentType)
+    ) {
+      return extractedDocumentType;
+    }
+
+    if (this.isSupportedSchemaSlipType(detectedSlipType)) {
+      return detectedSlipType;
+    }
+
+    return 'UNKNOWN';
+  }
+
+  private isSupportedSchemaSlipType(
+    slipType: string,
+  ): slipType is SupportedSlipSchemaType {
+    return slipType in taxSlipExtractionSchemas;
   }
 }

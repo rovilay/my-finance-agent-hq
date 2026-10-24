@@ -8,6 +8,7 @@
  *
  * Add new slip types here; gemini.service.ts detects the type and picks the right config.
  */
+import { type SupportedSlipSchemaType } from '@hq/validation-schema';
 
 // ─── Shared rules injected into every system instruction ─────────────────────
 
@@ -280,15 +281,48 @@ export type SlipType = 'T3' | 'T4' | 'T4A' | 'T4E' | 'T5' | 'T2202' | 'UNKNOWN';
 export interface ExtractionConfig {
   systemInstruction: string;
   userPrompt: string;
+  schemaType: SupportedSlipSchemaType;
+  promptVersion: string;
+  schemaVersion: string;
 }
 
-const SLIP_CONFIGS: Record<string, ExtractionConfig> = {
-  T4: T4_EXTRACTION,
-  T3: T3_EXTRACTION,
-  T4A: T4A_EXTRACTION,
-  T5: T5_EXTRACTION,
-  T4E: T4E_EXTRACTION,
-  T2202: T2202_EXTRACTION,
+const SLIP_CONFIGS: Record<Exclude<SlipType, 'UNKNOWN'>, ExtractionConfig> = {
+  T4: {
+    ...T4_EXTRACTION,
+    schemaType: 'T4',
+    promptVersion: 't4-v1',
+    schemaVersion: 't4-v1',
+  },
+  T3: {
+    ...T3_EXTRACTION,
+    schemaType: 'T3',
+    promptVersion: 't3-v1',
+    schemaVersion: 't3-v1',
+  },
+  T4A: {
+    ...T4A_EXTRACTION,
+    schemaType: 'T4A',
+    promptVersion: 't4a-v1',
+    schemaVersion: 't4a-v1',
+  },
+  T5: {
+    ...T5_EXTRACTION,
+    schemaType: 'T5',
+    promptVersion: 't5-v1',
+    schemaVersion: 't5-v1',
+  },
+  T4E: {
+    ...T4E_EXTRACTION,
+    schemaType: 'T4E',
+    promptVersion: 't4e-v1',
+    schemaVersion: 't4e-v1',
+  },
+  T2202: {
+    ...T2202_EXTRACTION,
+    schemaType: 'T2202',
+    promptVersion: 't2202-v1',
+    schemaVersion: 't2202-v1',
+  },
 };
 
 /**
@@ -312,7 +346,7 @@ Do not extract any other fields. Do not include any text outside the JSON.
  */
 export function getExtractionConfig(slipType: SlipType): ExtractionConfig {
   return (
-    SLIP_CONFIGS[slipType] ?? {
+    (slipType === 'UNKNOWN' ? undefined : SLIP_CONFIGS[slipType]) ?? {
       systemInstruction: `
 You are an expert Canadian tax assistant.
 First identify the document type (e.g. T4, T3, T4A, T5, T4E, T2202).
@@ -322,6 +356,34 @@ ${SHARED_RULES}
       `.trim(),
       userPrompt:
         'Identify this tax document type, then extract all tax-relevant fields into JSON format.',
+      schemaType: 'UNKNOWN',
+      promptVersion: 'generic-v1',
+      schemaVersion: 'unknown-v1',
     }
   );
+}
+
+export function getRepairPrompt({
+  userPrompt,
+  validationError,
+  previousInvalidResponse,
+}: {
+  userPrompt: string;
+  validationError: string;
+  previousInvalidResponse: string;
+}): string {
+  return `
+${userPrompt}
+
+Your previous response did not match the required JSON contract.
+Return ONLY one valid JSON object that strictly matches the expected schema.
+Do not include markdown or any explanatory text.
+If a field is missing, set it to null.
+
+Validation failure:
+${validationError}
+
+Previous invalid response:
+${previousInvalidResponse}
+  `.trim();
 }

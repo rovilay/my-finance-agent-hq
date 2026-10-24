@@ -15,6 +15,7 @@ export * from './user.schema';
 
 // Tax Document Schemas
 export * from './tax-document.schema';
+export * from './tax-slip-extraction.schema';
 
 // Tax Year Schemas
 export * from './tax-year.schema';
