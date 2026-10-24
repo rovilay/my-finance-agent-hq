@@ -66,7 +66,7 @@ export default function DocumentUploadModal({
           file,
           entityId,
           retentionPolicy,
-          extractData: false,
+          extractData: true,
         });
         setData(result);
         setIsLoading(false);

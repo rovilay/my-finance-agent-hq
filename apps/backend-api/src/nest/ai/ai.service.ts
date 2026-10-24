@@ -5,10 +5,6 @@ import {
   createTaxEducationAgent,
 } from '@hq/tools';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
-import {
-  ExtractionWorkflow,
-  ExtractionWorkflowSteps,
-} from './workflows/extraction.workflow';
 import { type EnvConfig, envConfig } from 'src/config/env';
 import { TaxService } from '../tax/tax.service';
 import { FinancialEntryService } from '../financial-entry/financial-entry.service';
@@ -35,7 +31,6 @@ export class AiService {
   constructor(
     @Inject(envConfig.KEY) private readonly config: EnvConfig,
     @Inject(MASTRA_STORE) private readonly mastraStore: MastraStore,
-    private readonly extractionWorkflow: ExtractionWorkflow,
     @Inject(forwardRef(() => TaxService))
     private readonly taxService: TaxService,
     @Inject(forwardRef(() => FinancialEntryService))
@@ -141,40 +136,6 @@ Provide the extracted data in the exact JSON format specified in your instructio
     } catch (error) {
       console.error('[AiService] Failed to parse extraction result:', error);
       throw new Error('Failed to extract financial entry data from document');
-    }
-  }
-
-  async verifyDocument(
-    documentId: string,
-    approved: boolean,
-    shouldKeepFile: boolean,
-  ): Promise<boolean> {
-    // This method is intentionally left blank as the logic has been moved to AiResolver
-    console.log(`[AiResolver] 🔘 Resuming workflow for Doc: ${documentId}`);
-
-    try {
-      // 1. Get the workflow instance
-      const workflow = this.extractionWorkflow.createWorkflow();
-
-      // 2. Locate the specific run using the resourceId (the documentId)
-      // Mastra's createRun with an existing resourceId links to the persistent state
-      const run = await workflow.createRun({
-        resourceId: documentId,
-      });
-
-      // 3. Send the resume data to the 'verify' step
-      await run.resume({
-        step: ExtractionWorkflowSteps.VERIFY,
-        resumeData: {
-          approved,
-          shouldKeepFile,
-        },
-      });
-
-      return true;
-    } catch (error) {
-      console.error(`[AiResolver] ❌ Failed to resume workflow:`, error);
-      return false;
     }
   }
 

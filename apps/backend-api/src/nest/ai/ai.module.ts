@@ -1,10 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AiService } from './ai.service';
-import { AiResolver } from './ai.resolver';
 import { AiController } from './ai.controller';
 import { DocumentModule } from '../document/document.module';
 import { ExtractionWorkflow } from './workflows/extraction.workflow';
-import { AiOrchestrator } from './ai.orchestrator';
 import { DatabaseModule } from '../database/database.module';
 import { GeminiService } from './gemini.service';
 import { EncryptionModule } from '../encryption/encryption.module';
@@ -30,13 +28,7 @@ import { envConfig } from 'src/config/env';
     forwardRef(() => DocumentModule),
   ],
   controllers: [AiController],
-  providers: [
-    GeminiService,
-    AiService,
-    AiResolver,
-    ExtractionWorkflow,
-    AiOrchestrator,
-  ],
-  exports: [ExtractionWorkflow, AiService, AiOrchestrator],
+  providers: [GeminiService, AiService, ExtractionWorkflow],
+  exports: [ExtractionWorkflow, AiService],
 })
 export class AiModule {}

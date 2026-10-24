@@ -1,5 +1,5 @@
 import { Workflow, createStep } from '@mastra/core/workflows';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { z } from 'zod';
 import { DocumentService } from '../../document/document.service';
 import { GeminiService, ExtractionError } from '../gemini.service';
@@ -7,13 +7,12 @@ import { GeminiService, ExtractionError } from '../gemini.service';
 export enum ExtractionWorkflowSteps {
   PREPARE = 'prepare',
   EXTRACTION = 'extraction',
-  VERIFY = 'verify',
-  PERSISTENCE = 'persistence',
 }
 
 @Injectable()
 export class ExtractionWorkflow {
   constructor(
+    @Inject(forwardRef(() => DocumentService))
     private readonly documentService: DocumentService,
     private readonly geminiService: GeminiService,
   ) {}
