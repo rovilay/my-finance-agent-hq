@@ -4,7 +4,7 @@ import {
   createFinanceEntryExtractionAgent,
   createTaxEducationAgent,
 } from '@hq/tools';
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { type EnvConfig, envConfig } from 'src/config/env';
 import { TaxService } from '../tax/tax.service';
 import { FinancialEntryService } from '../financial-entry/financial-entry.service';
@@ -23,8 +23,11 @@ interface ExtractedEntry {
   type?: string;
 }
 
+type FinancialContextSource = 'db' | 'cache' | 'memory';
+
 @Injectable()
 export class AiService {
+  private readonly logger = new Logger(AiService.name);
   private readonly CACHE_TTL_SECONDS = 5 * 60; // 5 minutes
   private readonly CACHE_KEY_PREFIX = 'financial-context:';
 
@@ -84,7 +87,7 @@ export class AiService {
       name: 'Financial Entry Extraction Agent',
     });
 
-    console.log('[AiService] Starting extraction for user:', userId);
+    this.logger.log(`Starting financial entry extraction for user ${userId}`);
 
     const prompt = `
 Extract financial entry data from the following document:
@@ -96,7 +99,9 @@ Provide the extracted data in the exact JSON format specified in your instructio
 
     const result = await extractionAgent.generate(prompt);
 
-    console.log('[AiService] Extraction result:', result.text);
+    this.logger.debug(
+      `Received extraction model response (length=${result.text.length}) for user ${userId}`,
+    );
 
     try {
       // Extract JSON from markdown code blocks if present
@@ -118,8 +123,8 @@ Provide the extracted data in the exact JSON format specified in your instructio
         : parsed;
 
       if (Array.isArray(parsed) && parsed.length > 1) {
-        console.warn(
-          `[AiService] ⚠️ Multiple entries detected (${parsed.length}). Using first entry. Consider implementing multi-entry selection in the UI.`,
+        this.logger.warn(
+          `Multiple extraction entries detected (${parsed.length}); using the first result`,
         );
       }
 
@@ -134,7 +139,10 @@ Provide the extracted data in the exact JSON format specified in your instructio
         type: extracted?.type ?? undefined,
       };
     } catch (error) {
-      console.error('[AiService] Failed to parse extraction result:', error);
+      this.logger.error(
+        `Failed to parse financial entry extraction response for user ${userId}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw new Error('Failed to extract financial entry data from document');
     }
   }
@@ -151,7 +159,9 @@ Provide the extracted data in the exact JSON format specified in your instructio
     const cached = await this.cacheService.get(cacheKey);
 
     if (cached) {
-      console.log('[AiService] Using cached financial data from cache');
+      this.logger.debug(
+        `Using cached financial context for entity ${entityId}${taxYear ? ` (${taxYear})` : ''}`,
+      );
     }
 
     return cached;
@@ -164,10 +174,8 @@ Provide the extracted data in the exact JSON format specified in your instructio
   ): Promise<void> {
     const cacheKey = this.getCacheKey(entityId, taxYear);
     await this.cacheService.set(cacheKey, data, this.CACHE_TTL_SECONDS);
-    console.log(
-      '[AiService] Cached financial data with TTL:',
-      this.CACHE_TTL_SECONDS,
-      's',
+    this.logger.debug(
+      `Cached financial context for entity ${entityId}${taxYear ? ` (${taxYear})` : ''} with TTL ${this.CACHE_TTL_SECONDS}s`,
     );
   }
 
@@ -181,111 +189,133 @@ Provide the extracted data in the exact JSON format specified in your instructio
   ): Promise<void> {
     const cacheKey = this.getCacheKey(entityId, taxYear);
     await this.cacheService.del(cacheKey);
-    console.log('[AiService] Invalidated financial cache:', cacheKey);
+    this.logger.debug(`Invalidated financial cache key ${cacheKey}`);
   }
 
   private async fetchFinancialContext(
     entityId: string,
     taxYear?: string,
   ): Promise<string> {
-    try {
-      // Fetch financial entries
-      const entries = await this.financialEntryService.findByEntity(
-        entityId,
-        taxYear,
-      );
+    const entries = await this.financialEntryService.findByEntity(
+      entityId,
+      taxYear,
+    );
 
-      // Fetch tax projection if tax year is provided
-      let taxProjection: TaxProjection | null = null;
-      if (taxYear) {
-        try {
-          taxProjection = await this.taxService.calculateProjection(
-            entityId,
-            taxYear,
-          );
-        } catch (error) {
-          console.log('[AiService] Could not fetch tax projection:', error);
-        }
+    let taxProjection: TaxProjection | null = null;
+    if (taxYear) {
+      try {
+        taxProjection = await this.taxService.calculateProjection(
+          entityId,
+          taxYear,
+        );
+      } catch {
+        this.logger.warn(
+          `Could not fetch tax projection for entity ${entityId} (${taxYear})`,
+        );
       }
+    }
 
-      // Build financial context summary
-      const incomeEntries = entries.filter(
-        (e) => e.type === FinancialType.income,
-      );
-      const deductionEntries = entries.filter(
-        (e) => e.type === FinancialType.deduction,
-      );
-      const creditEntries = entries.filter(
-        (e) => e.type === FinancialType.credit,
-      );
-      const taxPaidEntries = entries.filter(
-        (e) => e.type === FinancialType.taxPaid,
-      );
+    const incomeEntries = entries.filter(
+      (e) => e.type === FinancialType.income,
+    );
+    const deductionEntries = entries.filter(
+      (e) => e.type === FinancialType.deduction,
+    );
+    const creditEntries = entries.filter(
+      (e) => e.type === FinancialType.credit,
+    );
+    const taxPaidEntries = entries.filter(
+      (e) => e.type === FinancialType.taxPaid,
+    );
 
-      const totalIncome = incomeEntries.reduce((sum, e) => sum + e.amount, 0);
-      const totalDeductions = deductionEntries.reduce(
-        (sum, e) => sum + e.amount,
-        0,
-      );
-      const totalCredits = creditEntries.reduce((sum, e) => sum + e.amount, 0);
-      const totalTaxPaid = taxPaidEntries.reduce((sum, e) => sum + e.amount, 0);
+    const totalIncome = incomeEntries.reduce((sum, e) => sum + e.amount, 0);
+    const totalDeductions = deductionEntries.reduce(
+      (sum, e) => sum + e.amount,
+      0,
+    );
+    const totalCredits = creditEntries.reduce((sum, e) => sum + e.amount, 0);
+    const totalTaxPaid = taxPaidEntries.reduce((sum, e) => sum + e.amount, 0);
 
-      let financialContext = `
+    let financialContext = `
+===== USER FINANCIAL SUMMARY =====
+Tax Year Scope: ${taxYear || 'All years'}
 
-===== USER'S FINANCIAL DATA =====
-You have access to the user's financial information. Use this data to answer their questions.
+ENTRY TOTALS:
+- Income: $${totalIncome.toFixed(2)} CAD (${incomeEntries.length} entries)
+- Deductions: $${totalDeductions.toFixed(2)} CAD (${deductionEntries.length} entries)
+- Credits: $${totalCredits.toFixed(2)} CAD (${creditEntries.length} entries)
+- Tax Paid: $${totalTaxPaid.toFixed(2)} CAD (${taxPaidEntries.length} entries)
 
-Tax Year: ${taxYear || 'Not specified'}
-
-FINANCIAL ENTRIES:
-- Total Income: $${totalIncome.toFixed(2)} CAD (${incomeEntries.length} entries)
-- Total Deductions: $${totalDeductions.toFixed(2)} CAD (${deductionEntries.length} entries)
-- Total Credits: $${totalCredits.toFixed(2)} CAD (${creditEntries.length} entries)
-- Total Tax Paid: $${totalTaxPaid.toFixed(2)} CAD (${taxPaidEntries.length} entries)
-
-INCOME BREAKDOWN:
-${incomeEntries.map((e) => `  - ${e.category}: $${e.amount.toFixed(2)} (${e.date.toISOString().split('T')[0]})`).join('\n') || '  No income entries yet'}
-
-DEDUCTION BREAKDOWN:
-${deductionEntries.map((e) => `  - ${e.category}: $${e.amount.toFixed(2)} (${e.date.toISOString().split('T')[0]})`).join('\n') || '  No deduction entries yet'}
-
-CREDIT BREAKDOWN:
-${creditEntries.map((e) => `  - ${e.category}: $${e.amount.toFixed(2)} (${e.date.toISOString().split('T')[0]})`).join('\n') || '  No credit entries yet'}
-
-TAX PAID BREAKDOWN:
-${taxPaidEntries.map((e) => `  - ${e.category}: $${e.amount.toFixed(2)} (${e.date.toISOString().split('T')[0]})`).join('\n') || '  No tax paid entries yet'}
+TOP CATEGORIES (by amount):
+- Income: ${this.getTopCategorySummary(incomeEntries)}
+- Deductions: ${this.getTopCategorySummary(deductionEntries)}
+- Credits: ${this.getTopCategorySummary(creditEntries)}
+- Tax Paid: ${this.getTopCategorySummary(taxPaidEntries)}
 `;
 
-      if (taxProjection) {
-        financialContext += `
-TAX PROJECTION:
-- Total Income for Tax: $${taxProjection.incomeTotal.toFixed(2)}
-- Total Deductions: $${taxProjection.deductionsTotal.toFixed(2)}
+    if (taxProjection) {
+      financialContext += `
+TAX PROJECTION SNAPSHOT:
 - Taxable Income: $${taxProjection.taxableIncome.toFixed(2)}
-- Federal Tax: $${taxProjection.federalTax.toFixed(2)}
-- Provincial Tax (${taxProjection.province}): $${taxProjection.provincialTax.toFixed(2)}
 - Total Tax Owed: $${taxProjection.totalTax.toFixed(2)}
 - Credits Applied: $${taxProjection.creditsApplied.toFixed(2)}
-- Tax Liability (Final Amount): $${taxProjection.totalTaxLiability.toFixed(2)}
-- Effective Tax Rate: ${taxProjection.effectiveTaxRate.toFixed(2)}%
+- Estimated Tax Liability: $${taxProjection.totalTaxLiability.toFixed(2)}
 `;
-      }
-
-      financialContext += `
-===== END FINANCIAL DATA =====
-
-IMPORTANT INSTRUCTIONS:
-1. STORE this financial data in your working memory under "User Financial Profile"
-2. When the user asks about their income, taxes, deductions, or credits, refer to this data
-3. DO NOT ask them to provide information that you already have
-4. Update your working memory if they mention any new financial information
-`;
-
-      return financialContext;
-    } catch (error) {
-      console.error('[AiService] Error fetching financial data:', error);
-      return '\n\nNote: Unable to fetch user financial data at this time.\n';
     }
+
+    financialContext += `
+===== END FINANCIAL SUMMARY =====
+`;
+
+    return financialContext;
+  }
+
+  private async resolveFinancialContext(
+    entityId: string,
+    taxYear?: string,
+  ): Promise<{ context: string; source: FinancialContextSource }> {
+    // Precedence:
+    // 1) DB summary when available (via cache miss + successful fetch)
+    // 2) Cached summary
+    // 3) Existing memory only (no injected context)
+    const cached = await this.getCachedFinancialData(entityId, taxYear);
+
+    if (cached) {
+      return { context: cached, source: 'cache' };
+    }
+
+    try {
+      const dbContext = await this.fetchFinancialContext(entityId, taxYear);
+      await this.setCachedFinancialData(entityId, taxYear, dbContext);
+      return { context: dbContext, source: 'db' };
+    } catch (error) {
+      this.logger.error(
+        `Error fetching financial context for entity ${entityId}${taxYear ? ` (${taxYear})` : ''}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      return { context: '', source: 'memory' };
+    }
+  }
+
+  private getTopCategorySummary(
+    entries: Array<{ category: string; amount: number }>,
+    limit = 3,
+  ): string {
+    if (!entries.length) return 'None';
+
+    const totalsByCategory = new Map<string, number>();
+    for (const entry of entries) {
+      totalsByCategory.set(
+        entry.category,
+        (totalsByCategory.get(entry.category) ?? 0) + entry.amount,
+      );
+    }
+
+    return [...totalsByCategory.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([category, amount]) => `${category} ($${amount.toFixed(2)})`)
+      .join(', ');
   }
 
   /**
@@ -293,10 +323,8 @@ IMPORTANT INSTRUCTIONS:
    *
    * OPTIMIZATION STRATEGY:
    * - Uses cache (5 min TTL) to avoid redundant DB queries during conversations
-   * - Shared across server instances for horizontal scaling
-   * - First message: Fetches financial data, caches it, and passes to agent
-   * - Subsequent messages: Uses cache as indicator, lets agent use working memory
-   * - Agent stores financial data in its working memory for context awareness
+   * - Keeps deterministic precedence: DB summary > cached summary > memory notes
+   * - Passes compact financial summaries to reduce prompt bloat
    * - Call invalidateFinancialCache() when user creates/updates/deletes entries
    */
   async getTaxEducationResponse(
@@ -308,39 +336,36 @@ IMPORTANT INSTRUCTIONS:
   ): Promise<string> {
     const threadId = this.getTaxEducationThreadId(userId, entityId, taxYear);
 
-    console.log(
-      `[AiService] Starting tax education chat for user: ${userId}, entity: ${entityId}`,
+    this.logger.log(
+      `Starting tax education chat for entity ${entityId}${taxYear ? ` (${taxYear})` : ''}`,
     );
 
-    // Check cache to determine if we should pass financial context
-    let financialContext = '';
-    const cached = await this.getCachedFinancialData(entityId, taxYear);
-
-    if (cached) {
-      // Cache hit - this is likely a continuing conversation
-      // Don't pass financial context, agent should use working memory
-      console.log(
-        '[AiService] Using cached data (continuing conversation) - agent will use working memory',
-      );
-      financialContext = '';
-    } else {
-      // Cache miss - first message or cache expired
-      // Fetch fresh data, cache it, and pass to agent
-      console.log(
-        '[AiService] No cached data - fetching financial info and passing to agent',
-      );
-      financialContext = await this.fetchFinancialContext(entityId, taxYear);
-      await this.setCachedFinancialData(entityId, taxYear, financialContext);
-    }
+    const { context: financialContext, source: contextSource } =
+      await this.resolveFinancialContext(entityId, taxYear);
+    this.logger.debug(
+      `Tax education context source for entity ${entityId}${taxYear ? ` (${taxYear})` : ''}: ${contextSource}`,
+    );
 
     const userContext = this.buildUserContext(user);
+    const precedenceInstructions = `
+CONTEXT PRECEDENCE (highest to lowest):
+1. CURRENT_FINANCIAL_SUMMARY (deterministic data below)
+2. CACHED_FINANCIAL_SUMMARY (if current summary is unavailable)
+3. WORKING MEMORY NOTES from prior chat turns
+
+If there is a conflict, prefer higher-precedence data.
+Do not ask the user to repeat details that exist in higher-precedence context.
+`.trim();
+    const contextBlock = financialContext
+      ? `\n${financialContext}\n`
+      : '\nNo deterministic financial summary available for this turn. Use memory notes carefully.\n';
 
     const taxEducationAgent = createTaxEducationAgent({
       mastraStore: this.mastraStore,
       apiKey: this.config.AI_API_KEY,
       id: threadId,
       name: 'Tax Education Assistant',
-      additionalInstructions: `${userContext}${taxYear ? `The user is currently viewing tax year ${taxYear}.` : ''}${financialContext}`,
+      additionalInstructions: `${userContext}${taxYear ? `The user is currently viewing tax year ${taxYear}.` : ''}\n${precedenceInstructions}${contextBlock}`,
     });
 
     const memoryContext = {
@@ -352,7 +377,9 @@ IMPORTANT INSTRUCTIONS:
       memory: memoryContext,
     });
 
-    console.log('[AiService] Tax education response generated');
+    this.logger.debug(
+      `Tax education response generated for entity ${entityId}${taxYear ? ` (${taxYear})` : ''}`,
+    );
 
     return result.text;
   }

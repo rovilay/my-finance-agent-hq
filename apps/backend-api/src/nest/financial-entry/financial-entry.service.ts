@@ -9,6 +9,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -30,6 +31,8 @@ import { CipherUtil } from '@hq/encryption';
 
 @Injectable()
 export class FinancialEntryService {
+  private readonly logger = new Logger(FinancialEntryService.name);
+
   constructor(
     @Inject(DATABASE_CONNECTION) private readonly db: DatabaseClient,
     private readonly aiService: AiService,
@@ -288,9 +291,8 @@ export class FinancialEntryService {
           const parser = new PDFParse({ data: decryptedBuffer });
           const pdfData = await parser.getText();
           documentContent = pdfData.text;
-          console.log(
-            '[FinancialEntryService] Extracted text from PDF:',
-            documentContent.substring(0, 200),
+          this.logger.debug(
+            `Parsed PDF content for document ${documentId} (length=${documentContent.length})`,
           );
         } catch (error) {
           console.error('[FinancialEntryService] Failed to parse PDF:', error);
@@ -308,9 +310,8 @@ export class FinancialEntryService {
         userId,
       );
 
-      console.log(
-        `[FinancialEntryService] Successfully extracted data:`,
-        extracted,
+      this.logger.log(
+        `Successfully extracted financial entry fields for document ${documentId}`,
       );
 
       // Delete the temporary document immediately after extraction

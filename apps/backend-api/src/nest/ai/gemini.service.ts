@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { KmsService, CipherUtil } from '@hq/encryption';
 import { GcsService } from '../document/gcs.service';
@@ -63,6 +63,7 @@ function classifyError(error: unknown): ExtractionError {
 
 @Injectable()
 export class GeminiService {
+  private readonly logger = new Logger(GeminiService.name);
   private genAI: GoogleGenerativeAI;
 
   constructor(
@@ -79,9 +80,8 @@ export class GeminiService {
     storagePath: string,
     mimeType: string,
   ) {
-    console.log(
-      `[GeminiService] 🤖 Starting AI extraction for Doc: ${documentId}`,
-    );
+    const startedAt = Date.now();
+    this.logger.log(`Starting extraction for document ${documentId}`);
 
     try {
       // 1. Download & decrypt
@@ -113,10 +113,10 @@ export class GeminiService {
           .trim();
         const detected = JSON.parse(detectionText);
         slipType = (detected?.documentType ?? 'UNKNOWN') as SlipType;
-        console.log(`[GeminiService] Detected slip type: ${slipType}`);
+        this.logger.debug(`Detected slip type ${slipType} for ${documentId}`);
       } catch {
-        console.warn(
-          '[GeminiService] Could not parse type detection result; falling back to UNKNOWN',
+        this.logger.warn(
+          `Could not parse type detection response for ${documentId}; using UNKNOWN`,
         );
       }
 
@@ -128,7 +128,7 @@ export class GeminiService {
         systemInstruction: config.systemInstruction,
       });
 
-      const extracted = await this.runExtractionWithValidation({
+      const { extracted, retryCount } = await this.runExtractionWithValidation({
         extractionModel,
         inlineData,
         slipType,
@@ -136,15 +136,35 @@ export class GeminiService {
         userPrompt: config.userPrompt,
       });
 
-      console.log(
-        `[GeminiService] ✅ Extraction complete for ${slipType} (Doc: ${documentId}, promptVersion: ${config.promptVersion}, schemaVersion: ${config.schemaVersion})`,
+      this.logger.log(
+        JSON.stringify({
+          event: 'ai_extraction_completed',
+          documentId,
+          step: 'extraction',
+          model: agent_models.GEMINI_2_MODEL,
+          slipType,
+          promptVersion: config.promptVersion,
+          schemaVersion: config.schemaVersion,
+          retryCount,
+          latencyMs: Date.now() - startedAt,
+        }),
       );
       return extracted;
     } catch (error) {
-      console.error(`[GeminiService] ❌ AI Extraction failed`, error);
-      // Re-throw already-classified errors from inner try/catch blocks
-      if (error instanceof ExtractionError) throw error;
-      throw classifyError(error);
+      const classifiedError =
+        error instanceof ExtractionError ? error : classifyError(error);
+      this.logger.error(
+        JSON.stringify({
+          event: 'ai_extraction_failed',
+          documentId,
+          step: 'extraction',
+          model: agent_models.GEMINI_2_MODEL,
+          failureReason: classifiedError.reason,
+          message: classifiedError.message,
+          latencyMs: Date.now() - startedAt,
+        }),
+      );
+      throw classifiedError;
     }
   }
 
@@ -160,7 +180,7 @@ export class GeminiService {
     slipType: SlipType;
     expectedSchemaType: SupportedSlipSchemaType;
     userPrompt: string;
-  }): Promise<Record<string, unknown>> {
+  }): Promise<{ extracted: Record<string, unknown>; retryCount: number }> {
     const initialResponse = await extractionModel.generateContent([
       { inlineData },
       userPrompt,
@@ -171,11 +191,14 @@ export class GeminiService {
     );
 
     try {
-      return this.parseAndValidateExtraction(
-        initialResponseText,
-        slipType,
-        expectedSchemaType,
-      );
+      return {
+        extracted: this.parseAndValidateExtraction(
+          initialResponseText,
+          slipType,
+          expectedSchemaType,
+        ),
+        retryCount: 0,
+      };
     } catch (error) {
       if (!(error instanceof ExtractionError)) throw error;
       if (error.reason !== 'values_unreadable') throw error;
@@ -195,11 +218,14 @@ export class GeminiService {
         retryResponse.response.text(),
       );
 
-      return this.parseAndValidateExtraction(
-        retryResponseText,
-        slipType,
-        expectedSchemaType,
-      );
+      return {
+        extracted: this.parseAndValidateExtraction(
+          retryResponseText,
+          slipType,
+          expectedSchemaType,
+        ),
+        retryCount: 1,
+      };
     }
   }
 
